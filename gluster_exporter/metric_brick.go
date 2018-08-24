@@ -18,6 +18,11 @@ var (
 		"subvolume",
 	}
 
+	subvol_labels = []string{
+		"volume",
+		"subvolume",
+	}
+
 	glusterBrickCapacityUsed = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: "gluster",
@@ -71,6 +76,15 @@ var (
 		},
 		brick_labels,
 	)
+
+	glusterSubvolCapacityUsed = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "gluster",
+			Name:      "subvol_capacity_used",
+			Help:      "Effective used capacity of gluster subvolume",
+		},
+		subvol_labels,
+	)
 )
 
 func GetGlusterBrickLabels(brick GlusterBrick, subvol string) prometheus.Labels {
@@ -79,6 +93,13 @@ func GetGlusterBrickLabels(brick GlusterBrick, subvol string) prometheus.Labels 
 		"id": brick.Id,
 		"brick_path": brick.Path,
 		"volume": brick.VolumeName,
+		"subvolume": subvol,
+	}
+}
+
+func GetGlusterSubvolLabels(volname string, subvol string) prometheus.Labels {
+	return prometheus.Labels{
+		"volume": volname,
 		"subvolume": subvol,
 	}
 }
@@ -103,12 +124,13 @@ type GlusterBrick struct {
 }
 
 type GlusterSubVolume struct {
-	ArbiterCount  uint `json:"arbiter-count"`
-	Bricks        []GlusterBrick `json:"bricks"`
-	DisperseCount uint `json:"disperse-count"`
-	Name          string `json:"name"`
-	ReplicaCount  uint `json:"replica-count"`
-	Type          string `json:"type"`
+	ArbiterCount      uint `json:"arbiter-count"`
+	Bricks            []GlusterBrick `json:"bricks"`
+	DisperseCount     uint `json:"disperse-count"`
+	DisperseDataCount uint `json:"disperse-data-count"`
+	Name              string `json:"name"`
+	ReplicaCount      uint `json:"replica-count"`
+	Type              string `json:"type"`
 }
 
 type GlusterVolume struct {
@@ -156,6 +178,7 @@ func BrickUtilization() {
 		subvols := volume.SubVolumes
 		for _, subvol := range subvols {
 			bricks := subvol.Bricks
+			var maxBrickUsed float64 = 0
 			for _, brick := range bricks {
                                 if brick.PeerId == getNodeID() {
 					usage := DiskUsage(brick.Path)
@@ -167,7 +190,27 @@ func BrickUtilization() {
 					glusterBrickInodesTotal.With(lbls).Set(usage.InodesAll)
 					glusterBrickInodesFree.With(lbls).Set(usage.InodesFree)
 					glusterBrickInodesUsed.With(lbls).Set(usage.InodesUsed)
+					// Skip exporting utilization data in case of arbiter
+					// brick to avoid wrong values when both the data bricks
+					// are down
+					if brick.Type != "Arbiter" && usage.Used >= maxBrickUsed {
+						maxBrickUsed = usage.Used
+					}
 				}
+			}
+			effectiveCapacity := maxBrickUsed
+			var subvolLabels = GetGlusterSubvolLabels(volume.Name, subvol.Name)
+			if subvol.Type == "Disperse" {
+				// In disperse volume data bricks contribute to the sub
+				// volume size
+				effectiveCapacity = maxBrickUsed * float64(subvol.DisperseDataCount)
+			}
+
+			// Export the metric only if available. it will be zero if the subvolume
+			// contains only arbiter brick on current node or no local bricks on
+			// this node
+			if effectiveCapacity > 0 {
+				glusterSubvolCapacityUsed.With(subvolLabels).Set(effectiveCapacity)
 			}
 		}
 	}
@@ -180,6 +223,7 @@ func init() {
 	prometheus.MustRegister(glusterBrickInodesTotal)
 	prometheus.MustRegister(glusterBrickInodesFree)
 	prometheus.MustRegister(glusterBrickInodesUsed)
+	prometheus.MustRegister(glusterSubvolCapacityUsed)
 
 	// Register to update this every 2 seconds
 	// Name, Callback Func, Interval Seconds
