@@ -1,14 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 
@@ -169,6 +172,125 @@ var (
 		LongHelp:  "",
 		Labels:    lvmLbls,
 	})
+
+	brickDiskLabels = []MetricLabel{
+		{
+			Name: "host",
+			Help: "Host FDQN or IP",
+		},
+		{
+			Name: "id",
+			Help: "Brick ID",
+		},
+		{
+			Name: "brick_path",
+			Help: "Brick Path",
+		},
+		{
+			Name: "volume",
+			Help: "Volume Name",
+		},
+		{
+			Name: "subvolume",
+			Help: "Sub Volume name",
+		},
+		{
+			Name: "device",
+			Help: "Device Name",
+		},
+		{
+			Name: "disk",
+			Help: "Physical disk name",
+		},
+	}
+
+	glusterDiskReadIOs = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_read_ios",
+		Help:      "Brick disk's read IOs",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskReadMerges = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_read_merges",
+		Help:      "Brick disk's read merges",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskReadSectors = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_read_sectors",
+		Help:      "Brick disk's read sectors",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskReadTicks = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_read_ticks",
+		Help:      "Brick disk's read ticks",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskWriteIOs = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_write_ios",
+		Help:      "Brick disk's write IOs",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskWriteMerges = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_write_merges",
+		Help:      "Brick disk's write_merges",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskWriteSectors = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_write_sectors",
+		Help:      "Brick disk's write sectors",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskWriteTicks = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_write_ticks",
+		Help:      "Brick disk's write_ticks",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskInflight = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_inflight",
+		Help:      "Brick disk's inflight no of requests",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskTotalTicks = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_total_ticks",
+		Help:      "Brick disk's total ticks (millis)",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
+
+	glusterDiskTimeInqueue = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "disk_timeinqueue",
+		Help:      "Brick disk's time in queue (millis)",
+		LongHelp:  "",
+		Labels:    brickDiskLabels,
+	})
 )
 
 func getGlusterBrickLabels(brick glusterutils.Brick, subvol string) prometheus.Labels {
@@ -186,6 +308,102 @@ func getGlusterSubvolLabels(volname string, subvol string) prometheus.Labels {
 		"volume":    volname,
 		"subvolume": subvol,
 	}
+}
+
+func getBrickDiskLabels(
+	brick glusterutils.Brick,
+	subvol string,
+	volume string,
+	device string,
+	disk string) prometheus.Labels {
+	return prometheus.Labels{
+		"host":       brick.Host,
+		"id":         brick.ID,
+		"brick_path": brick.Path,
+		"volume":     volume,
+		"subvolume":  subvol,
+		"device":     device,
+		"disk":       disk,
+	}
+}
+
+func getBrickDevice(brickPath string) string {
+	cmd := fmt.Sprintf("df --output=source %s", brickPath)
+	command := exec.Command(cmd)
+	out := &bytes.Buffer{}
+	command.Stdout = out
+	err := command.Start()
+	if err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"command": cmd,
+		}).Error("Error executing command")
+		return ""
+	}
+
+	// Create a ticker that outputs elapsed time
+	ticker := time.NewTicker(time.Second)
+	// Wait for 5 seconds for output, else kill the process
+	timer := time.NewTimer(time.Second * 5)
+	go func(timer *time.Timer, ticker *time.Ticker, cmd *exec.Cmd) {
+		for _ = range timer.C {
+			err := cmd.Process.Signal(os.Kill)
+			log.WithError(err).WithFields(log.Fields{
+				"command": cmd,
+			}).Error("Command timed out")
+			ticker.Stop()
+			return
+		}
+	}(timer, ticker, command)
+
+	// Procedd only if process has finished
+	command.Wait()
+
+	dfData := strings.Split(strings.TrimSpace(string(out.Bytes())), "\n")[1]
+	fInfo, err := os.Lstat(dfData)
+	if err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"brickpath": brickPath,
+		}).Error("Error getting df data")
+		return ""
+	}
+	return fInfo.Name()
+}
+
+func getPhysicalDisks(blockDevice string) []string {
+	cmd := "lsblk --all --bytes --raw --noheadings --output NAME,PKNAME,TYPE"
+	out, err := exec.Command("sh", "-c", cmd).Output()
+	if err != nil {
+		log.WithError(err).WithFields(log.Fields{
+			"command": cmd,
+		}).Error("Error executing command")
+		return []string{}
+	}
+	parentDetails := make(map[string][]string)
+	lines := strings.Split(string(out), "\n")
+	for _, line := range lines {
+		if line != "" {
+			fields := strings.Split(line, " ")
+			if fields[1] != "" {
+				parentDetails[fields[0]] = append(parentDetails[fields[0]], fields[1])
+			}
+		}
+	}
+	sl := strings.Split(blockDevice, "/")
+	dev := sl[len(sl)-1]
+	parents := parentDetails[dev]
+	ret_val := []string{}
+	for _, parent := range parents {
+		for {
+			if _, exists := parentDetails[parent]; exists {
+				// now on there would be one entry for parent
+				parent = parentDetails[parent][0]
+			} else {
+				ret_val = append(ret_val, parent)
+				break
+			}
+		}
+	}
+	return ret_val
 }
 
 // DiskStatus represents Disk usage
@@ -386,6 +604,47 @@ func lvmUsage(path string) (stats []LVMStat, err error) {
 	return stats, nil
 }
 
+// BlockDeviceStat represents block device stats
+type BlockDeviceStat struct {
+	ReadIos      uint64
+	ReadMerges   uint64
+	ReadSectors  uint64
+	ReadTicks    uint64
+	WriteIos     uint64
+	WriteMerges  uint64
+	WriteSectors uint64
+	WriteTicks   uint64
+	InFlight     uint64
+	TotalTicks   uint64
+	TimeInqueue  uint64
+}
+
+func blockStat(blockDev string) (stat BlockDeviceStat) {
+	fileObj, err := os.Open(fmt.Sprintf("/sys/block/%s/stat", blockDev))
+	if err != nil {
+		log.WithError(err).Error("Error reading block stats")
+		return
+	}
+	i, err := fmt.Fscanf(fileObj, "%d %d %d %d %d %d %d %d %d %d %d",
+		&stat.ReadIos,
+		&stat.ReadMerges,
+		&stat.ReadSectors,
+		&stat.ReadTicks,
+		&stat.WriteIos,
+		&stat.WriteMerges,
+		&stat.WriteSectors,
+		&stat.WriteTicks,
+		&stat.InFlight,
+		&stat.TotalTicks,
+		&stat.TimeInqueue,
+	)
+	if i == 0 || err != nil {
+		log.WithError(err).Error("Error parsing block stats")
+		return
+	}
+	return
+}
+
 func brickUtilization() error {
 	volumes, err := gluster.VolumeInfo()
 	if err != nil {
@@ -451,6 +710,40 @@ func brickUtilization() error {
 						// Convert to bytes
 						glusterBrickLVMetadataSize.With(lvmLbls).Set(stat.MetadataSize * 1024 * 1024)
 						glusterBrickLVMetadataPercent.With(lvmLbls).Set(stat.MetadataPercent)
+					}
+
+					bDev := getBrickDevice(brick.Path)
+					disks := getPhysicalDisks(bDev)
+					for _, disk := range disks {
+						stat := blockStat(disk)
+						var brickDiskLbls = getBrickDiskLabels(
+							brick,
+							subvol.Name,
+							volume.Name,
+							bDev,
+							disk)
+						glusterDiskReadIOs.With(brickDiskLbls).
+							Set(float64(stat.ReadIos))
+						glusterDiskReadMerges.With(brickDiskLbls).
+							Set(float64(stat.ReadMerges))
+						glusterDiskReadSectors.With(brickDiskLbls).
+							Set(float64(stat.ReadSectors))
+						glusterDiskReadTicks.With(brickDiskLbls).
+							Set(float64(stat.ReadTicks))
+						glusterDiskWriteIOs.With(brickDiskLbls).
+							Set(float64(stat.WriteIos))
+						glusterDiskWriteMerges.With(brickDiskLbls).
+							Set(float64(stat.WriteMerges))
+						glusterDiskWriteSectors.With(brickDiskLbls).
+							Set(float64(stat.WriteSectors))
+						glusterDiskWriteTicks.With(brickDiskLbls).
+							Set(float64(stat.WriteTicks))
+						glusterDiskInflight.With(brickDiskLbls).
+							Set(float64(stat.InFlight))
+						glusterDiskTotalTicks.With(brickDiskLbls).
+							Set(float64(stat.TotalTicks))
+						glusterDiskTimeInqueue.With(brickDiskLbls).
+							Set(float64(stat.TimeInqueue))
 					}
 				}
 			}
