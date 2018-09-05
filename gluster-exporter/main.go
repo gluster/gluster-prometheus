@@ -9,9 +9,11 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -24,12 +26,10 @@ var (
 	defaultGlusterd2Workdir = ""
 )
 var (
-	glusterMgmt     = flag.String("gluster-mgmt", "glusterd1", "Choice of GlusterD version i.e glusterd1 or glusterd2, Default is glusterd1")
-	glusterdWorkdir = flag.String("glusterd-dir", "", "Directory where the local peer info file is stored, Default for glusterd1 is /var/lib/glusterd/ and for glusterd2 is /var/lib/glusterd2/")
-	port            = flag.Int("port", 8080, "Exporter Port")
-	metricsPath     = flag.String("metrics-path", "/metrics", "Metrics API Path")
-	volinfo         = flag.String("volinfo", "", "Volume info json file")
-	showVersion     = flag.Bool("version", false, "Show the version information")
+	volinfo       = flag.String("volinfo", "", "Volume info json file")
+	showVersion   = flag.Bool("version", false, "Show the version information")
+	config        = flag.String("config", "", "Global config file path")
+	collectorsCfg = flag.String("collectors-config", "", "Collectors config file path")
 
 	peerID          string
 	defaultInterval time.Duration = 5
@@ -37,33 +37,23 @@ var (
 )
 
 type glusterMetric struct {
-	name            string
-	fn              func()
-	intervalSeconds time.Duration
+	name string
+	fn   func()
 }
 
 var glusterMetrics []glusterMetric
 
-func registerMetric(name string, fn func(), intervalSeconds int64) {
-	glusterMetrics = append(glusterMetrics, glusterMetric{name: name, fn: fn, intervalSeconds: time.Duration(intervalSeconds)})
-}
-
-func getGlusterdWorkdir() string {
-	if *glusterdWorkdir != "" {
-		return *glusterdWorkdir
-	}
-	if *glusterMgmt == "glusterd2" {
-		return defaultGlusterd2Workdir
-	}
-	return defaultGlusterd1Workdir
+func registerMetric(name string, fn func()) {
+	glusterMetrics = append(glusterMetrics, glusterMetric{name: name, fn: fn})
 }
 
 func getPeerID() (string, error) {
 	if peerID == "" {
-		workdir := getGlusterdWorkdir()
+		glusterMgmt, _ := conf.SystemConfig["gluster-mgmt"]
+		workdir, _ := conf.SystemConfig["glusterd-dir"]
 		keywordID := "UUID"
 		filepath := workdir + "/glusterd.info"
-		if *glusterMgmt == "glusterd2" {
+		if glusterMgmt == "glusterd2" {
 			keywordID = "peer-id"
 			filepath = workdir + "/uuid.toml"
 		}
@@ -107,6 +97,15 @@ func dumpVersionInfo() {
 func main() {
 	flag.Parse()
 
+	if err := conf.LoadCollectorsConfig(*collectorsCfg); err != "" {
+		fmt.Fprintf(os.Stderr, "Loading collectors config failed: %s", err)
+		os.Exit(1)
+	}
+	if err := conf.LoadConfig(*config); err != "" {
+		fmt.Fprintf(os.Stderr, "Loading global config failed: %s", err)
+		os.Exit(1)
+	}
+
 	if *showVersion {
 		dumpVersionInfo()
 		return
@@ -115,16 +114,20 @@ func main() {
 	// start := time.Now()
 
 	for _, m := range glusterMetrics {
-		go func(m glusterMetric) {
-			for {
-				m.fn()
-				interval := defaultInterval
-				if m.intervalSeconds > 0 {
-					interval = m.intervalSeconds
-				}
-				time.Sleep(time.Duration(time.Second * time.Duration(interval)))
+		if collectorConf, ok := conf.Collectors[m.name]; ok {
+			if collectorConf.Disabled == false {
+				go func(m glusterMetric) {
+					for {
+						m.fn()
+						interval := defaultInterval
+						if collectorConf.SyncInterval > 0 {
+							interval = time.Duration(collectorConf.SyncInterval)
+						}
+						time.Sleep(time.Duration(time.Second * time.Duration(interval)))
+					}
+				}(m)
 			}
-		}(m)
+		}
 	}
 
 	if len(glusterMetrics) == 0 {
@@ -132,8 +135,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	http.Handle(*metricsPath, promhttp.Handler())
-	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
+	metricsPath, _ := conf.SystemConfig["metrics-path"]
+	port, _ := conf.SystemConfig["port"]
+	nport, _ := strconv.Atoi(port)
+	http.Handle(metricsPath, promhttp.Handler())
+	err := http.ListenAndServe(fmt.Sprintf(":%d", nport), nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to run exporter\nError: %s", err)
 		os.Exit(1)
