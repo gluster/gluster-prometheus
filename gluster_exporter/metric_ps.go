@@ -19,7 +19,7 @@ var (
 
 	labels = []string{
 		"volume",
-		"nodeid",
+		"peerid",
 		"brick_path",
 		"name",
 	}
@@ -88,7 +88,7 @@ func getGlusterdLabels(cmd string, args []string) prometheus.Labels {
 	return prometheus.Labels{
 		"name": cmd,
 		"volume": "",
-		"nodeid": getNodeID(),
+		"peerid": getPeerID(),
 		"brick_path": "",
 	}
 }
@@ -110,7 +110,7 @@ func getGlusterFsdLabels(cmd string, args []string) prometheus.Labels {
 	return prometheus.Labels{
 		"name": cmd,
 		"volume": volume,
-		"nodeid": getNodeID(),
+		"peerid": getPeerID(),
 		"brick_path": bpath,
 	}
 }
@@ -119,7 +119,7 @@ func getUnknownLabels(cmd string, args []string) prometheus.Labels {
 	return prometheus.Labels{
 		"name": cmd,
 		"volume": "",
-		"nodeid": getNodeID(),
+		"peerid": getPeerID(),
 		"brick_path": "",
 	}
 }
