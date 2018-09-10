@@ -13,7 +13,7 @@ import (
 var (
 	port = flag.Int("port", 8080, "Exporter Port")
 	metricsPath = flag.String("metrics-path", "/metrics", "Metrics API Path")
-	nodeid = flag.String("nodeid", "", "Gluster Node ID")
+	peerid = flag.String("peerid", "", "Gluster Node's peer ID")
 	volinfo = flag.String("volinfo", "", "Volume info json file")
 
 	defaultInterval time.Duration = 5
@@ -32,8 +32,8 @@ func registerMetric(name string, fn func(), intervalSeconds int64) {
 	glusterMetrics = append(glusterMetrics, glusterMetric{name: name, fn: fn, intervalSeconds: time.Duration(intervalSeconds)})
 }
 
-func getNodeID() string {
-	return *nodeid
+func getPeerID() string {
+	return *peerid
 }
 
 func getVolInfoFile() string {
