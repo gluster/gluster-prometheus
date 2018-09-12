@@ -1,6 +1,13 @@
  
 #### Gluster prometheus end point schema: 
 
+#### Cluster Metrics:
+| Gluster Prometheus Schema | example | comments |
+|--------|----------|--|
+|gluster_volume_total_count | gluster_volume_total_count{} 20 |
+|gluster_volume_started_count | gluster_volume_started_count {} 10 | 
+| gluster_volume_stopped_count | gluster_volume_stopped_count{} 10 |
+
 #### Volume Metrics : 
 
 |Gluster Promethus schema| example| comments |
