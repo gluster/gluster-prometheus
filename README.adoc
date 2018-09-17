@@ -1,6 +1,6 @@
 = Prometheus exporter for Gluster Metrics
 
-These exporters will be run on all Gluster nodes, So it makes sense to
+These exporters will be run on all Gluster peers, So it makes sense to
 collect only local metrics and aggregate in Prometheus server when
 required.
 
@@ -15,7 +15,7 @@ go build
 
 == Usage
 
-Run `gluster_exporter` with Gluster Node ID(Current limitation, this
+Run `gluster_exporter` with Gluster Peer ID(Current limitation, this
 will be detected in future releases)
 
 ----
@@ -102,7 +102,7 @@ glusterCPUPercentage = prometheus.NewGaugeVec(
         Name:      "cpu_percentage",
         Help:      "CPU Percentage used by Gluster processes",
     },
-    []string{"volume", "nodeid", "brick_path"},
+    []string{"volume", "peerid", "brick_path"},
 )
 ----
 
@@ -124,6 +124,6 @@ glusterCPUPercentage = prometheus.NewGaugeVec(
 * Handling failures
 * Rules generation
 * Consuming Glusterd2 REST APIs
-* Detect Gluster Node ID automatically(Now accepts as Commandline
+* Detect Gluster Peer ID automatically(Now accepts as Commandline
   parameter)
 * Tutorial for setup, integration with Grafana etc
