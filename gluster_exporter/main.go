@@ -7,7 +7,7 @@ import (
 	"time"
 	"os"
 	"strings"
-	"io/ioutil"
+	"bufio"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -35,13 +35,25 @@ func registerMetric(name string, fn func(), intervalSeconds int64) {
 }
 
 func getPeerID() string {
-        gdInfo, err := ioutil.ReadFile("/var/lib/glusterd/glusterd.info")
-        if err != nil {
-                fmt.Print(err)
-        }
-        parts := strings.Split(string(gdInfo), "=")
-        // fmt.Print(parts[1])
-	return parts[1]
+	gdInfo, err := os.Open("/var/lib/glusterd/glusterd.info")
+	if err != nil {
+			fmt.Print(err)
+	}
+	defer gdInfo.Close()
+
+	scanner := bufio.NewScanner(gdInfo)
+
+	line := 0
+	for scanner.Scan(){
+		if strings.Contains(scanner.Text(), "UUID"){
+			lines := strings.Split(scanner.Text(), "\n")
+			parts := strings.Split(string(lines[line]), "=")
+			fmt.Println(parts[1])
+			return parts[1]
+		}
+		line++
+	}
+
 }
 
 func getVolInfoFile() string {
