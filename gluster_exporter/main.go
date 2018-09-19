@@ -42,18 +42,17 @@ func getPeerID() string {
 	defer gdInfo.Close()
 
 	scanner := bufio.NewScanner(gdInfo)
-	uuid := nil
+
 	line := 0
 	for scanner.Scan(){
 		if strings.Contains(scanner.Text(), "UUID"){
 			lines := strings.Split(scanner.Text(), "\n")
 			parts := strings.Split(string(lines[line]), "=")
-			uuid := parts[1]
-			return uuid
+			return parts[1]
 		}
 		line++
 	}
-	return uuid
+	return ""
 }
 
 func getVolInfoFile() string {
