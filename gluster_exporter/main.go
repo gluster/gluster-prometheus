@@ -15,7 +15,7 @@ import (
 var (
 	port = flag.Int("port", 8080, "Exporter Port")
 	metricsPath = flag.String("metrics-path", "/metrics", "Metrics API Path")
-	peerid = flag.String("peerid", "", "Gluster Node's peer ID")
+	peerid = flag.String("peerid", getPeerID(), "Gluster Node's peer ID")
 	volinfo = flag.String("volinfo", "", "Volume info json file")
 
 	defaultInterval time.Duration = 5
