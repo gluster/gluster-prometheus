@@ -49,11 +49,11 @@ func getPeerID() string {
 			lines := strings.Split(scanner.Text(), "\n")
 			parts := strings.Split(string(lines[line]), "=")
 			fmt.Println(parts[1])
-			return parts[1]
+			uuid := parts[1]
 		}
 		line++
 	}
-
+	return uuid
 }
 
 func getVolInfoFile() string {
