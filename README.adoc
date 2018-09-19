@@ -1,6 +1,6 @@
 = Prometheus exporter for Gluster Metrics
 
-These exporters will be run on all Gluster nodes, So it makes sense to
+These exporters will be run on all Gluster peers, So it makes sense to
 collect only local metrics and aggregate in Prometheus server when
 required.
 
@@ -15,17 +15,17 @@ go build
 
 == Usage
 
-Run `gluster_exporter` with Gluster Node ID(Current limitation, this
+Run `gluster_exporter` with Gluster Peer ID(Current limitation, this
 will be detected in future releases)
 
 ----
-./gluster_exporter -nodeid <gluster-node-id>
+./gluster_exporter -peerid <gluster-peer-id>
 ----
 
 For example,
 
 ----
-./gluster_exporter -nodeid 019042a8-fc13-4abe-88b4-f070905bf78b
+./gluster_exporter -peerid 019042a8-fc13-4abe-88b4-f070905bf78b
 ----
 
 Other available options,
@@ -33,8 +33,8 @@ Other available options,
 ----
 -metrics-path string
       Metrics API Path (default "/metrics")
--nodeid string
-      Gluster Node ID
+-peerid string
+      Gluster Peer ID
 -port int
       Exporter Port (default 8080)
 ----
@@ -46,8 +46,8 @@ Other available options,
 ----
 # HELP gluster_cpu_percentage CPU Percentage used by Gluster processes
 # TYPE gluster_cpu_percentage gauge
-gluster_cpu_percentage{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 0
-gluster_cpu_percentage{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 0
+gluster_cpu_percentage{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 0
+gluster_cpu_percentage{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 0
 ----
 
 === Elapsed Time/Uptime of Gluster Processes
@@ -56,8 +56,8 @@ gluster_cpu_percentage{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905
 ----
 # HELP gluster_elapsed_time_seconds Elapsed Time of Gluster processes
 # TYPE gluster_elapsed_time_seconds gauge
-gluster_elapsed_time_seconds{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 2969
-gluster_elapsed_time_seconds{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 2969
+gluster_elapsed_time_seconds{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 2969
+gluster_elapsed_time_seconds{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 2969
 ----
 
 === Memory percentage, Resident Memory and Virtual Memory of Gluster Processes
@@ -66,18 +66,18 @@ gluster_elapsed_time_seconds{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f
 ----
 # HELP gluster_memory_percentage Memory Percentage used by Gluster processes
 # TYPE gluster_memory_percentage gauge
-gluster_memory_percentage{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 0.7
-gluster_memory_percentage{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 0.7
+gluster_memory_percentage{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 0.7
+gluster_memory_percentage{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 0.7
 
 # HELP gluster_resident_memory Resident Memory of Gluster processes
 # TYPE gluster_resident_memory gauge
-gluster_resident_memory{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 15392
-gluster_resident_memory{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 14760
+gluster_resident_memory{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 15392
+gluster_resident_memory{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 14760
 
 # HELP gluster_virtual_memory Virtual Memory of Gluster processes
 # TYPE gluster_virtual_memory gauge
-gluster_virtual_memory{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 912260
-gluster_virtual_memory{name="glusterfsd",nodeid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 912520
+gluster_virtual_memory{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 912260
+gluster_virtual_memory{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 912520
 ----
 
 Exporter will automatically detect the running processes which are
@@ -102,7 +102,7 @@ glusterCPUPercentage = prometheus.NewGaugeVec(
         Name:      "cpu_percentage",
         Help:      "CPU Percentage used by Gluster processes",
     },
-    []string{"volume", "nodeid", "brick_path"},
+    []string{"volume", "peerid", "brick_path"},
 )
 ----
 
@@ -124,6 +124,6 @@ glusterCPUPercentage = prometheus.NewGaugeVec(
 * Handling failures
 * Rules generation
 * Consuming Glusterd2 REST APIs
-* Detect Gluster Node ID automatically(Now accepts as Commandline
+* Detect Gluster Peer ID automatically(Now accepts as Commandline
   parameter)
 * Tutorial for setup, integration with Grafana etc

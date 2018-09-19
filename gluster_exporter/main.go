@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 	"os"
+	"strings"
+	"io/ioutil"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -13,7 +15,7 @@ import (
 var (
 	port = flag.Int("port", 8080, "Exporter Port")
 	metricsPath = flag.String("metrics-path", "/metrics", "Metrics API Path")
-	peerid = flag.String("peerid", "", "Gluster Node's peer ID")
+	peerid = flag.String("peerid", getPeerID(), "Gluster Node's peer ID")
 	volinfo = flag.String("volinfo", "", "Volume info json file")
 
 	defaultInterval time.Duration = 5
@@ -33,7 +35,13 @@ func registerMetric(name string, fn func(), intervalSeconds int64) {
 }
 
 func getPeerID() string {
-	return *peerid
+        gdInfo, err := ioutil.ReadFile("/var/lib/glusterd/glusterd.info")
+        if err != nil {
+                fmt.Print(err)
+        }
+        parts := strings.Split(string(gdInfo), "=")
+        // fmt.Print(parts[1])
+	return parts[1]
 }
 
 func getVolInfoFile() string {
