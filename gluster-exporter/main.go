@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -19,14 +23,17 @@ var (
 	defaultGlusterd1Workdir = ""
 	defaultGlusterd2Workdir = ""
 )
-
 var (
-	port                          = flag.Int("port", 8080, "Exporter Port")
-	metricsPath                   = flag.String("metrics-path", "/metrics", "Metrics API Path")
-	peerid                        = flag.String("peerid", "", "Gluster Node's peer ID")
-	volinfo                       = flag.String("volinfo", "", "Volume info json file")
-	showVersion                   = flag.Bool("version", false, "Show the version information")
+	glusterMgmt     = flag.String("gluster-mgmt", "glusterd1", "Choice of GlusterD version i.e glusterd1 or glusterd2, Default is glusterd1")
+	glusterdWorkdir = flag.String("glusterd-dir", "", "Directory where the local peer info file is stored, Default for glusterd1 is /var/lib/glusterd/ and for glusterd2 is /var/lib/glusterd2/")
+	port            = flag.Int("port", 8080, "Exporter Port")
+	metricsPath     = flag.String("metrics-path", "/metrics", "Metrics API Path")
+	volinfo         = flag.String("volinfo", "", "Volume info json file")
+	showVersion     = flag.Bool("version", false, "Show the version information")
+
+	peerID          string
 	defaultInterval time.Duration = 5
+	peerIDPattern                 = regexp.MustCompile("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
 )
 
 type glusterMetric struct {
@@ -41,8 +48,49 @@ func registerMetric(name string, fn func(), intervalSeconds int64) {
 	glusterMetrics = append(glusterMetrics, glusterMetric{name: name, fn: fn, intervalSeconds: time.Duration(intervalSeconds)})
 }
 
-func getPeerID() string {
-	return *peerid
+func getGlusterdWorkdir() string {
+	if *glusterdWorkdir != "" {
+		return *glusterdWorkdir
+	}
+	if *glusterMgmt == "glusterd2" {
+		return defaultGlusterd2Workdir
+	}
+	return defaultGlusterd1Workdir
+}
+
+func getPeerID() (string, error) {
+	if peerID == "" {
+		workdir := getGlusterdWorkdir()
+		keywordID := "UUID"
+		filepath := workdir + "/glusterd.info"
+		if *glusterMgmt == "glusterd2" {
+			keywordID = "peer-id"
+			filepath = workdir + "/uuid.toml"
+		}
+		fileStream, err := os.Open(filepath)
+		if err != nil {
+			return "", err
+		}
+		defer fileStream.Close()
+
+		scanner := bufio.NewScanner(fileStream)
+		for scanner.Scan() {
+			lines := strings.Split(scanner.Text(), "\n")
+			for _, line := range lines {
+				if strings.Contains(line, keywordID) {
+					parts := strings.Split(string(line), "=")
+					unformattedPeerID := parts[1]
+					peerID = peerIDPattern.FindString(unformattedPeerID)
+					if peerID == "" {
+						return "", errors.New("unable to find peer address")
+					}
+					return peerID, nil
+				}
+			}
+		}
+		return "", errors.New("unable to find peer address")
+	}
+	return peerID, nil
 }
 
 func getVolInfoFile() string {
