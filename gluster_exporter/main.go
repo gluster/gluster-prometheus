@@ -42,7 +42,7 @@ func getPeerID() string {
 	defer gdInfo.Close()
 
 	scanner := bufio.NewScanner(gdInfo)
-
+	uuid := null
 	line := 0
 	for scanner.Scan(){
 		if strings.Contains(scanner.Text(), "UUID"){
