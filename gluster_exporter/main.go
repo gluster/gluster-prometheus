@@ -48,7 +48,8 @@ func getPeerID() string {
 		if strings.Contains(scanner.Text(), "UUID"){
 			lines := strings.Split(scanner.Text(), "\n")
 			parts := strings.Split(string(lines[line]), "=")
-			return uuid := parts[1]
+			uuid := parts[1]
+			return uuid
 		}
 		line++
 	}
