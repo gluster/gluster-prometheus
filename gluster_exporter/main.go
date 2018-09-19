@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 	"os"
+	"strings"
+	"io/ioutil"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -33,7 +35,13 @@ func registerMetric(name string, fn func(), intervalSeconds int64) {
 }
 
 func getPeerID() string {
-	return *peerid
+        gdInfo, err := ioutil.ReadFile("/var/lib/glusterd/glusterd.info")
+        if err != nil {
+                fmt.Print(err)
+        }
+        parts := strings.Split(string(gdInfo), "=")
+        // fmt.Print(parts[1])
+	return parts[1]
 }
 
 func getVolInfoFile() string {
