@@ -31,7 +31,7 @@ VERSION=$("$(dirname "$0")/pkg-version" --full)
 GIT_SHA=${GIT_SHA:-$(git rev-parse --short HEAD || echo "undefined")}
 GIT_SHA_FULL=${GIT_SHA_FULL:-$(git rev-parse HEAD || echo "undefined")}
 LDFLAGS="-X main.ExporterVersion=${VERSION} -X main.GitSHA=${GIT_SHA}"
-LDFLAGS="-X main.defaultGd1Workdir=${GD1STATEDIR} -X main.defaultGd2Workdir=${GD2STATEDIR}"
+LDFLAGS="-X main.defaultGlusterd1Workdir=${GD1STATEDIR} -X main.defaultGlusterd2Workdir=${GD2STATEDIR}"
 LDFLAGS+=" -B 0x${GIT_SHA_FULL}"
 
 if [ "$FASTBUILD" == "yes" ];then
