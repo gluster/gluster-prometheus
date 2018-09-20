@@ -40,57 +40,35 @@ func getWorkingDir( glusterMgmt *string ) string {
 }
 
 func getPeerID( gluster_workdir *string ) string {
-        if( *gluster_workdir == "/var/lib/glusterd2") {
-                peer_id:=parse_toml( *gluster_workdir + "/uuid.toml" )
-                return peer_id
-        } else {
-                peer_id:=parse_info( *gluster_workdir + "/glusterd.info" )
-                return peer_id
-        }
-}
-
-func parse_info(dir string) string{
-        gdInfo, err := os.Open(dir)
+	if( *glusterMgmt == "glusterd2") {
+		filepath:= *gluster_workdir + "/uuid.toml"
+		keywordID:= "peer-id"
+	} else {
+		filepath:= *gluster_workdir + "/glusterd.info"
+		keywordID:= "UUID"
+	}
+	
+	fileStream, err := os.Open(filepath)
         if err != nil {
-                        fmt.Print(err)
+		fmt.Print(err)
         }
-        defer gdInfo.Close()
+        defer fileStream.Close()
 
-        scanner := bufio.NewScanner(gdInfo)
+        scanner := bufio.NewScanner(fileStream)
 
         line := 0
         for scanner.Scan(){
-                if strings.Contains(scanner.Text(), "UUID"){
-                        lines := strings.Split(scanner.Text(), "\n")
-                        parts := strings.Split(string(lines[line]), "=")
-                        return parts[1]
-                }
+		if strings.Contains(scanner.Text(), keywordID){
+			lines := strings.Split(scanner.Text(), "\n")
+			parts := strings.Split(string(lines[line]), "=")
+			return parts[1]
+		}
                 line++
-        }
-        return ""
+	}
+	return ""
 }
 
-func parse_toml(dir string) string {
-        fileptr, err := os.Open(dir)
-        if err != nil {
-                        fmt.Print(err)
-        }
-        defer fileptr.Close()
 
-        scanner := bufio.NewScanner(fileptr)
-        for scanner.Scan(){
-                lines := strings.Split(scanner.Text(), "\n")
-                for _ , line := range lines{
-                        if strings.Contains(line, "peer-id"){
-                                parts := strings.Split(string(line), "=")
-                                peerID := parts[1]
-                                peer_ID := peerID[2:len(peerID)-1]
-                                return peer_ID
-                        }
-                }
-        }
-        return ""
-}
 
 func getVolInfoFile() string {
 	return *volinfo
@@ -102,8 +80,7 @@ func main() {
 	flag.Parse()
 	var glusterd_workdir = flag.String( "glusterd-dir", getWorkingDir(glusterMgmt), "Directory where the local peer info file is stored, Default for glusterd1 is /var/lib/glusterd/ and for glusterd2 is /var/lib/glusterd2/")
 	flag.Parse()
-	var peerid = flag.String( "peerid", getPeerID( glusterd_workdir ), "Gluster Node's peer ID")
-	flag.Parse()
+	var peerid = getPeerID( glusterd_workdir )
 	// start := time.Now()
 
 	for _, m := range glusterMetrics {
