@@ -1,10 +1,10 @@
 package main
 
 import (
-	"strings"
+	"io/ioutil"
 	"os/exec"
 	"strconv"
-	"io/ioutil"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -68,12 +68,10 @@ var (
 		},
 		labels,
 	)
-
 )
 
-
 func getCmdLine(pid string) []string {
-	var args  []string
+	var args []string
 
 	out, err := ioutil.ReadFile("/proc/" + pid + "/cmdline")
 	if err != nil {
@@ -86,9 +84,9 @@ func getCmdLine(pid string) []string {
 
 func getGlusterdLabels(cmd string, args []string) prometheus.Labels {
 	return prometheus.Labels{
-		"name": cmd,
-		"volume": "",
-		"peerid": getPeerID(),
+		"name":       cmd,
+		"volume":     "",
+		"peerid":     getPeerID(),
 		"brick_path": "",
 	}
 }
@@ -108,27 +106,27 @@ func getGlusterFsdLabels(cmd string, args []string) prometheus.Labels {
 	}
 
 	return prometheus.Labels{
-		"name": cmd,
-		"volume": volume,
-		"peerid": getPeerID(),
+		"name":       cmd,
+		"volume":     volume,
+		"peerid":     getPeerID(),
 		"brick_path": bpath,
 	}
 }
 
 func getUnknownLabels(cmd string, args []string) prometheus.Labels {
 	return prometheus.Labels{
-		"name": cmd,
-		"volume": "",
-		"peerid": getPeerID(),
+		"name":       cmd,
+		"volume":     "",
+		"peerid":     getPeerID(),
 		"brick_path": "",
 	}
 }
 
 func ps() {
 	args := []string{
-		"--no-header",  // No header in the output
-		"-ww",  // To set unlimited width to avoid crop
-		"-o",  // Output Format
+		"--no-header", // No header in the output
+		"-ww",         // To set unlimited width to avoid crop
+		"-o",          // Output Format
 		"pid,pcpu,pmem,rsz,vsz,etimes,comm",
 		"-C",
 		strings.Join(glusterProcs, ","),
@@ -165,10 +163,14 @@ func ps() {
 
 		var lbls prometheus.Labels
 		switch lineData[6] {
-		case "glusterd": lbls = getGlusterdLabels(lineData[6], cmdlineArgs)
-		case "glusterd2": lbls = getGlusterdLabels(lineData[6], cmdlineArgs)
-		case "glusterfsd": lbls = getGlusterFsdLabels(lineData[6], cmdlineArgs)
-		default: lbls = getUnknownLabels(lineData[6], cmdlineArgs)
+		case "glusterd":
+			lbls = getGlusterdLabels(lineData[6], cmdlineArgs)
+		case "glusterd2":
+			lbls = getGlusterdLabels(lineData[6], cmdlineArgs)
+		case "glusterfsd":
+			lbls = getGlusterFsdLabels(lineData[6], cmdlineArgs)
+		default:
+			lbls = getUnknownLabels(lineData[6], cmdlineArgs)
 		}
 
 		pcpu, err := strconv.ParseFloat(lineData[1], 64)
