@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	brick_labels = []string{
+	brickLabels = []string{
 		"host",
 		"id",
 		"brick_path",
@@ -18,7 +18,7 @@ var (
 		"subvolume",
 	}
 
-	subvol_labels = []string{
+	subvolLabels = []string{
 		"volume",
 		"subvolume",
 	}
@@ -29,7 +29,7 @@ var (
 			Name:      "brick_capacity_used",
 			Help:      "Used capacity of gluster bricks",
 		},
-		brick_labels,
+		brickLabels,
 	)
 
 	glusterBrickCapacityFree = prometheus.NewGaugeVec(
@@ -38,7 +38,7 @@ var (
 			Name:      "brick_capacity_free",
 			Help:      "Free capacity of gluster bricks",
 		},
-		brick_labels,
+		brickLabels,
 	)
 
 	glusterBrickCapacityTotal = prometheus.NewGaugeVec(
@@ -47,7 +47,7 @@ var (
 			Name:      "brick_capacity_total",
 			Help:      "Total capacity of gluster bricks",
 		},
-		brick_labels,
+		brickLabels,
 	)
 
 	glusterBrickInodesTotal = prometheus.NewGaugeVec(
@@ -56,7 +56,7 @@ var (
 			Name:      "brick_inodes_total",
 			Help:      "Total no of inodes of gluster brick disk",
 		},
-		brick_labels,
+		brickLabels,
 	)
 
 	glusterBrickInodesFree = prometheus.NewGaugeVec(
@@ -65,7 +65,7 @@ var (
 			Name:      "brick_inodes_free",
 			Help:      "Free no of inodes of gluster brick disk",
 		},
-		brick_labels,
+		brickLabels,
 	)
 
 	glusterBrickInodesUsed = prometheus.NewGaugeVec(
@@ -74,7 +74,7 @@ var (
 			Name:      "brick_inodes_used",
 			Help:      "Used no of inodes of gluster brick disk",
 		},
-		brick_labels,
+		brickLabels,
 	)
 
 	glusterSubvolCapacityUsed = prometheus.NewGaugeVec(
@@ -83,27 +83,28 @@ var (
 			Name:      "subvol_capacity_used",
 			Help:      "Effective used capacity of gluster subvolume",
 		},
-		subvol_labels,
+		subvolLabels,
 	)
 )
 
-func GetGlusterBrickLabels(brick GlusterBrick, subvol string) prometheus.Labels {
+func getGlusterBrickLabels(brick GlusterBrick, subvol string) prometheus.Labels {
 	return prometheus.Labels{
-		"host": brick.Host,
-		"id": brick.Id,
+		"host":       brick.Host,
+		"id":         brick.ID,
 		"brick_path": brick.Path,
-		"volume": brick.VolumeName,
-		"subvolume": subvol,
+		"volume":     brick.VolumeName,
+		"subvolume":  subvol,
 	}
 }
 
-func GetGlusterSubvolLabels(volname string, subvol string) prometheus.Labels {
+func getGlusterSubvolLabels(volname string, subvol string) prometheus.Labels {
 	return prometheus.Labels{
-		"volume": volname,
+		"volume":    volname,
 		"subvolume": subvol,
 	}
 }
 
+// DiskStatus represents Disk usage
 type DiskStatus struct {
 	All        float64 `json:"all"`
 	Used       float64 `json:"used"`
@@ -113,41 +114,44 @@ type DiskStatus struct {
 	InodesUsed float64 `json:"inodesused"`
 }
 
+// GlusterBrick represents brick info
 type GlusterBrick struct {
 	Host       string `json:"host"`
-	Id         string `json:"id"`
+	ID         string `json:"id"`
 	Path       string `json:"path"`
-	PeerId     string `json:"peer-id"`
+	PeerID     string `json:"peer-id"`
 	Type       string `json:"type"`
-	VolumeId   string `json:"volume-id"`
+	VolumeID   string `json:"volume-id"`
 	VolumeName string `json:"volume-name"`
 }
 
+// GlusterSubVolume represents sub volume of distribution set
 type GlusterSubVolume struct {
-	ArbiterCount      uint `json:"arbiter-count"`
+	ArbiterCount      uint           `json:"arbiter-count"`
 	Bricks            []GlusterBrick `json:"bricks"`
-	DisperseCount     uint `json:"disperse-count"`
-	DisperseDataCount uint `json:"disperse-data-count"`
-	Name              string `json:"name"`
-	ReplicaCount      uint `json:"replica-count"`
-	Type              string `json:"type"`
+	DisperseCount     uint           `json:"disperse-count"`
+	DisperseDataCount uint           `json:"disperse-data-count"`
+	Name              string         `json:"name"`
+	ReplicaCount      uint           `json:"replica-count"`
+	Type              string         `json:"type"`
 }
 
+// GlusterVolume represents Gluster Volume
 type GlusterVolume struct {
-	DistributeCount uint `json:"distribute-count"`
-	Id              string `json:"id"`
-	Metadata        map[string]string `json:"metadata"`
-	Name            string `json:"name"`
-	Options         map[string]string `json:"options"`
-	ReplicCount     uint `json:"replica-count"`
-	SnapList        []string `json:"snap-list"`
-	State           string `json:"state"`
+	DistributeCount uint               `json:"distribute-count"`
+	ID              string             `json:"id"`
+	Metadata        map[string]string  `json:"metadata"`
+	Name            string             `json:"name"`
+	Options         map[string]string  `json:"options"`
+	ReplicCount     uint               `json:"replica-count"`
+	SnapList        []string           `json:"snap-list"`
+	State           string             `json:"state"`
 	SubVolumes      []GlusterSubVolume `json:"subvols"`
-	Transport       string `json:"transport"`
-	Type            string `json:"type"`
+	Transport       string             `json:"transport"`
+	Type            string             `json:"type"`
 }
 
-func DiskUsage(path string) (disk DiskStatus) {
+func diskUsage(path string) (disk DiskStatus) {
 	fs := syscall.Statfs_t{}
 	err := syscall.Statfs(path, &fs)
 	if err != nil {
@@ -162,7 +166,7 @@ func DiskUsage(path string) (disk DiskStatus) {
 	return
 }
 
-func BrickUtilization() {
+func brickUtilization() {
 	fileObj, err := os.Open(getVolInfoFile())
 	if err != nil {
 		// TODO: log the error
@@ -178,11 +182,11 @@ func BrickUtilization() {
 		subvols := volume.SubVolumes
 		for _, subvol := range subvols {
 			bricks := subvol.Bricks
-			var maxBrickUsed float64 = 0
+			var maxBrickUsed float64
 			for _, brick := range bricks {
-                                if brick.PeerId == getPeerID() {
-					usage := DiskUsage(brick.Path)
-					var lbls = GetGlusterBrickLabels(brick, subvol.Name)
+				if brick.PeerID == getPeerID() {
+					usage := diskUsage(brick.Path)
+					var lbls = getGlusterBrickLabels(brick, subvol.Name)
 					// Update the metrics
 					glusterBrickCapacityUsed.With(lbls).Set(usage.Used)
 					glusterBrickCapacityFree.With(lbls).Set(usage.Free)
@@ -199,7 +203,7 @@ func BrickUtilization() {
 				}
 			}
 			effectiveCapacity := maxBrickUsed
-			var subvolLabels = GetGlusterSubvolLabels(volume.Name, subvol.Name)
+			var subvolLabels = getGlusterSubvolLabels(volume.Name, subvol.Name)
 			if subvol.Type == "Disperse" {
 				// In disperse volume data bricks contribute to the sub
 				// volume size
@@ -227,5 +231,5 @@ func init() {
 
 	// Register to update this every 2 seconds
 	// Name, Callback Func, Interval Seconds
-	registerMetric("gluster_brick", BrickUtilization, 5)
+	registerMetric("gluster_brick", brickUtilization, 5)
 }

@@ -4,25 +4,34 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	"time"
 	"os"
+	"runtime"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// ExporterVersion and GitSHA
+// These are set as flags during build time. The current values are just placeholders
 var (
-	port = flag.Int("port", 8080, "Exporter Port")
-	metricsPath = flag.String("metrics-path", "/metrics", "Metrics API Path")
-	peerid = flag.String("peerid", "", "Gluster Node's peer ID")
-	volinfo = flag.String("volinfo", "", "Volume info json file")
+	ExporterVersion         = ""
+	GitSHA                  = ""
+	defaultGlusterd1Workdir = ""
+	defaultGlusterd2Workdir = ""
+)
 
+var (
+	port                          = flag.Int("port", 8080, "Exporter Port")
+	metricsPath                   = flag.String("metrics-path", "/metrics", "Metrics API Path")
+	peerid                        = flag.String("peerid", "", "Gluster Node's peer ID")
+	volinfo                       = flag.String("volinfo", "", "Volume info json file")
+	showVersion                   = flag.Bool("version", false, "Show the version information")
 	defaultInterval time.Duration = 5
 )
 
-
 type glusterMetric struct {
-	name string
-	fn func()
+	name            string
+	fn              func()
 	intervalSeconds time.Duration
 }
 
@@ -40,8 +49,20 @@ func getVolInfoFile() string {
 	return *volinfo
 }
 
+func dumpVersionInfo() {
+	fmt.Printf("version   : %s\n", ExporterVersion)
+	fmt.Printf("git SHA   : %s\n", GitSHA)
+	fmt.Printf("go version: %s\n", runtime.Version())
+	fmt.Printf("go OS/arch: %s/%s\n", runtime.GOOS, runtime.GOARCH)
+}
+
 func main() {
 	flag.Parse()
+
+	if *showVersion {
+		dumpVersionInfo()
+		return
+	}
 
 	// start := time.Now()
 
@@ -62,7 +83,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "No Metrics registered, Exiting..\n")
 		os.Exit(1)
 	}
-	
+
 	http.Handle(*metricsPath, promhttp.Handler())
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 	if err != nil {
@@ -70,4 +91,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
