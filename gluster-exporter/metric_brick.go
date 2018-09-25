@@ -184,7 +184,11 @@ func brickUtilization() {
 			bricks := subvol.Bricks
 			var maxBrickUsed float64
 			for _, brick := range bricks {
-				if brick.PeerID == getPeerID() {
+
+				// TODO: Handle error
+				peerID, _ = getPeerID()
+
+				if brick.PeerID == peerID {
 					usage := diskUsage(brick.Path)
 					var lbls = getGlusterBrickLabels(brick, subvol.Name)
 					// Update the metrics

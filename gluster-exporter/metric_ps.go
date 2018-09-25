@@ -83,10 +83,14 @@ func getCmdLine(pid string) []string {
 }
 
 func getGlusterdLabels(cmd string, args []string) prometheus.Labels {
+
+	// TODO: Handle error
+	peerID, _ = getPeerID()
+
 	return prometheus.Labels{
 		"name":       cmd,
 		"volume":     "",
-		"peerid":     getPeerID(),
+		"peerid":     peerID,
 		"brick_path": "",
 	}
 }
@@ -96,6 +100,10 @@ func getGlusterFsdLabels(cmd string, args []string) prometheus.Labels {
 	volume := ""
 
 	prevArg := ""
+
+	// TODO: Handle error
+	peerID, _ = getPeerID()
+
 	for _, a := range args {
 		if prevArg == "--brick-name" {
 			bpath = a
@@ -108,16 +116,20 @@ func getGlusterFsdLabels(cmd string, args []string) prometheus.Labels {
 	return prometheus.Labels{
 		"name":       cmd,
 		"volume":     volume,
-		"peerid":     getPeerID(),
+		"peerid":     peerID,
 		"brick_path": bpath,
 	}
 }
 
 func getUnknownLabels(cmd string, args []string) prometheus.Labels {
+
+	// TODO: Handle error
+	peerID, _ = getPeerID()
+
 	return prometheus.Labels{
 		"name":       cmd,
 		"volume":     "",
-		"peerid":     getPeerID(),
+		"peerid":     peerID,
 		"brick_path": "",
 	}
 }
