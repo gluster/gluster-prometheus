@@ -36,6 +36,13 @@ type Config struct {
 	Timeout           int64
 }
 
+// Peer represents a Gluster Peer
+type Peer struct {
+	ID            string   `json:"id"`
+	PeerAddresses []string `json:"peer-addresses"`
+	Online        bool     `json:"online"`
+}
+
 // Brick represents Gluster Brick
 type Brick struct {
 	Host       string `json:"host"`
