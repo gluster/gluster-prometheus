@@ -1,4 +1,4 @@
-package gluster_interface
+package glusterinterface
 
 import (
 	"encoding/json"
@@ -16,10 +16,12 @@ type ginterface interface {
 	GetVolStatus(vol string) ([]Volume, error)
 }
 
-type PeerStatus struct {
+type peerStatus struct {
 	XMLName xml.Name `xml:"cliOutput"`
 	Peers   []Peer   `xml:"peerStatus>peer"`
 }
+
+// Peer struct describe gluster peer
 type Peer struct {
 	XMLName   xml.Name `xml:"peer"`
 	UUID      string   `xml:"uuid"`
@@ -27,10 +29,12 @@ type Peer struct {
 	Connected int      `xml:"connected"`
 }
 
-type HealBricks struct {
+type healBricks struct {
 	XMLName     xml.Name      `xml:"cliOutput"`
 	Healentries []HealEntries `xml:"healInfo>bricks>brick"`
 }
+
+// HealEntries describe gluster heal info for each brick
 type HealEntries struct {
 	XMLName        xml.Name `xml:"brick"`
 	HostUUID       string   `xml:"hostUuid,attr"`
@@ -39,11 +43,12 @@ type HealEntries struct {
 	NumHealEntries float64  `xml:"numberOfEntries"`
 }
 
-type VolumeStatus struct {
+type volumeStatus struct {
 	XMLName xml.Name `xml:"cliOutput"`
 	Volumes []Volume `xml:"volStatus>volumes>volume"`
 }
 
+// Volume describes gluster volume
 type Volume struct {
 	XMLName   xml.Name `xml:"volume"`
 	VolName   string   `xml:"volName"`
@@ -51,11 +56,13 @@ type Volume struct {
 	Node      []Node   `xml:"node"`
 	Status    string
 }
+
+// Node describes gluster brick node
 type Node struct {
 	XMLName  xml.Name `xml:"node"`
 	Hostname string   `xml:"hostname"`
 	Path     string   `xml:"path"`
-	PeerId   string   `xml:"peerid"`
+	PeerID   string   `xml:"peerid"`
 	Status   string   `xml:"status"`
 	Port     string   `xml:"port"`
 	Ports    struct {
@@ -65,25 +72,28 @@ type Node struct {
 	Pid string `xml:"pid"`
 }
 
+// GD1 enables users to interact with gd1 version
 type GD1 struct {
 }
 
+// ExecuteCmd enables to execute system cmds and returns stdout, err
 func ExecuteCmd(cmd string) ([]byte, error) {
-	cmd_fields := strings.Fields(cmd)
-	cmd_str := cmd_fields[0]
-	args := cmd_fields[1:]
-	fmt.Println("executing", cmd_str, args)
-	out, err := exec.Command(cmd_str, args...).Output()
+	cmdfields := strings.Fields(cmd)
+	cmdstr := cmdfields[0]
+	args := cmdfields[1:]
+	fmt.Println("executing", cmdstr, args)
+	out, err := exec.Command(cmdstr, args...).Output()
 	return out, err
 }
 
+// GetOnlinePeers gets you the online gluster peers, look for Peer struct
 func (g GD1) GetOnlinePeers() ([]Peer, error) {
 	cmd := "gluster peer status --xml"
 	out, err := ExecuteCmd(cmd)
 	if err != nil {
 		return nil, err
 	}
-	var result PeerStatus
+	var result peerStatus
 	err = xml.Unmarshal(out, &result)
 	var onlinePeers []Peer
 	for _, peer := range result.Peers {
@@ -93,16 +103,21 @@ func (g GD1) GetOnlinePeers() ([]Peer, error) {
 	}
 	return onlinePeers, err
 }
+
+// GetHealInfo gets gluster vol heal in []HealEntries
 func (g GD1) GetHealInfo(vol string) ([]HealEntries, error) {
 	cmd := fmt.Sprintf("gluster vol heal %s info --xml", vol)
 	out, err := ExecuteCmd(cmd)
 	if err != nil {
 		return nil, err
 	}
-	var healop HealBricks
+	var healop healBricks
 	err = xml.Unmarshal(out, &healop)
 	return healop.Healentries, err
 }
+
+// GetVolStatus gets the volume status if given vol name,
+// otherwise gets all vols status
 func (g GD1) GetVolStatus(vol string) ([]Volume, error) {
 
 	cmd := fmt.Sprintf("gluster vol status %s --xml", vol)
@@ -111,7 +126,7 @@ func (g GD1) GetVolStatus(vol string) ([]Volume, error) {
 	if err != nil {
 		return nil, err
 	}
-	var volstatus VolumeStatus
+	var volstatus volumeStatus
 	err = xml.Unmarshal(out, &volstatus)
 	if err == nil {
 		Volumes := volstatus.Volumes
@@ -131,16 +146,19 @@ func (g GD1) GetVolStatus(vol string) ([]Volume, error) {
 	return volstatus.Volumes, err
 }
 
+// GD2 is struct to interact with Glusterd2 using REST API
 type GD2 struct {
 	Host string
 	Port string
 }
 
+// MakeGD2 returns created gd2 instance, given host and port
 func MakeGD2(host string, port string) GD2 {
 	gd2 := GD2{host, port}
 	return gd2
 }
 
+// GetOnlinePeers gets online peers from Glusterd2 using REST
 func (g GD2) GetOnlinePeers() ([]Peer, error) {
 	url := "http://" + g.Host + ":" + g.Port + "/v1/peers"
 	resp, err := http.Get(url)
@@ -158,27 +176,27 @@ func (g GD2) GetOnlinePeers() ([]Peer, error) {
 	if err != nil {
 		return nil, err
 	}
-	var online_peers []Peer
+	var onlinepeers []Peer
 
 	for _, peer := range peers {
 		UUID := peer["id"].(string)
 		online := peer["online"].(bool)
 		if online {
-			peer_addresses := peer["peer-addresses"].([]interface{})
-			var list_addresses []string
-			for _, i := range peer_addresses {
+			peeraddresses := peer["peer-addresses"].([]interface{})
+			var listaddresses []string
+			for _, i := range peeraddresses {
 				addr := i.(string)
-				list_addresses = append(list_addresses, addr)
+				listaddresses = append(listaddresses, addr)
 			}
-			addresses := strings.Join(list_addresses, ",")
-			online_peer := Peer{UUID: UUID, Hostname: addresses, Connected: 1}
-			online_peers = append(online_peers, online_peer)
+			addresses := strings.Join(listaddresses, ",")
+			onlinepeer := Peer{UUID: UUID, Hostname: addresses, Connected: 1}
+			onlinepeers = append(onlinepeers, onlinepeer)
 		}
 	}
-	return online_peers, nil
+	return onlinepeers, nil
 }
 
-func (g GD2) GetAllVolStatus() ([]Volume, error) {
+func (g GD2) getAllVolStatus() ([]Volume, error) {
 	url := "http://" + g.Host + ":" + g.Port + "/v1/volumes"
 	resp, err := http.Get(url)
 	if err != nil {
@@ -197,17 +215,17 @@ func (g GD2) GetAllVolStatus() ([]Volume, error) {
 	}
 	var Volumes []Volume
 	for _, volume := range volumes {
-		v := GetVolumeObj(volume)
+		v := getVolumeObj(volume)
 		Volumes = append(Volumes, v)
 	}
 	return Volumes, nil
 }
 
-func GetVolumeObj(volume map[string]interface{}) Volume {
+func getVolumeObj(volume map[string]interface{}) Volume {
 	var name string
 	var state string
 	var NodeMap = make(map[string]string)
-	var List_Nodes []Node
+	var ListNodes []Node
 	for key, val := range volume {
 		switch key {
 		case "name":
@@ -229,9 +247,9 @@ func GetVolumeObj(volume map[string]interface{}) Volume {
 					_, present := NodeMap[host]
 					if !present {
 						NodeMap[keystr] = peer
-						N1 := Node{Hostname: host, Path: path, PeerId: peer,
+						N1 := Node{Hostname: host, Path: path, PeerID: peer,
 							Status: "NA", Port: "NA", Pid: "NA"}
-						List_Nodes = append(List_Nodes, N1)
+						ListNodes = append(ListNodes, N1)
 					}
 				}
 			}
@@ -239,13 +257,15 @@ func GetVolumeObj(volume map[string]interface{}) Volume {
 	}
 	Count := len(NodeMap)
 	vol := Volume{VolName: name, NodeCount: Count,
-		Node: List_Nodes, Status: state}
+		Node: ListNodes, Status: state}
 	return vol
 }
 
+// GetVolStatus of GD2 gives vol status using REST, if vol name not given
+// then it gets status of all vols
 func (g GD2) GetVolStatus(vol string) ([]Volume, error) {
 	if vol == "" {
-		return g.GetAllVolStatus()
+		return g.getAllVolStatus()
 	}
 	url := "http://" + g.Host + ":" + g.Port + "/v1/volumes/" + vol
 	resp, err := http.Get(url)
@@ -263,12 +283,13 @@ func (g GD2) GetVolStatus(vol string) ([]Volume, error) {
 	if err != nil {
 		return nil, err
 	}
-	var list_volumes []Volume
-	v := GetVolumeObj(volume)
-	list_volumes = append(list_volumes, v)
-	return list_volumes, nil
+	var ListVolumes []Volume
+	v := getVolumeObj(volume)
+	ListVolumes = append(ListVolumes, v)
+	return ListVolumes, nil
 }
 
+// GetHealInfo gets heal info from glusterd2 using rest api
 func (g GD2) GetHealInfo(vol string) ([]HealEntries, error) {
 	url := "http://" + g.Host + ":" + g.Port + "/v1/volumes/" + vol +
 		"/heal-info"
@@ -287,7 +308,7 @@ func (g GD2) GetHealInfo(vol string) ([]HealEntries, error) {
 	if err != nil {
 		return nil, err
 	}
-	var List_Heals []HealEntries
+	var ListHeals []HealEntries
 	for _, heal := range HealInfo {
 		uuid := heal["host-id"].(string)
 		name := heal["name"].(string)
@@ -295,8 +316,8 @@ func (g GD2) GetHealInfo(vol string) ([]HealEntries, error) {
 		connected := heal["status"].(string)
 		HealEntry := HealEntries{HostUUID: uuid, Brickname: name,
 			Connected: connected, NumHealEntries: entries}
-		List_Heals = append(List_Heals, HealEntry)
+		ListHeals = append(ListHeals, HealEntry)
 	}
-	return List_Heals, nil
+	return ListHeals, nil
 
 }
