@@ -15,28 +15,29 @@ go build
 
 == Usage
 
-Run `gluster_exporter` with Gluster Peer ID(Current limitation, this
-will be detected in future releases)
+Run `gluster_exporter` with default settings, glusterd1 is consumable at http://localhost:8080/metrics
 
 ----
-./gluster_exporter -peerid <gluster-peer-id>
-----
-
-For example,
-
-----
-./gluster_exporter -peerid 019042a8-fc13-4abe-88b4-f070905bf78b
+./gluster_exporter
 ----
 
 Other available options,
 
 ----
+-gluster-mgmt string
+      Choice of GlusterD version i.e glusterd1 or glusterd2. (default: "glusterd1")
+-glusterd-dir string
+      Path to where the local peer info file is stored
+      (glusterd1 default: /var/lib/glusterd/ )
+      (glusterd2 default: /var/lib/glusterd2/ )
 -metrics-path string
-      Metrics API Path (default "/metrics")
--peerid string
-      Gluster Peer ID
+      Metrics API Path (default: "/metrics")
 -port int
-      Exporter Port (default 8080)
+      Exporter Port (default: 8080)
+-volinfo string
+      Path to volinfo JSON
+-version bool
+      Shows current version (default: false)
 ----
 
 == Metrics
@@ -124,6 +125,4 @@ glusterCPUPercentage = prometheus.NewGaugeVec(
 * Handling failures
 * Rules generation
 * Consuming Glusterd2 REST APIs
-* Detect Gluster Peer ID automatically(Now accepts as Commandline
-  parameter)
 * Tutorial for setup, integration with Grafana etc
