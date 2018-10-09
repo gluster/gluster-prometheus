@@ -1,0 +1,12 @@
+[
+	{
+		"name": "gluster_ps",
+		"sync_interval": 5,
+		"disabled": false
+	},
+	{
+		"name": "gluster_brick",
+		"sync_interval": 5,
+		"disabled": false
+	}
+]

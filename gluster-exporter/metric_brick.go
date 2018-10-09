@@ -235,5 +235,5 @@ func init() {
 
 	// Register to update this every 2 seconds
 	// Name, Callback Func, Interval Seconds
-	registerMetric("gluster_brick", brickUtilization, 5)
+	registerMetric("gluster_brick", BrickUtilization)
 }

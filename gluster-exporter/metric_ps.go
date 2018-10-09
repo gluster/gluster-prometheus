@@ -232,5 +232,5 @@ func init() {
 
 	// Register to update this every 2 seconds
 	// Name, Callback Func, Interval Seconds
-	registerMetric("gluster_ps", ps, 2)
+	registerMetric("gluster_ps", ps)
 }
