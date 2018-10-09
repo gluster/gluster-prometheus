@@ -1,10 +1,9 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"os"
 	"syscall"
+
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -87,7 +86,7 @@ var (
 	)
 )
 
-func getGlusterBrickLabels(brick GlusterBrick, subvol string) prometheus.Labels {
+func getGlusterBrickLabels(brick glusterutils.Brick, subvol string) prometheus.Labels {
 	return prometheus.Labels{
 		"host":       brick.Host,
 		"id":         brick.ID,
@@ -114,43 +113,6 @@ type DiskStatus struct {
 	InodesUsed float64 `json:"inodesused"`
 }
 
-// GlusterBrick represents brick info
-type GlusterBrick struct {
-	Host       string `json:"host"`
-	ID         string `json:"id"`
-	Path       string `json:"path"`
-	PeerID     string `json:"peer-id"`
-	Type       string `json:"type"`
-	VolumeID   string `json:"volume-id"`
-	VolumeName string `json:"volume-name"`
-}
-
-// GlusterSubVolume represents sub volume of distribution set
-type GlusterSubVolume struct {
-	ArbiterCount      uint           `json:"arbiter-count"`
-	Bricks            []GlusterBrick `json:"bricks"`
-	DisperseCount     uint           `json:"disperse-count"`
-	DisperseDataCount uint           `json:"disperse-data-count"`
-	Name              string         `json:"name"`
-	ReplicaCount      uint           `json:"replica-count"`
-	Type              string         `json:"type"`
-}
-
-// GlusterVolume represents Gluster Volume
-type GlusterVolume struct {
-	DistributeCount uint               `json:"distribute-count"`
-	ID              string             `json:"id"`
-	Metadata        map[string]string  `json:"metadata"`
-	Name            string             `json:"name"`
-	Options         map[string]string  `json:"options"`
-	ReplicCount     uint               `json:"replica-count"`
-	SnapList        []string           `json:"snap-list"`
-	State           string             `json:"state"`
-	SubVolumes      []GlusterSubVolume `json:"subvols"`
-	Transport       string             `json:"transport"`
-	Type            string             `json:"type"`
-}
-
 func diskUsage(path string) (disk DiskStatus) {
 	fs := syscall.Statfs_t{}
 	err := syscall.Statfs(path, &fs)
@@ -167,28 +129,18 @@ func diskUsage(path string) (disk DiskStatus) {
 }
 
 func brickUtilization() {
-	fileObj, err := os.Open(getVolInfoFile())
-	if err != nil {
-		// TODO: log the error
-		return
-	}
-	defer fileObj.Close()
-	data, _ := ioutil.ReadAll(fileObj)
-	var volumes []GlusterVolume
-	if err := json.Unmarshal(data, &volumes); err != nil {
-		return
-	}
+	// TODO: Handle error
+	volumes, _ := glusterutils.VolumeInfo(&glusterConfig)
+	// TODO: Handle error
+	localPeerID, _ := glusterutils.LocalPeerID(&glusterConfig)
+
 	for _, volume := range volumes {
 		subvols := volume.SubVolumes
 		for _, subvol := range subvols {
 			bricks := subvol.Bricks
 			var maxBrickUsed float64
 			for _, brick := range bricks {
-
-				// TODO: Handle error
-				peerID, _ = getPeerID()
-
-				if brick.PeerID == peerID {
+				if brick.PeerID == localPeerID {
 					usage := diskUsage(brick.Path)
 					var lbls = getGlusterBrickLabels(brick, subvol.Name)
 					// Update the metrics
@@ -201,14 +153,14 @@ func brickUtilization() {
 					// Skip exporting utilization data in case of arbiter
 					// brick to avoid wrong values when both the data bricks
 					// are down
-					if brick.Type != "Arbiter" && usage.Used >= maxBrickUsed {
+					if brick.Type != glusterutils.BrickTypeArbiter && usage.Used >= maxBrickUsed {
 						maxBrickUsed = usage.Used
 					}
 				}
 			}
 			effectiveCapacity := maxBrickUsed
 			var subvolLabels = getGlusterSubvolLabels(volume.Name, subvol.Name)
-			if subvol.Type == "Disperse" {
+			if subvol.Type == glusterutils.SubvolTypeDisperse {
 				// In disperse volume data bricks contribute to the sub
 				// volume size
 				effectiveCapacity = maxBrickUsed * float64(subvol.DisperseDataCount)
@@ -235,5 +187,5 @@ func init() {
 
 	// Register to update this every 2 seconds
 	// Name, Callback Func, Interval Seconds
-	registerMetric("gluster_brick", BrickUtilization)
+	registerMetric("gluster_brick", brickUtilization)
 }

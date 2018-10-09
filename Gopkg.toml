@@ -5,3 +5,7 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/gluster/glusterd2"
+  branch = "master"

@@ -33,13 +33,14 @@ EXPORTER_BUILD = $(BUILDDIR)/$(EXPORTER_BIN)
 EXPORTER_INSTALL = $(DESTDIR)$(SBINDIR)/$(EXPORTER_BIN)
 EXPORTER_SERVICE_BUILD = $(BUILDDIR)/$(EXPORTER).service
 EXPORTER_SERVICE_INSTALL = $(DESTDIR)/usr/lib/systemd/system/$(EXPORTER).service
+EXPORTER_CONF_INSTALL = $(DESTDIR)$(SYSCONFDIR)/$(EXPORTER)
 
 GD2STATEDIR = $(LOCALSTATEDIR)/glusterd2
 GD1STATEDIR = $(LOCALSTATEDIR)/glusterd
 EXPORTER_LOGDIR = $(LOGDIR)/$(EXPORTER)
 EXPORTER_RUNDIR = $(RUNDIR)/$(EXPORTER)
 
-GLUSTER_MGMT ?= "glusterd1"
+GLUSTER_MGMT ?= "glusterd"
 
 DEPENV ?=
 
@@ -69,6 +70,8 @@ $(EXPORTER_BUILD):
 install:
 	install -D $(EXPORTER_BUILD) $(EXPORTER_INSTALL)
 	install -D -m 0644 $(EXPORTER_SERVICE_BUILD) $(EXPORTER_SERVICE_INSTALL)
+	install -D -m 0600 ./extras/conf/global.conf.sample $(EXPORTER_CONF_INSTALL)/global.conf
+	install -D -m 0600 ./extras/conf/collectors.conf.sample $(EXPORTER_CONF_INSTALL)/collectors.conf
 	@echo
 
 vendor-update:
@@ -94,4 +97,5 @@ dist-vendor: vendor-install
 	@VENDOR=yes DISTDIR=$(DISTDIR) SIGN=$(SIGN) ./scripts/dist.sh
 
 gen-service:
-	SBINDIR=$(SBINDIR) GLUSTER_MGMT=$(GLUSTER_MGMT) ./scripts/gen-service.sh
+	SBINDIR=$(SBINDIR) SYSCONFDIR=$(SYSCONFDIR) GLUSTER_MGMT=$(GLUSTER_MGMT) \
+		./scripts/gen-service.sh

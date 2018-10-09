@@ -8,37 +8,61 @@ required.
 
 ----
 git clone https://github.com/gluster/gluster-prometheus.git
-cd gluster-prometheus/gluster_exporter
-go get
-go build
+cd gluster-prometheus
+PREFIX=/usr make
+PREFIX=/usr make install
 ----
 
 == Usage
 
-Run `gluster_exporter` with default settings, glusterd1 is consumable at http://localhost:8080/metrics
+Run `gluster-exporter` with default settings, glusterd is consumable
+at http://localhost:8080/metrics
 
 ----
-./gluster_exporter
+systemctl enable gluster-exporter
+systemctl start gluster-exporter
 ----
 
-Other available options,
+Systemd service uses following configuration files for global and
+collectors related configurations.
+
+.`/etc/gluster-exporter/global.conf`
+[source,json]
+----
+{
+        "gluster-mgmt": "glusterd",
+        "glusterd-dir": "/var/lib/glusterd",
+        "gluster-binary-path": "gluster",
+        "gd2-rest-endpoint": "http://localhost:24007",
+        "port": "8080",
+        "metrics-path": "/metrics"
+}
+----
+
+.`/etc/gluster-exporter/collectors.conf`
+[source,json]
+----
+[
+        {
+                "name": "gluster_ps",
+                "sync_interval": 5,
+                "disabled": false
+        },
+        {
+                "name": "gluster_brick",
+                "sync_interval": 5,
+                "disabled": false
+        }
+]
+----
+
+To use `gluster-exporter` without systemd,
 
 ----
--gluster-mgmt string
-      Choice of GlusterD version i.e glusterd1 or glusterd2. (default: "glusterd1")
--glusterd-dir string
-      Path to where the local peer info file is stored
-      (glusterd1 default: /var/lib/glusterd/ )
-      (glusterd2 default: /var/lib/glusterd2/ )
--metrics-path string
-      Metrics API Path (default: "/metrics")
--port int
-      Exporter Port (default: 8080)
--volinfo string
-      Path to volinfo JSON
--version bool
-      Shows current version (default: false)
+gluster-exporter --config=/etc/gluster-exporter/global.conf \
+        --collectors-config=/etc/gluster-exporter/collectors.conf
 ----
+
 
 == Metrics
 === CPU Usage Percentage of Gluster Processes
@@ -91,7 +115,7 @@ Heal etc.
 
 == Adding New metrics
 
-* Add new file under `gluster_exporter` directory.
+* Add new file under `gluster-exporter` directory.
 * Define Metrics depending on the type of
   Metric(https://prometheus.io/docs/concepts/metric_types/)
   For example, "Gauge" Metrics type
@@ -119,7 +143,6 @@ glusterCPUPercentage = prometheus.NewGaugeVec(
 * Thats it! Exporter will run these registered metrics.
 
 == TODO
-* Build and Install Makefile
 * More metrics need to be implemented
 * Logging
 * Handling failures
