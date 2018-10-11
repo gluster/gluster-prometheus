@@ -78,6 +78,12 @@ func main() {
 	mgmt, exists := conf.SystemConfig["gluster-mgmt"]
 	if exists {
 		glusterConfig.GlusterMgmt = mgmt
+		if mgmt == "glusterd2" {
+			endpoint, exists := conf.SystemConfig["gd2-rest-endpoint"]
+			if exists {
+				glusterConfig.Glusterd2Endpoint = endpoint
+			}
+		}
 	}
 	glusterConfig.GlusterdWorkdir = getDefaultGlusterdDir(glusterConfig.GlusterMgmt)
 	gddir, exists := conf.SystemConfig["glusterd-dir"]
