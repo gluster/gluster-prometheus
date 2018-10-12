@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
-
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -86,7 +84,7 @@ func getCmdLine(pid string) ([]string, error) {
 
 func getGlusterdLabels(cmd string, args []string) (prometheus.Labels, error) {
 
-	peerID, err := glusterutils.LocalPeerID(&glusterConfig)
+	peerID, err := gluster.LocalPeerID()
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +104,7 @@ func getGlusterFsdLabels(cmd string, args []string) (prometheus.Labels, error) {
 	prevArg := ""
 
 	// TODO: Handle error
-	peerID, err := glusterutils.LocalPeerID(&glusterConfig)
+	peerID, err := gluster.LocalPeerID()
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +129,7 @@ func getGlusterFsdLabels(cmd string, args []string) (prometheus.Labels, error) {
 func getUnknownLabels(cmd string, args []string) (prometheus.Labels, error) {
 
 	// TODO: Handle error
-	peerID, err := glusterutils.LocalPeerID(&glusterConfig)
+	peerID, err := gluster.LocalPeerID()
 	if err != nil {
 		return nil, err
 	}

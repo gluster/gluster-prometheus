@@ -28,6 +28,7 @@ var (
 	config                        = flag.String("config", defaultConfFile, "Config file path")
 	defaultInterval time.Duration = 5
 	glusterConfig   glusterutils.Config
+	gluster         glusterutils.GInterface
 )
 
 type glusterMetric struct {
@@ -83,6 +84,7 @@ func main() {
 	if exporterConf.GlobalConf.GlusterdDir != "" {
 		glusterConfig.GlusterdWorkdir = exporterConf.GlobalConf.GlusterdDir
 	}
+	gluster = glusterutils.MakeGluster(&glusterConfig)
 
 	// start := time.Now()
 

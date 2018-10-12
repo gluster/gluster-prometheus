@@ -11,8 +11,9 @@ var subvolTypeValueToName = map[api.SubvolType]string{
 	api.SubvolDisperse:   "Disperse",
 }
 
-func gd2VolumeInfo(config *Config) ([]Volume, error) {
-	client, err := initRESTClient(config)
+// VolumeInfo returns gluster vol info (glusterd2)
+func (g *GD2) VolumeInfo() ([]Volume, error) {
+	client, err := initRESTClient(g.config)
 	if err != nil {
 		return nil, err
 	}

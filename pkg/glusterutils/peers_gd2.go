@@ -8,10 +8,10 @@ var (
 	peers api.PeerListResp
 )
 
-// PeersGD2 returns the list of peers ( for GlusterD2 )
-func peersGD2(config *Config) ([]Peer, error) {
+// Peers returns the list of peers ( for GlusterD2 )
+func (g *GD2) Peers() ([]Peer, error) {
 	var peersgd2 []Peer
-	client, err := initRESTClient(config)
+	client, err := initRESTClient(g.config)
 	if err != nil {
 		return nil, err
 	}
