@@ -1,0 +1,163 @@
+= Try gluster-exporter with Kubernetes
+
+== FAQs
+
+* **Is this docker image is final one?** The docker image used here
+    is only for testing. Once the official rpm is available then this
+    `Dockerfile` is not required. gluster-prometheus rpm will be
+    included in official gluster containers.
+* **Is this temporary docker image available in docker hub?**
+    Not Yet. This can be built locally using latest docker.
+* **How is it different from glusterd2 container?** This container
+    image is built on top of glusterd2 container. Glusterd1 CLI also
+    included and prometheus exporter bits are installed.
+* **How to test with Glusterd2?** Gluster prometheus exporter works
+    with both Glusterd1 and Glusterd2, modify the `Dockerfile` to
+    enable the glusterd2 by default and disable glusterd. Config file
+    also need some changes which reflects the glusterd2
+    environment. Note: Final release will have updated defaults
+    depending on in which container prometheus rpm will be deployed.
+* **Is this solution Production ready?** - No. The solution here is
+    only to test deploying `gluster-exporter` and help testing.
+
+== Setup
+* Clone this PR
+* Install latest version of docker in the build machine. This is only
+  required in build machine to use multi stage build feature of
+  Dockerfile.
+----
+# dnf remove -y docker docker-common container-selinux docker-selinux docker-engine
+# curl -o /etc/yum.repos.d/docker-ce.repo https://download.docker.com/linux/fedora/docker-ce.repo
+# dnf -y install docker-ce
+----
+
+* Start docker service using `systemctl start docker`
+
+* Build docker image by running `./build-docker-image.sh`. Once docker
+  image is successfully built, save the image using
+----
+# docker save -o gluster-prometheus.img gluster/gluster-prometheus
+----
+
+* Copy the docker image to all nodes and load to local docker
+  repository.
+
+----
+# ansible all -m command -a 'docker load -i gluster-prometheus.img'
+----
+Verify if the docker image is loaded in the local repository or not by
+running,
+
+----
+# ansible all -m shell -a 'docker images | grep prometheus'
+node1.example.com | SUCCESS | rc=0 >>
+gluster/gluster-prometheus   latest   27356c3e2942   16 hours ago   464 MB
+
+node3.example.com | SUCCESS | rc=0 >>
+gluster/gluster-prometheus   latest   27356c3e2942   16 hours ago   464 MB
+
+node2.example.com | SUCCESS | rc=0 >>
+gluster/gluster-prometheus   latest   27356c3e2942   16 hours ago   464 MB
+----
+
+* Once the docker image is available, apply gluster daemonSet using
+  the template available in `extras/gluster-prometheus-ds.yml`
+
+----
+# kubectl get nodes
+NAME                 STATUS   ROLES    AGE   VERSION
+master.example.com   Ready    master   10h   v1.12.1
+node1.example.com    Ready    <none>   10h   v1.12.1
+node2.example.com    Ready    <none>   10h   v1.12.1
+node3.example.com    Ready    <none>   10h   v1.12.1
+----
+
+----
+# kubectl apply -f gluster-prometheus-ds.yml
+----
+
+Run `get pods` to see gluster pods are running
+
+----
+# kubectl get pods
+NAME              READY   STATUS    RESTARTS   AGE
+glusterfs-24xsn   1/1     Running   0          9h
+glusterfs-hkb4h   1/1     Running   0          9h
+glusterfs-vjlxq   1/1     Running   0          9h
+----
+
+Verify that `glusterd` and `gluster-exporter` are running in gluster
+pods.
+
+----
+# kubectl get pods | grep gluster | awk '{print $1}' | xargs -i kubectl exec -it "{}" -- /bin/bash -c 'ps -ax | grep gluster' 2>/dev/null
+20 ?        Ssl    0:01 /usr/sbin/gluster-exporter --config=/etc/gluster-exporter/global.conf --collectors-config=/etc/gluster-exporter/collectors.conf
+30 ?        Ssl    0:00 /usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO
+
+20 ?        Ssl    0:01 /usr/sbin/gluster-exporter --config=/etc/gluster-exporter/global.conf --collectors-config=/etc/gluster-exporter/collectors.conf
+31 ?        Ssl    0:00 /usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO
+
+21 ?        Ssl    0:01 /usr/sbin/gluster-exporter --config=/etc/gluster-exporter/global.conf --collectors-config=/etc/gluster-exporter/collectors.conf
+26 ?        Ssl    0:00 /usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO
+----
+
+Create brick directory in all pods using,
+
+----
+# kubectl get pods | grep gluster | awk '{print $1}' | \
+      xargs -i kubectl exec -it "{}" -- /bin/bash \
+      -c 'mkdir -p /bricks/gv1'
+----
+
+Peer probe and create a Volume,
+
+----
+# gluster peer probe node2.example.com
+# gluster peer probe node3.example.com
+# gluster volume create gv1 node1.example.com:/bricks/gv1/brick1 \
+      node2.example.com:/bricks/gv1/brick2 \
+      node3.example.com:/bricks/gv1/brick3 \
+      force
+# gluster volume start gv1
+----
+
+**Note:** All these changes are temporary, only for testing metrics
+
+Login to any one pod and see if metrics are exported by Prometheus
+exporter.
+
+----
+# curl http://node1.example.com:8080/metrics | grep gluster | grep -v "# "
+gluster_brick_capacity_free{brick_path="/bricks/gv1/brick1",host="node1.example.com",id="",subvolume="gv1-distribute-0",volume="gv1"} 1.16426752e+09
+gluster_brick_capacity_total{brick_path="/bricks/gv1/brick1",host="node1.example.com",id="",subvolume="gv1-distribute-0",volume="gv1"} 5.67279616e+09
+gluster_brick_capacity_used{brick_path="/bricks/gv1/brick1",host="node1.example.com",id="",subvolume="gv1-distribute-0",volume="gv1"} 4.50852864e+09
+gluster_brick_inodes_free{brick_path="/bricks/gv1/brick1",host="node1.example.com",id="",subvolume="gv1-distribute-0",volume="gv1"} 2.274345e+06
+gluster_brick_inodes_total{brick_path="/bricks/gv1/brick1",host="node1.example.com",id="",subvolume="gv1-distribute-0",volume="gv1"} 2.33636e+06
+gluster_brick_inodes_used{brick_path="/bricks/gv1/brick1",host="node1.example.com",id="",subvolume="gv1-distribute-0",volume="gv1"} 62015
+gluster_cpu_percentage{brick_path="",name="glusterd",peerid="",volume=""} 0
+gluster_cpu_percentage{brick_path="",name="glusterd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume=""} 0
+gluster_cpu_percentage{brick_path="/bricks/gv1/brick1",name="glusterfsd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume="gv1"} 0
+gluster_elapsed_time_seconds{brick_path="",name="glusterd",peerid="",volume=""} 221
+gluster_elapsed_time_seconds{brick_path="",name="glusterd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume=""} 611
+gluster_elapsed_time_seconds{brick_path="/bricks/gv1/brick1",name="glusterfsd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume="gv1"} 53
+gluster_memory_percentage{brick_path="",name="glusterd",peerid="",volume=""} 1.1
+gluster_memory_percentage{brick_path="",name="glusterd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume=""} 1.5
+gluster_memory_percentage{brick_path="/bricks/gv1/brick1",name="glusterfsd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume="gv1"} 1.1
+gluster_resident_memory{brick_path="",name="glusterd",peerid="",volume=""} 11424
+gluster_resident_memory{brick_path="",name="glusterd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume=""} 15536
+gluster_resident_memory{brick_path="/bricks/gv1/brick1",name="glusterfsd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume="gv1"} 11460
+gluster_subvol_capacity_used{subvolume="gv1-distribute-0",volume="gv1"} 4.50852864e+09
+gluster_virtual_memory{brick_path="",name="glusterd",peerid="",volume=""} 500788
+gluster_virtual_memory{brick_path="",name="glusterd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume=""} 504992
+gluster_virtual_memory{brick_path="/bricks/gv1/brick1",name="glusterfsd",peerid="9eb6974c-1f92-4330-a805-f0b059a8cf1a",volume="gv1"} 817844
+----
+
+
+**TODO**:
+
+* Use Prometheus operator to see metrics are captured from gluster
+  exporters using scrape annotations.
+* build nightly rpm and include with official gluster containers.
+* Update defaults to deploy with glusterd2 container.
+* Documentation to setup and use.
+
