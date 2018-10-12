@@ -129,14 +129,14 @@ func diskUsage(path string) (disk DiskStatus, err error) {
 }
 
 func brickUtilization() {
-	volumes, err := glusterutils.VolumeInfo(&glusterConfig)
+	volumes, err := gluster.VolumeInfo()
 	if err != nil {
 		// TODO: Log error
 		// Return without exporting metric in this cycle
 		return
 	}
 
-	localPeerID, err := glusterutils.LocalPeerID(&glusterConfig)
+	localPeerID, err := gluster.LocalPeerID()
 	if err != nil {
 		// TODO: Log error
 		// Return without exporting metric in this cycle

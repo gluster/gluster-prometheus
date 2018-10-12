@@ -95,3 +95,22 @@ type Volume struct {
 	DisperseRedundancyCount int               `json:"disperse-redundancy-count"`
 	ReplicaCount            int               `json:"replica-count"`
 }
+
+// GInterface should be implemented in GD1 and GD2 structs
+type GInterface interface {
+	Peers() ([]Peer, error)
+	LocalPeerID() (string, error)
+	IsLeader() (bool, error)
+	//	HealInfo(vol string) ([]HealEntry, error)
+	VolumeInfo() ([]Volume, error)
+}
+
+// GD1 enables users to interact with gd1 version
+type GD1 struct {
+	config *Config
+}
+
+// GD2 is struct to interact with Glusterd2 using REST API
+type GD2 struct {
+	config *Config
+}

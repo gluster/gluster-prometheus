@@ -18,11 +18,11 @@ type peersGlusterd1 struct {
 	List    []peerGlusterd1 `xml:"peerStatus>peer"`
 }
 
-// PeersGD1 returns the list of peers ( for GlusterD1 )
-func peersGD1(config *Config) ([]Peer, error) {
+// Peers returns the list of peers ( for GlusterD1 )
+func (g *GD1) Peers() ([]Peer, error) {
 	var gd1Peers peersGlusterd1
 	var peersgd1 []Peer
-	out, err := exec.Command(config.GlusterCmd, "pool", "list", "--xml").Output()
+	out, err := exec.Command(g.config.GlusterCmd, "pool", "list", "--xml").Output()
 	if err != nil {
 		return peersgd1, err
 	}

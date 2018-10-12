@@ -3,7 +3,9 @@ package glusterutils
 import (
 	"bufio"
 	"errors"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -13,40 +15,16 @@ var (
 	peerIDPattern = regexp.MustCompile("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
 )
 
-// Peers return a list of peers
-func Peers(config *Config) ([]Peer, error) {
-	setDefaultConfig(config)
-
-	if config.GlusterMgmt == MgmtGlusterd2 {
-		return peersGD2(config)
-	}
-
-	return peersGD1(config)
-}
-
 // IsLeader returns true or false based on whether the node is the leader of the cluster or not
-func IsLeader(config *Config) (bool, error) {
-	setDefaultConfig(config)
-	peerList, err := Peers(config)
+func (g *GD1) IsLeader() (bool, error) {
+	setDefaultConfig(g.config)
+	peerList, err := g.Peers()
 	if err != nil {
 		return false, err
 	}
-	peerID, err := LocalPeerID(config)
+	peerID, err := g.LocalPeerID()
 	if err != nil {
 		return false, err
-	}
-	if config.GlusterMgmt == MgmtGlusterd2 {
-		//The following lines checks and returns true if the local PeerID is equal to that of the first PeerID in the list
-		for _, pr := range peerList {
-			if pr.Online {
-				if peerID == peerList[0].ID {
-					return true, nil
-				}
-				return false, nil
-			}
-		}
-		// This would imply none of the peers are online and return false
-		return false, nil
 	}
 	var maxPeerID string
 	//This for loop iterates among all the peers and finds the peer with the maximum UUID (lexicographically)
@@ -64,33 +42,40 @@ func IsLeader(config *Config) (bool, error) {
 	return false, nil
 }
 
-// VolumeInfo gets Volume info from Gd1/Gd2 based on config provided
-func VolumeInfo(config *Config) ([]Volume, error) {
-	setDefaultConfig(config)
-
-	if config.GlusterMgmt == MgmtGlusterd2 {
-		return gd2VolumeInfo(config)
+// IsLeader returns true or false based on whether the node is the leader of the cluster or not
+func (g *GD2) IsLeader() (bool, error) {
+	peerList, err := g.Peers()
+	if err != nil {
+		return false, err
 	}
-
-	return gd1VolumeInfo(config)
+	peerID, err := g.LocalPeerID()
+	if err != nil {
+		return false, err
+	}
+	for _, pr := range peerList {
+		if pr.Online {
+			if peerID == peerList[0].ID {
+				return true, nil
+			}
+			return false, nil
+		}
+	}
+	// This would imply none of the peers are online and return false
+	return false, nil
 }
 
-// LocalPeerID returns local peer ID of glusterd/glusterd2
-func LocalPeerID(config *Config) (string, error) {
+// MakeGluster returns respective gluster obj based on configuration
+func MakeGluster(config *Config) GInterface {
 	setDefaultConfig(config)
+	if config.GlusterMgmt == "" || config.GlusterMgmt == MgmtGlusterd {
+		return &GD1{config: config}
+	}
+	return &GD2{config: config}
 
-	keywordID := "UUID"
-	peeridFile := config.GlusterdWorkdir + "/glusterd.info"
-	if config.GlusterMgmt == MgmtGlusterd2 {
-		keywordID = "peer-id"
-		peeridFile = config.GlusterdWorkdir + "/uuid.toml"
-	}
-	fileStream, err := os.Open(filepath.Clean(peeridFile))
-	if err != nil {
-		return "", err
-	}
+}
+func readPeerID(fileStream io.ReadCloser, keywordID string) (string, error) {
 	defer func() {
-		err = fileStream.Close()
+		err := fileStream.Close()
 		if err != nil {
 			// TODO: Log here
 			return
@@ -113,4 +98,47 @@ func LocalPeerID(config *Config) (string, error) {
 		}
 	}
 	return "", errors.New("unable to find peer address")
+}
+
+// LocalPeerID returns local peer ID of glusterd
+func (g *GD1) LocalPeerID() (string, error) {
+	keywordID := "UUID"
+	peeridFile := g.config.GlusterdWorkdir + "/glusterd.info"
+	fileStream, err := os.Open(filepath.Clean(peeridFile))
+	if err != nil {
+		return "", err
+	}
+	return readPeerID(fileStream, keywordID)
+}
+
+// LocalPeerID returns local peer ID of glusterd2
+func (g *GD2) LocalPeerID() (string, error) {
+	keywordID := "peer-id"
+	peeridFile := g.config.GlusterdWorkdir + "/uuid.toml"
+	fileStream, err := os.Open(filepath.Clean(peeridFile))
+	if err != nil {
+		return "", err
+	}
+	return readPeerID(fileStream, keywordID)
+}
+
+// GetGlusterVersion gets the glusterfs version
+func GetGlusterVersion() (string, error) {
+	cmd := "glusterfs --version | head -1"
+	bytes, err := executeCmd(cmd)
+	if err != nil {
+		return "", err
+	}
+	stdout := string(bytes[:])
+	fields := strings.Fields(stdout)
+	return fields[1], err
+}
+
+// executeCmd enables to execute system cmds and returns stdout, err
+func executeCmd(cmd string) ([]byte, error) {
+	cmdfields := strings.Fields(cmd)
+	cmdstr := cmdfields[0]
+	args := cmdfields[1:]
+	out, err := exec.Command(cmdstr, args...).Output()
+	return out, err
 }
