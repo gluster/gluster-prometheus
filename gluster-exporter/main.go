@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"strconv"
 	"time"
 
 	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
@@ -22,11 +21,11 @@ var (
 	GitSHA                  = ""
 	defaultGlusterd1Workdir = ""
 	defaultGlusterd2Workdir = ""
+	defaultConfFile         = ""
 )
 var (
 	showVersion                   = flag.Bool("version", false, "Show the version information")
-	config                        = flag.String("config", "", "Global config file path")
-	collectorsCfg                 = flag.String("collectors-config", "", "Collectors config file path")
+	config                        = flag.String("config", defaultConfFile, "Config file path")
 	defaultInterval time.Duration = 5
 	glusterConfig   glusterutils.Config
 )
@@ -59,12 +58,9 @@ func getDefaultGlusterdDir(mgmt string) string {
 func main() {
 	flag.Parse()
 
-	if err := conf.LoadCollectorsConfig(*collectorsCfg); err != "" {
-		fmt.Fprintf(os.Stderr, "Loading collectors config failed: %s\n", err)
-		os.Exit(1)
-	}
-	if err := conf.LoadConfig(*config); err != "" {
-		fmt.Fprintf(os.Stderr, "Loading global config failed: %s\n", err)
+	exporterConf, err := conf.LoadConfig(*config)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Loading global config failed: %s\n", err.Error())
 		os.Exit(1)
 	}
 
@@ -75,26 +71,23 @@ func main() {
 
 	// Set the Gluster Configurations used in glusterutils
 	glusterConfig.GlusterMgmt = "glusterd"
-	mgmt, exists := conf.SystemConfig["gluster-mgmt"]
-	if exists {
-		glusterConfig.GlusterMgmt = mgmt
-		if mgmt == "glusterd2" {
-			endpoint, exists := conf.SystemConfig["gd2-rest-endpoint"]
-			if exists {
-				glusterConfig.Glusterd2Endpoint = endpoint
+	if exporterConf.GlobalConf.GlusterMgmt != "" {
+		glusterConfig.GlusterMgmt = exporterConf.GlobalConf.GlusterMgmt
+		if exporterConf.GlobalConf.GlusterMgmt == "glusterd2" {
+			if exporterConf.GlobalConf.GD2RESTEndpoint != "" {
+				glusterConfig.Glusterd2Endpoint = exporterConf.GlobalConf.GD2RESTEndpoint
 			}
 		}
 	}
 	glusterConfig.GlusterdWorkdir = getDefaultGlusterdDir(glusterConfig.GlusterMgmt)
-	gddir, exists := conf.SystemConfig["glusterd-dir"]
-	if exists {
-		glusterConfig.GlusterdWorkdir = gddir
+	if exporterConf.GlobalConf.GlusterdDir != "" {
+		glusterConfig.GlusterdWorkdir = exporterConf.GlobalConf.GlusterdDir
 	}
 
 	// start := time.Now()
 
 	for _, m := range glusterMetrics {
-		if collectorConf, ok := conf.Collectors[m.name]; ok {
+		if collectorConf, ok := exporterConf.CollectorsConf[m.name]; ok {
 			if collectorConf.Disabled == false {
 				go func(m glusterMetric) {
 					for {
@@ -115,12 +108,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsPath, _ := conf.SystemConfig["metrics-path"]
-	port, _ := conf.SystemConfig["port"]
-	nport, _ := strconv.Atoi(port)
+	metricsPath := exporterConf.GlobalConf.MetricsPath
+	port := exporterConf.GlobalConf.Port
 	http.Handle(metricsPath, promhttp.Handler())
-	err := http.ListenAndServe(fmt.Sprintf(":%d", nport), nil)
-	if err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to run exporter\nError: %s", err)
 		os.Exit(1)
 	}

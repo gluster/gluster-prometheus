@@ -64,14 +64,14 @@ check-reqs:
 $(EXPORTER_BIN): $(EXPORTER_BUILD) gen-service
 $(EXPORTER_BUILD):
 	FASTBUILD=$(FASTBUILD) BASE_PREFIX=$(BASE_PREFIX) GD1STATEDIR=$(GD1STATEDIR) \
+		CONFFILE=${SYSCONFDIR}/gluster-exporter/gluster-exporter.toml \
 		GD2STATEDIR=$(GD2STATEDIR) ./scripts/build.sh $(EXPORTER)
 	@echo
 
 install:
 	install -D $(EXPORTER_BUILD) $(EXPORTER_INSTALL)
 	install -D -m 0644 $(EXPORTER_SERVICE_BUILD) $(EXPORTER_SERVICE_INSTALL)
-	install -D -m 0600 ./extras/conf/global.conf.sample $(EXPORTER_CONF_INSTALL)/global.conf
-	install -D -m 0600 ./extras/conf/collectors.conf.sample $(EXPORTER_CONF_INSTALL)/collectors.conf
+	install -D -m 0600 ./extras/conf/gluster-exporter.toml.sample $(EXPORTER_CONF_INSTALL)/gluster-exporter.toml
 	@echo
 
 vendor-update:

@@ -1,8 +1,0 @@
-{
-	"gluster-mgmt": "glusterd",
-	"glusterd-dir": "/var/lib/glusterd",
-	"gluster-binary-path": "gluster",
-	"gd2-rest-endpoint": "http://localhost:24007",
-	"port": "8080",
-	"metrics-path": "/metrics"
-}

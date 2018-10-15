@@ -1,0 +1,17 @@
+[globals]
+gluster-mgmt = "glusterd"
+glusterd-dir = "/var/lib/glusterd"
+gluster-binary-path = "gluster"
+gd2-rest-endpoint = "http://localhost:24007"
+port = 8080
+metrics-path = "/metrics"
+
+[collectors.gluster_ps]
+name = "gluster_ps"
+sync-interval = 5
+disabled = false
+
+[collectors.gluster_brick]
+name = "gluster_brick"
+sync-interval = 5
+disabled = false
