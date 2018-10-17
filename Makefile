@@ -76,16 +76,18 @@ install:
 
 vendor-update:
 	@echo Updating vendored packages
-	@$(DEPENV) dep ensure -update
+	@$(DEPENV) dep ensure -v -update
 	@echo
 
 vendor-install:
 	@echo Installing vendored packages
-	@$(DEPENV) dep ensure -vendor-only
+	@$(DEPENV) dep ensure -v -vendor-only
 	@echo
 
 test: check-reqs
-	@./test.sh $(TESTOPTIONS)
+	@./scripts/pre-commit.sh
+	@./scripts/gometalinter-tests.sh
+	@echo
 
 release: build
 	@./scripts/release.sh

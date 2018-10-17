@@ -21,6 +21,11 @@ const (
 	BrickTypeDefault = "Brick"
 	// BrickTypeArbiter represents arbiter brick type
 	BrickTypeArbiter = "Arbiter"
+
+	// MgmtGlusterd represents glusterd
+	MgmtGlusterd = "glusterd"
+	// MgmtGlusterd2 represents glusterd
+	MgmtGlusterd2 = "glusterd2"
 )
 
 // Config represents Glusterd1/Glusterd2 configurations

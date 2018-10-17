@@ -3,7 +3,7 @@
 ## This script builds a gluster-exporter binary and creates an archive, and then signs it.
 ## Should be called from the root of the repo
 
-VERSION=$("$(dirname "$0")"/pkg-version --full)
+VERSION="$(git describe --dirty --always --tags | sed 's/-/./2' | sed 's/-/./2')"
 OS=$(go env GOOS)
 ARCH=$(go env GOARCH)
 EXPORTER=gluster-exporter

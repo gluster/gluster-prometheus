@@ -17,6 +17,9 @@ func gd2VolumeInfo(config *Config) ([]Volume, error) {
 		return nil, err
 	}
 	vols, err := client.Volumes("")
+	if err != nil {
+		return nil, err
+	}
 	volumes := make([]Volume, len(vols))
 
 	// Convert to required format

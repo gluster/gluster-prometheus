@@ -1,0 +1,43 @@
+---
+sudo: true
+
+addons:
+  apt:
+    packages:
+      - python
+      - realpath
+      - ruby
+
+language: go
+
+env:
+  global:
+    - GO_METALINTER_VERSION="v2.0.11"
+
+go:
+  # Kubernetes minimum_go_version can be found in this file:
+  # https://github.com/kubernetes/kubernetes/blob/master/hack/lib/golang.sh
+  - stable
+
+install:
+  - gem install asciidoctor mdl
+  - pip install --user --upgrade pip
+  - pip install --user yamllint
+  # install dep
+  - >
+    curl -L
+    https://raw.githubusercontent.com/golang/dep/master/install.sh
+    | sh
+  # install gometalinter
+  - >
+    curl -L
+    'https://raw.githubusercontent.com/alecthomas/gometalinter/master/scripts/install.sh'
+    | bash -s -- -b ${TRAVIS_HOME}/gopath/bin "${GO_METALINTER_VERSION}"
+
+script:
+  # Lint text-like files
+  - scripts/pre-commit.sh --require-all
+  # Fetch vendor dependencies so linters succeed
+  - make vendor-install
+  # Lint golang sources
+  - scripts/gometalinter-tests.sh
