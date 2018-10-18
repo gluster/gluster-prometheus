@@ -10,7 +10,7 @@ cat >"$OUTPUT" <<EOF
 Description=Gluster Prometheus Exporter
 
 [Service]
-ExecStart=${SBINDIR}/gluster-exporter --config=${SYSCONFDIR}/gluster-exporter/global.conf --collectors-config=${SYSCONFDIR}/gluster-exporter/collectors.conf
+ExecStart=${SBINDIR}/gluster-exporter --config=${SYSCONFDIR}/gluster-exporter/gluster-exporter.toml
 KillMode=process
 
 [Install]

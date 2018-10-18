@@ -23,44 +23,38 @@ systemctl enable gluster-exporter
 systemctl start gluster-exporter
 ----
 
-Systemd service uses following configuration files for global and
+Systemd service uses following configuration file for global and
 collectors related configurations.
 
-.`/etc/gluster-exporter/global.conf`
-[source,json]
+.`/etc/gluster-exporter/gluster-exporter.toml`
+[source,toml]
 ----
-{
-        "gluster-mgmt": "glusterd",
-        "glusterd-dir": "/var/lib/glusterd",
-        "gluster-binary-path": "gluster",
-        "gd2-rest-endpoint": "http://localhost:24007",
-        "port": "8080",
-        "metrics-path": "/metrics"
-}
-----
+[globals]
+gluster-mgmt = "glusterd"
+glusterd-dir = "/var/lib/glusterd"
+gluster-binary-path = "gluster"
+gd2-rest-endpoint = "http://127.0.0.1:24007"
+port = 8080
+metrics-path = "/metrics"
+log-dir = "/var/log"
+log-file = "gluster-exporter.log"
+log-level = "info"
 
-.`/etc/gluster-exporter/collectors.conf`
-[source,json]
-----
-[
-        {
-                "name": "gluster_ps",
-                "sync_interval": 5,
-                "disabled": false
-        },
-        {
-                "name": "gluster_brick",
-                "sync_interval": 5,
-                "disabled": false
-        }
-]
+[collectors.gluster_ps]
+name = "gluster_ps"
+sync-interval = 5
+disabled = false
+
+[collectors.gluster_brick]
+name = "gluster_brick"
+sync-interval = 5
+disabled = false
 ----
 
 To use `gluster-exporter` without systemd,
 
 ----
-gluster-exporter --config=/etc/gluster-exporter/global.conf \
-        --collectors-config=/etc/gluster-exporter/collectors.conf
+gluster-exporter --config=/etc/gluster-exporter/gluster-exporter.toml
 ----
 
 
@@ -138,7 +132,14 @@ glusterCPUPercentage = prometheus.NewGaugeVec(
 
         // Register to update this every 2 seconds
         // Name, Callback Func, Interval Seconds
-        registerMetric("gluster_ps", psfunc, 2)
+        registerMetric("gluster_ps", psfunc)
+
+* Add an entry in /etc/gluster-exporter/gluster-exporter.toml
+
+	[collectors.gluster_ps]
+	name = "gluster_ps"
+	sync-interval = 5
+	disabled = false
 
 * Thats it! Exporter will run these registered metrics.
 
