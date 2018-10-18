@@ -2,14 +2,10 @@ package glusterutils
 
 import (
 	"github.com/gluster/glusterd2/pkg/api"
-	"github.com/gluster/glusterd2/pkg/restclient"
 )
 
 var (
-	client    *restclient.Client
-	peers     api.PeerListResp
-	maxPeerID string
-	peerID    string
+	peers api.PeerListResp
 )
 
 // PeersGD2 returns the list of peers ( for GlusterD2 )

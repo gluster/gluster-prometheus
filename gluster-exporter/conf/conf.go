@@ -2,6 +2,7 @@ package conf
 
 import (
 	"io/ioutil"
+	"path/filepath"
 
 	"github.com/BurntSushi/toml"
 )
@@ -32,7 +33,7 @@ type Config struct {
 // LoadConfig loads the configuration file
 func LoadConfig(confFilePath string) (*Config, error) {
 	var conf Config
-	b, err := ioutil.ReadFile(confFilePath)
+	b, err := ioutil.ReadFile(filepath.Clean(confFilePath))
 	if err != nil {
 		return nil, err
 	}

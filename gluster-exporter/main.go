@@ -49,7 +49,7 @@ func dumpVersionInfo() {
 }
 
 func getDefaultGlusterdDir(mgmt string) string {
-	if mgmt == "glusterd2" {
+	if mgmt == glusterutils.MgmtGlusterd2 {
 		return defaultGlusterd2Workdir
 	}
 	return defaultGlusterd1Workdir
@@ -60,7 +60,7 @@ func main() {
 
 	exporterConf, err := conf.LoadConfig(*config)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Loading global config failed: %s\n", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "Loading global config failed: %s\n", err.Error())
 		os.Exit(1)
 	}
 
@@ -88,7 +88,7 @@ func main() {
 
 	for _, m := range glusterMetrics {
 		if collectorConf, ok := exporterConf.CollectorsConf[m.name]; ok {
-			if collectorConf.Disabled == false {
+			if !collectorConf.Disabled {
 				go func(m glusterMetric) {
 					for {
 						m.fn()
@@ -96,7 +96,7 @@ func main() {
 						if collectorConf.SyncInterval > 0 {
 							interval = time.Duration(collectorConf.SyncInterval)
 						}
-						time.Sleep(time.Duration(time.Second * time.Duration(interval)))
+						time.Sleep(time.Second * interval)
 					}
 				}(m)
 			}
@@ -104,7 +104,7 @@ func main() {
 	}
 
 	if len(glusterMetrics) == 0 {
-		fmt.Fprintf(os.Stderr, "No Metrics registered, Exiting..\n")
+		_, _ = fmt.Fprintf(os.Stderr, "No Metrics registered, Exiting..\n")
 		os.Exit(1)
 	}
 
@@ -112,7 +112,7 @@ func main() {
 	port := exporterConf.GlobalConf.Port
 	http.Handle(metricsPath, promhttp.Handler())
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to run exporter\nError: %s", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Failed to run exporter\nError: %s", err)
 		os.Exit(1)
 	}
 }

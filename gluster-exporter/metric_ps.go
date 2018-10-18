@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -72,39 +73,43 @@ var (
 	)
 )
 
-func getCmdLine(pid string) []string {
+func getCmdLine(pid string) ([]string, error) {
 	var args []string
 
-	out, err := ioutil.ReadFile("/proc/" + pid + "/cmdline")
+	out, err := ioutil.ReadFile(filepath.Clean("/proc/" + pid + "/cmdline"))
 	if err != nil {
-		// TODO: Log Error
-		return args
+		return args, err
 	}
 
-	return strings.Split(strings.Trim(string(out), "\x00"), "\x00")
+	return strings.Split(strings.Trim(string(out), "\x00"), "\x00"), nil
 }
 
-func getGlusterdLabels(cmd string, args []string) prometheus.Labels {
+func getGlusterdLabels(cmd string, args []string) (prometheus.Labels, error) {
 
-	// TODO: Handle error
-	peerID, _ := glusterutils.LocalPeerID(&glusterConfig)
+	peerID, err := glusterutils.LocalPeerID(&glusterConfig)
+	if err != nil {
+		return nil, err
+	}
 
 	return prometheus.Labels{
 		"name":       cmd,
 		"volume":     "",
 		"peerid":     peerID,
 		"brick_path": "",
-	}
+	}, nil
 }
 
-func getGlusterFsdLabels(cmd string, args []string) prometheus.Labels {
+func getGlusterFsdLabels(cmd string, args []string) (prometheus.Labels, error) {
 	bpath := ""
 	volume := ""
 
 	prevArg := ""
 
 	// TODO: Handle error
-	peerID, _ := glusterutils.LocalPeerID(&glusterConfig)
+	peerID, err := glusterutils.LocalPeerID(&glusterConfig)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, a := range args {
 		if prevArg == "--brick-name" {
@@ -120,20 +125,23 @@ func getGlusterFsdLabels(cmd string, args []string) prometheus.Labels {
 		"volume":     volume,
 		"peerid":     peerID,
 		"brick_path": bpath,
-	}
+	}, nil
 }
 
-func getUnknownLabels(cmd string, args []string) prometheus.Labels {
+func getUnknownLabels(cmd string, args []string) (prometheus.Labels, error) {
 
 	// TODO: Handle error
-	peerID, _ := glusterutils.LocalPeerID(&glusterConfig)
+	peerID, err := glusterutils.LocalPeerID(&glusterConfig)
+	if err != nil {
+		return nil, err
+	}
 
 	return prometheus.Labels{
 		"name":       cmd,
 		"volume":     "",
 		"peerid":     peerID,
 		"brick_path": "",
-	}
+	}, nil
 }
 
 func ps() {
@@ -149,7 +157,8 @@ func ps() {
 	out, err := exec.Command("ps", args...).Output()
 
 	if err != nil {
-		// TODO: Handle error
+		// TODO: Log error
+		// Return without exporting metrics in this cycle
 		return
 	}
 
@@ -168,7 +177,11 @@ func ps() {
 		if len(lineData) < 7 {
 			continue
 		}
-		cmdlineArgs := getCmdLine(lineData[0])
+		cmdlineArgs, err := getCmdLine(lineData[0])
+		if err != nil {
+			// TODO: Log error
+			continue
+		}
 
 		if len(cmdlineArgs) == 0 {
 			// No cmdline file, may be that process died
@@ -178,13 +191,18 @@ func ps() {
 		var lbls prometheus.Labels
 		switch lineData[6] {
 		case "glusterd":
-			lbls = getGlusterdLabels(lineData[6], cmdlineArgs)
+			lbls, err = getGlusterdLabels(lineData[6], cmdlineArgs)
 		case "glusterd2":
-			lbls = getGlusterdLabels(lineData[6], cmdlineArgs)
+			lbls, err = getGlusterdLabels(lineData[6], cmdlineArgs)
 		case "glusterfsd":
-			lbls = getGlusterFsdLabels(lineData[6], cmdlineArgs)
+			lbls, err = getGlusterFsdLabels(lineData[6], cmdlineArgs)
 		default:
-			lbls = getUnknownLabels(lineData[6], cmdlineArgs)
+			lbls, err = getUnknownLabels(lineData[6], cmdlineArgs)
+		}
+
+		if err != nil {
+			// TODO: Log error
+			continue
 		}
 
 		pcpu, err := strconv.ParseFloat(lineData[1], 64)

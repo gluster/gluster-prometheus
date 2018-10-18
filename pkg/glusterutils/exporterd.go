@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -16,7 +17,7 @@ var (
 func Peers(config *Config) ([]Peer, error) {
 	setDefaultConfig(config)
 
-	if config.GlusterMgmt == "glusterd2" {
+	if config.GlusterMgmt == MgmtGlusterd2 {
 		return peersGD2(config)
 	}
 
@@ -34,10 +35,10 @@ func IsLeader(config *Config) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if config.GlusterMgmt == "glusterd2" {
+	if config.GlusterMgmt == MgmtGlusterd2 {
 		//The following lines checks and returns true if the local PeerID is equal to that of the first PeerID in the list
 		for _, pr := range peerList {
-			if pr.Online == true {
+			if pr.Online {
 				if peerID == peerList[0].ID {
 					return true, nil
 				}
@@ -50,7 +51,7 @@ func IsLeader(config *Config) (bool, error) {
 	var maxPeerID string
 	//This for loop iterates among all the peers and finds the peer with the maximum UUID (lexicographically)
 	for i, pr := range peerList {
-		if pr.Online == true {
+		if pr.Online {
 			if peerList[i].ID > maxPeerID {
 				maxPeerID = peerList[i].ID
 			}
@@ -67,7 +68,7 @@ func IsLeader(config *Config) (bool, error) {
 func VolumeInfo(config *Config) ([]Volume, error) {
 	setDefaultConfig(config)
 
-	if config.GlusterMgmt == "glusterd2" {
+	if config.GlusterMgmt == MgmtGlusterd2 {
 		return gd2VolumeInfo(config)
 	}
 
@@ -79,23 +80,29 @@ func LocalPeerID(config *Config) (string, error) {
 	setDefaultConfig(config)
 
 	keywordID := "UUID"
-	filepath := config.GlusterdWorkdir + "/glusterd.info"
-	if config.GlusterMgmt == "glusterd2" {
+	peeridFile := config.GlusterdWorkdir + "/glusterd.info"
+	if config.GlusterMgmt == MgmtGlusterd2 {
 		keywordID = "peer-id"
-		filepath = config.GlusterdWorkdir + "/uuid.toml"
+		peeridFile = config.GlusterdWorkdir + "/uuid.toml"
 	}
-	fileStream, err := os.Open(filepath)
+	fileStream, err := os.Open(filepath.Clean(peeridFile))
 	if err != nil {
 		return "", err
 	}
-	defer fileStream.Close()
+	defer func() {
+		err = fileStream.Close()
+		if err != nil {
+			// TODO: Log here
+			return
+		}
+	}()
 
 	scanner := bufio.NewScanner(fileStream)
 	for scanner.Scan() {
 		lines := strings.Split(scanner.Text(), "\n")
 		for _, line := range lines {
 			if strings.Contains(line, keywordID) {
-				parts := strings.Split(string(line), "=")
+				parts := strings.Split(line, "=")
 				unformattedPeerID := parts[1]
 				peerID := peerIDPattern.FindString(unformattedPeerID)
 				if peerID == "" {

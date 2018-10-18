@@ -5,16 +5,14 @@ GOPATH=$(go env GOPATH)
 GOBINDIR=$GOPATH/bin
 
 install_tools_darwin() {
-  type brew >/dev/null 2>&1
-  if [ $? -eq 0 ]; then
+  if type brew >/dev/null 2>&1; then
     echo "brew is already installed"
   else
     echo "Installing brew."
     mkdir homebrew && curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C homebrew
   fi
 
-  type gtar >/dev/null 2>&1
-  if [ $? -eq 0 ]; then
+  if type gtar >/dev/null 2>&1; then
     echo "gnu-tar (gtar) is already installed"
   else
     echo "Installing gnu-tar."
@@ -38,8 +36,7 @@ bootstrap_platform() {
 install_dep() {
   DEPVER="v0.5.0"
   DEPURL="https://github.com/golang/dep/releases/download/${DEPVER}/dep-linux-amd64"
-  type dep >/dev/null 2>&1
-  if [ $? -eq 0 ]; then
+  if type dep >/dev/null 2>&1; then
     local version
     version=$(dep version | awk '/^ version/{print $3}')
     if [[ $version == "$DEPVER" || $version >  $DEPVER ]]; then
@@ -59,8 +56,7 @@ install_gometalinter() {
   LINTER_TARBALL="gometalinter-${LINTER_VER}-linux-amd64.tar.gz"
   LINTER_URL="https://github.com/alecthomas/gometalinter/releases/download/v${LINTER_VER}/${LINTER_TARBALL}"
 
-  type gometalinter >/dev/null 2>&1
-  if [ $? -eq 0 ]; then
+  if type gometalinter >/dev/null 2>&1; then
     echo "gometalinter already installed"
     return
   fi

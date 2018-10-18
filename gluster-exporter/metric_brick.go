@@ -113,9 +113,9 @@ type DiskStatus struct {
 	InodesUsed float64 `json:"inodesused"`
 }
 
-func diskUsage(path string) (disk DiskStatus) {
+func diskUsage(path string) (disk DiskStatus, err error) {
 	fs := syscall.Statfs_t{}
-	err := syscall.Statfs(path, &fs)
+	err = syscall.Statfs(path, &fs)
 	if err != nil {
 		return
 	}
@@ -129,10 +129,19 @@ func diskUsage(path string) (disk DiskStatus) {
 }
 
 func brickUtilization() {
-	// TODO: Handle error
-	volumes, _ := glusterutils.VolumeInfo(&glusterConfig)
-	// TODO: Handle error
-	localPeerID, _ := glusterutils.LocalPeerID(&glusterConfig)
+	volumes, err := glusterutils.VolumeInfo(&glusterConfig)
+	if err != nil {
+		// TODO: Log error
+		// Return without exporting metric in this cycle
+		return
+	}
+
+	localPeerID, err := glusterutils.LocalPeerID(&glusterConfig)
+	if err != nil {
+		// TODO: Log error
+		// Return without exporting metric in this cycle
+		return
+	}
 
 	for _, volume := range volumes {
 		subvols := volume.SubVolumes
@@ -141,7 +150,11 @@ func brickUtilization() {
 			var maxBrickUsed float64
 			for _, brick := range bricks {
 				if brick.PeerID == localPeerID {
-					usage := diskUsage(brick.Path)
+					usage, err := diskUsage(brick.Path)
+					if err != nil {
+						// TODO: Log Error
+						continue
+					}
 					var lbls = getGlusterBrickLabels(brick, subvol.Name)
 					// Update the metrics
 					glusterBrickCapacityUsed.With(lbls).Set(usage.Used)

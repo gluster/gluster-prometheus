@@ -26,8 +26,7 @@ REPO_PATH="github.com/gluster/gluster-prometheus"
 GOPKG="${REPO_PATH}/${PACKAGE}"
 BIN=$(basename "$PACKAGE")
 
-VERSION=$("$(dirname "$0")/pkg-version" --full)
-[[ -f VERSION ]] && source VERSION
+VERSION="$(git describe --dirty --always --tags | sed 's/-/./2' | sed 's/-/./2')"
 GIT_SHA=${GIT_SHA:-$(git rev-parse --short HEAD || echo "undefined")}
 GIT_SHA_FULL=${GIT_SHA_FULL:-$(git rev-parse HEAD || echo "undefined")}
 LDFLAGS="-X main.ExporterVersion=${VERSION} -X main.GitSHA=${GIT_SHA}"

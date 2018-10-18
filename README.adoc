@@ -7,6 +7,8 @@ required.
 == Install
 
 ----
+mkdir -p $GOPATH/src/github.com/gluster
+cd $GOPATH/src/github.com/gluster
 git clone https://github.com/gluster/gluster-prometheus.git
 cd gluster-prometheus
 PREFIX=/usr make
