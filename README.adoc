@@ -1,5 +1,7 @@
 = Prometheus exporter for Gluster Metrics
 
+image:https://travis-ci.org/gluster/gluster-prometheus.svg?branch=master["Build Status", link="https://travis-ci.org/gluster/gluster-prometheus"]
+
 These exporters will be run on all Gluster peers, So it makes sense to
 collect only local metrics and aggregate in Prometheus server when
 required.
