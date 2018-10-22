@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -110,7 +111,6 @@ func getGlusterFsdLabels(cmd string, args []string) (prometheus.Labels, error) {
 
 	prevArg := ""
 
-	// TODO: Handle error
 	peerID, err := gluster.LocalPeerID()
 	if err != nil {
 		return nil, err
@@ -135,7 +135,6 @@ func getGlusterFsdLabels(cmd string, args []string) (prometheus.Labels, error) {
 
 func getUnknownLabels(cmd string, args []string) (prometheus.Labels, error) {
 
-	// TODO: Handle error
 	peerID, err := gluster.LocalPeerID()
 	if err != nil {
 		return nil, err
@@ -149,7 +148,7 @@ func getUnknownLabels(cmd string, args []string) (prometheus.Labels, error) {
 	}, nil
 }
 
-func ps() {
+func ps() error {
 	args := []string{
 		"--no-header", // No header in the output
 		"-ww",         // To set unlimited width to avoid crop
@@ -162,9 +161,8 @@ func ps() {
 	out, err := exec.Command("ps", args...).Output()
 
 	if err != nil {
-		// TODO: Log error
 		// Return without exporting metrics in this cycle
-		return
+		return err
 	}
 
 	for _, line := range strings.Split(string(out), "\n") {
@@ -184,7 +182,10 @@ func ps() {
 		}
 		cmdlineArgs, err := getCmdLine(lineData[0])
 		if err != nil {
-			// TODO: Log error
+			log.WithError(err).WithFields(log.Fields{
+				"command": lineData[6],
+				"pid":     lineData[0],
+			}).Error("Error getting command line")
 			continue
 		}
 
@@ -197,45 +198,76 @@ func ps() {
 		switch lineData[6] {
 		case "glusterd":
 			lbls, err = getGlusterdLabels(lineData[6], cmdlineArgs)
+			if err != nil {
+				log.WithError(err).Error("Unable to get glusterd labels")
+				continue
+			}
 		case "glusterd2":
 			lbls, err = getGlusterdLabels(lineData[6], cmdlineArgs)
+			if err != nil {
+				log.WithError(err).Error("Unable to get glusterd2 labels")
+				continue
+			}
 		case "glusterfsd":
 			lbls, err = getGlusterFsdLabels(lineData[6], cmdlineArgs)
+			if err != nil {
+				log.WithError(err).Error("Unable to get glusterfsd labels")
+				continue
+			}
 		default:
 			lbls, err = getUnknownLabels(lineData[6], cmdlineArgs)
-		}
-
-		if err != nil {
-			// TODO: Log error
-			continue
+			if err != nil {
+				log.WithError(err).Error("Unable to get default labels")
+				continue
+			}
 		}
 
 		pcpu, err := strconv.ParseFloat(lineData[1], 64)
 		if err != nil {
-			// TODO: Log Error
+			log.WithError(err).WithFields(log.Fields{
+				"value":   lineData[1],
+				"command": lineData[6],
+				"pid":     lineData[0],
+			}).Error("Unable to parse pcpu value")
 			continue
 		}
 
 		pmem, err := strconv.ParseFloat(lineData[2], 64)
 		if err != nil {
-			// TODO: Log Error
+			log.WithError(err).WithFields(log.Fields{
+				"value":   lineData[2],
+				"command": lineData[6],
+				"pid":     lineData[0],
+			}).Error("Unable to parse pmem value")
 			continue
 		}
 		rsz, err := strconv.ParseFloat(lineData[3], 64)
 		if err != nil {
-			// TODO: Log Error
+			log.WithError(err).WithFields(log.Fields{
+				"value":   lineData[3],
+				"command": lineData[6],
+				"pid":     lineData[0],
+			}).Error("Unable to parse rsz value")
 			continue
 		}
 
 		vsz, err := strconv.ParseFloat(lineData[4], 64)
 		if err != nil {
-			// TODO: Log Error
+			log.WithError(err).WithFields(log.Fields{
+				"value":   lineData[4],
+				"command": lineData[6],
+				"pid":     lineData[0],
+			}).Error("Unable to parse vsz value")
 			continue
 		}
 
 		etimes, err := strconv.ParseFloat(lineData[5], 64)
 		if err != nil {
-			// TODO: Log Error
+			log.WithError(err).WithFields(log.Fields{
+				"value":   lineData[5],
+				"command": lineData[6],
+				"pid":     lineData[0],
+			}).Error("Unable to parse etimes value")
 			continue
 		}
 
@@ -250,6 +282,7 @@ func ps() {
 		glusterVirtualMemory.With(lbls).Set(vsz)
 		glusterElapsedTime.With(lbls).Set(etimes)
 	}
+	return nil
 }
 
 func init() {

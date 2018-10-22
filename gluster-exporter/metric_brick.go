@@ -6,6 +6,7 @@ import (
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -142,19 +143,17 @@ func diskUsage(path string) (disk DiskStatus, err error) {
 	return
 }
 
-func brickUtilization() {
+func brickUtilization() error {
 	volumes, err := gluster.VolumeInfo()
 	if err != nil {
-		// TODO: Log error
 		// Return without exporting metric in this cycle
-		return
+		return err
 	}
 
 	localPeerID, err := gluster.LocalPeerID()
 	if err != nil {
-		// TODO: Log error
 		// Return without exporting metric in this cycle
-		return
+		return err
 	}
 
 	for _, volume := range volumes {
@@ -171,7 +170,10 @@ func brickUtilization() {
 				if brick.PeerID == localPeerID {
 					usage, err := diskUsage(brick.Path)
 					if err != nil {
-						// TODO: Log Error
+						log.WithError(err).WithFields(log.Fields{
+							"volume":     volume.Name,
+							"brick_path": brick.Path,
+						}).Error("Error getting disk usage")
 						continue
 					}
 					var lbls = getGlusterBrickLabels(brick, subvol.Name)
@@ -206,6 +208,7 @@ func brickUtilization() {
 			}
 		}
 	}
+	return nil
 }
 
 func init() {

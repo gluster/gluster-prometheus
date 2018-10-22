@@ -11,8 +11,10 @@ import (
 
 	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
+	"github.com/gluster/gluster-prometheus/pkg/logging"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	log "github.com/sirupsen/logrus"
 )
 
 // Below variables are set as flags during build time. The current
@@ -35,12 +37,12 @@ var (
 
 type glusterMetric struct {
 	name string
-	fn   func()
+	fn   func() error
 }
 
 var glusterMetrics []glusterMetric
 
-func registerMetric(name string, fn func()) {
+func registerMetric(name string, fn func() error) {
 	glusterMetrics = append(glusterMetrics, glusterMetric{name: name, fn: fn})
 }
 
@@ -76,6 +78,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := logging.Init(exporterConf.GlobalConf.LogDir, exporterConf.GlobalConf.LogFile, exporterConf.GlobalConf.LogLevel); err != nil {
+		log.WithError(err).Fatal("Failed to initialize logging")
+	}
+
 	// Set the Gluster Configurations used in glusterutils
 	glusterConfig.GlusterMgmt = "glusterd"
 	if exporterConf.GlobalConf.GlusterMgmt != "" {
@@ -106,10 +112,15 @@ func main() {
 			if !collectorConf.Disabled {
 				go func(m glusterMetric) {
 					for {
-						m.fn()
+						err := m.fn()
 						interval := defaultInterval
 						if collectorConf.SyncInterval > 0 {
 							interval = time.Duration(collectorConf.SyncInterval)
+						}
+						if err != nil {
+							log.WithError(err).WithFields(log.Fields{
+								"name": m.name,
+							}).Error("failed to export metric")
 						}
 						time.Sleep(time.Second * interval)
 					}
@@ -128,6 +139,6 @@ func main() {
 	http.Handle(metricsPath, promhttp.Handler())
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Failed to run exporter\nError: %s", err)
-		os.Exit(1)
+		log.WithError(err).Fatal("Failed to run exporter")
 	}
 }
