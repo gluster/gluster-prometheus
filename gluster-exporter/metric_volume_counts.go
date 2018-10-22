@@ -4,6 +4,7 @@ import (
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -53,18 +54,17 @@ func getVolumeLabels(volname string) prometheus.Labels {
 	}
 }
 
-func volumeCounts() {
+func volumeCounts() error {
 	isLeader, err := gluster.IsLeader()
 	if !isLeader || err != nil {
 		// Unable to find out if the current node is leader
 		// Cannot register volume metrics at this node
-		// TODO: log the error
-		return
+		log.WithError(err).Error("Unable to find if the current node is leader")
+		return err
 	}
 	volumes, err := gluster.VolumeInfo()
 	if err != nil {
-		// TODO: Log error
-		return
+		return err
 	}
 
 	var volCount, volStartCount, volCreatedCount int
@@ -89,6 +89,7 @@ func volumeCounts() {
 	glusterVolumeTotalCount.With(prometheus.Labels{}).Set(float64(volCount))
 	glusterVolumeStartedCount.With(prometheus.Labels{}).Set(float64(volStartCount))
 	glusterVolumeCreatedCount.With(prometheus.Labels{}).Set(float64(volCreatedCount))
+	return nil
 }
 
 func init() {

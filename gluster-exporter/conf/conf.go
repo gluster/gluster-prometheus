@@ -15,6 +15,9 @@ type Globals struct {
 	GD2RESTEndpoint   string `toml:"gd2-rest-endpoint"`
 	Port              int    `toml:"port"`
 	MetricsPath       string `toml:"metrics-path"`
+	LogDir            string `toml:"log-dir"`
+	LogFile           string `toml:"log-file"`
+	LogLevel          string `toml:"log-level"`
 }
 
 // Collectors struct defines the structure of collectors configuration

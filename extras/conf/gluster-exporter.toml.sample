@@ -5,6 +5,9 @@ gluster-binary-path = "gluster"
 gd2-rest-endpoint = "http://localhost:24007"
 port = 8080
 metrics-path = "/metrics"
+log-dir = "/var/log/gluster-exporter"
+log-file = "exporter.log"
+log-level = "info"
 
 [collectors.gluster_ps]
 name = "gluster_ps"
