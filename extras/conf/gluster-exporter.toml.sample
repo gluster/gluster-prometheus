@@ -15,3 +15,8 @@ disabled = false
 name = "gluster_brick"
 sync-interval = 5
 disabled = false
+
+[collectors.gluster_volume_counts]
+name = "gluster_volume_counts"
+sync-interval = 5
+disabled = false
