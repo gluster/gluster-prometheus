@@ -20,12 +20,6 @@
   version = "v3.1.0"
 
 [[projects]]
-  name = "github.com/fsnotify/fsnotify"
-  packages = ["."]
-  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
-  version = "v1.4.7"
-
-[[projects]]
   branch = "master"
   name = "github.com/gluster/glusterd2"
   packages = ["pkg/api","pkg/errors","pkg/restclient","pkg/utils","plugins/bitrot/api","plugins/device/api","plugins/events/api","plugins/georeplication/api","plugins/glustershd/api"]
@@ -44,40 +38,16 @@
   version = "v1.0.0"
 
 [[projects]]
-  name = "github.com/hashicorp/hcl"
-  packages = [".","hcl/ast","hcl/parser","hcl/printer","hcl/scanner","hcl/strconv","hcl/token","json/parser","json/scanner","json/token"]
-  revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
-  version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/magiconair/properties"
-  packages = ["."]
-  revision = "c2353362d570a7bfa228149c62842019201cfb71"
-  version = "v1.8.0"
-
-[[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
   packages = ["pbutil"]
   revision = "c12348ce28de40eed0136aa2b644d0ee0650e56c"
   version = "v1.0.1"
 
 [[projects]]
-  name = "github.com/mitchellh/mapstructure"
-  packages = ["."]
-  revision = "3536a929edddb9a5b34bd6861dc4a9647cb459fe"
-  version = "v1.1.2"
-
-[[projects]]
   name = "github.com/pborman/uuid"
   packages = ["."]
   revision = "adf5a7427709b9deb95d29d3fa8a2bf9cfd388f1"
   version = "v1.2"
-
-[[projects]]
-  name = "github.com/pelletier/go-toml"
-  packages = ["."]
-  revision = "c01d1270ff3e442a8a57cddc1c92dc1138598194"
-  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/prometheus/client_golang"
@@ -157,15 +127,9 @@
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
-[[projects]]
-  name = "gopkg.in/yaml.v2"
-  packages = ["."]
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1bba72732480b2b2f2386d805465062f1f3509894cd4742d0ff46dff4b89473a"
+  inputs-digest = "0f6d002e81821e7af912658ffbab554f6486163ae24d9892684ed7ccd5037bf6"
   solver-name = "gps-cdcl"
   solver-version = 1
