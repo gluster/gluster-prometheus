@@ -59,9 +59,9 @@ func VolumeCounts() {
 	volCount = len(volumes)
 	for _, volume := range volumes {
 		switch volume.State {
-		case "Started":
+		case glusterutils.VolumeStateStarted:
 			volStartCount += 1
-		case "Created":
+		case glusterutils.VolumeStateCreated:
 			volCreatedCount += 1
 		default:
 			// Volume is stopped, nothing to do as the stopped count

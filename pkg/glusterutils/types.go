@@ -26,6 +26,13 @@ const (
 	MgmtGlusterd = "glusterd"
 	// MgmtGlusterd2 represents glusterd
 	MgmtGlusterd2 = "glusterd2"
+
+	// VolumeStateCreated represents Volume Created state
+	VolumeStateCreated = "Created"
+	// VolumeStateStarted represents Volume started state
+	VolumeStateStarted = "Started"
+	// VolumeStateStopped represents Volume stopped state
+	VolumeStateStopped = "Stopped"
 )
 
 // Config represents Glusterd1/Glusterd2 configurations

@@ -144,6 +144,11 @@ func brickUtilization() {
 	}
 
 	for _, volume := range volumes {
+		if volume.State != glusterutils.VolumeStateStarted {
+			// Export brick metrics only if the Volume
+			// is is in Started state
+			continue
+		}
 		subvols := volume.SubVolumes
 		for _, subvol := range subvols {
 			bricks := subvol.Bricks
