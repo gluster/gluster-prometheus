@@ -51,8 +51,12 @@ func getVolumeLabels(volname string) prometheus.Labels {
 	}
 }
 
-func VolumeCounts() {
-	volumes, _ := glusterutils.VolumeInfo(&glusterConfig)
+func volumeCounts() {
+	volumes, err := glusterutils.VolumeInfo(&glusterConfig)
+	if err != nil {
+		// TODO: Log error
+		return
+	}
 
 	var volCount, volStartCount, volCreatedCount int
 
@@ -60,9 +64,9 @@ func VolumeCounts() {
 	for _, volume := range volumes {
 		switch volume.State {
 		case glusterutils.VolumeStateStarted:
-			volStartCount += 1
+			volStartCount++
 		case glusterutils.VolumeStateCreated:
-			volCreatedCount += 1
+			volCreatedCount++
 		default:
 			// Volume is stopped, nothing to do as the stopped count
 			// could be derived using total - started - created
@@ -84,7 +88,6 @@ func init() {
 	prometheus.MustRegister(glusterVolumeCreatedCount)
 	prometheus.MustRegister(glusterVolumeBrickCount)
 
-
 	// Name, Callback Func, Interval Seconds
 	isLeader, err := glusterutils.IsLeader(&glusterConfig)
 	if !isLeader || err != nil {
@@ -93,5 +96,5 @@ func init() {
 		// TODO: log the error
 		return
 	}
-	registerMetric("gluster_volume_counts", VolumeCounts)
+	registerMetric("gluster_volume_counts", volumeCounts)
 }
