@@ -61,55 +61,9 @@ To use `gluster-exporter` without systemd,
 gluster-exporter --config=/etc/gluster-exporter/gluster-exporter.toml
 ----
 
-
 == Metrics
-=== CPU Usage Percentage of Gluster Processes
 
-.Example output:
-----
-# HELP gluster_cpu_percentage CPU Percentage used by Gluster processes
-# TYPE gluster_cpu_percentage gauge
-gluster_cpu_percentage{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 0
-gluster_cpu_percentage{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 0
-----
-
-=== Elapsed Time/Uptime of Gluster Processes
-
-.Example output:
-----
-# HELP gluster_elapsed_time_seconds Elapsed Time of Gluster processes
-# TYPE gluster_elapsed_time_seconds gauge
-gluster_elapsed_time_seconds{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 2969
-gluster_elapsed_time_seconds{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 2969
-----
-
-=== Memory percentage, Resident Memory and Virtual Memory of Gluster Processes
-
-.Example output:
-----
-# HELP gluster_memory_percentage Memory Percentage used by Gluster processes
-# TYPE gluster_memory_percentage gauge
-gluster_memory_percentage{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 0.7
-gluster_memory_percentage{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 0.7
-
-# HELP gluster_resident_memory Resident Memory of Gluster processes
-# TYPE gluster_resident_memory gauge
-gluster_resident_memory{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 15392
-gluster_resident_memory{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 14760
-
-# HELP gluster_virtual_memory Virtual Memory of Gluster processes
-# TYPE gluster_virtual_memory gauge
-gluster_virtual_memory{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b1",volume="gv1"} 912260
-gluster_virtual_memory{name="glusterfsd",peerid="019042a8-fc13-4abe-88b4-f070905bf78b",brick_path="/bricks/b2",volume="gv1"} 912520
-----
-
-Exporter will automatically detect the running processes which are
-related to Gluster, and extracts the meta informations like Volume
-name, Brick path etc from the `/proc/<pid>/cmdline`. These meta
-information will be available as labels in Prometheus. Currently it is
-detecting `glusterd`, `glusterfsd` and `glusterd2` processes only.
-Support will be added to more processes like Geo-replication, Self
-Heal etc.
+List of supported metrics are documented link:docs/metrics.adoc[here].
 
 == Adding New metrics
 
@@ -118,6 +72,7 @@ Heal etc.
   Metric(https://prometheus.io/docs/concepts/metric_types/)
   For example, "Gauge" Metrics type
 
+[source,go]
 ----
 glusterCPUPercentage = prometheus.NewGaugeVec(
     prometheus.GaugeOpts{
@@ -132,25 +87,21 @@ glusterCPUPercentage = prometheus.NewGaugeVec(
 * Implement the function to gather data, and register to gather data
   in required interval
 
-        prometheus.MustRegister(glusterCPUPercentage)
+[source,go]
+----
+prometheus.MustRegister(glusterCPUPercentage)
 
-        // Register to update this every 2 seconds
-        // Name, Callback Func, Interval Seconds
-        registerMetric("gluster_ps", psfunc)
+registerMetric("gluster_brick", brickUtilization)
+----
 
 * Add an entry in /etc/gluster-exporter/gluster-exporter.toml
 
-	[collectors.gluster_ps]
-	name = "gluster_ps"
-	sync-interval = 5
-	disabled = false
+[source,toml]
+----
+[collectors.gluster_ps]
+name = "gluster_ps"
+sync-interval = 5
+disabled = false
+----
 
 * Thats it! Exporter will run these registered metrics.
-
-== TODO
-* More metrics need to be implemented
-* Logging
-* Handling failures
-* Rules generation
-* Consuming Glusterd2 REST APIs
-* Tutorial for setup, integration with Grafana etc

@@ -46,7 +46,7 @@ DEPENV ?=
 
 FASTBUILD ?= yes
 
-.PHONY: all build binaries check check-go check-reqs install vendor-update vendor-install verify release check-protoc $(EXPORTER_BIN) $(EXPORTER_BUILD) test dist dist-vendor gen-service gen-version
+.PHONY: all build binaries check check-go check-reqs install vendor-update vendor-install verify release check-protoc $(EXPORTER_BIN) $(EXPORTER_BUILD) test dist dist-vendor gen-service gen-version metrics-docgen
 
 all: build
 
@@ -107,3 +107,7 @@ gen-service:
 gen-version:
 	@git describe --tags --always --match "v[0-9]*" > ./VERSION
 	@git rev-parse HEAD > ./GIT_SHA_FULL
+
+metrics-docgen: $(EXPORTER_BIN)
+	mkdir -p docs
+	./build/gluster-exporter --docgen > docs/metrics.adoc
