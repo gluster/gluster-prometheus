@@ -18,57 +18,64 @@ var (
 		// TODO: Add more processes
 	}
 
-	labels = []string{
-		"volume",
-		"peerid",
-		"brick_path",
-		"name",
+	labels = []MetricLabel{
+		{
+			Name: "volume",
+			Help: "Volume Name",
+		},
+		{
+			Name: "peerid",
+			Help: "Peer ID",
+		},
+		{
+			Name: "brick_path",
+			Help: "Brick Path",
+		},
+		{
+			Name: "name",
+			Help: "Name of the Gluster process(Ex: `glusterfsd`, `glusterd` etc)",
+		},
 	}
 
-	glusterCPUPercentage = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "cpu_percentage",
-			Help:      "CPU Percentage used by Gluster processes",
-		},
-		labels,
-	)
+	glusterCPUPercentage = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "cpu_percentage",
+		Help:      "CPU Percentage used by Gluster processes",
+		LongHelp:  "CPU percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the CPU time used divided by the time the process has been running (cputime/realtime ratio), expressed as a percentage.",
+		Labels:    labels,
+	})
 
-	glusterMemoryPercentage = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "memory_percentage",
-			Help:      "Memory Percentage used by Gluster processes",
-		},
-		labels,
-	)
+	glusterMemoryPercentage = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "memory_percentage",
+		Help:      "Memory Percentage used by Gluster processes",
+		LongHelp:  "Memory percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the ratio of the process's resident set size to the physical memory on the machine, expressed as a percentage",
+		Labels:    labels,
+	})
 
-	glusterResidentMemory = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "resident_memory",
-			Help:      "Resident Memory of Gluster processes",
-		},
-		labels,
-	)
+	glusterResidentMemory = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "resident_memory_bytes",
+		Help:      "Resident Memory of Gluster processes in bytes",
+		LongHelp:  "Resident Memory of Gluster process in bytes. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.",
+		Labels:    labels,
+	})
 
-	glusterVirtualMemory = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "virtual_memory",
-			Help:      "Virtual Memory of Gluster processes",
-		},
-		labels,
-	)
+	glusterVirtualMemory = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "virtual_memory_bytes",
+		Help:      "Virtual Memory of Gluster processes in bytes",
+		LongHelp:  "Virtual Memory of Gluster process in bytes. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.",
+		Labels:    labels,
+	})
 
-	glusterElapsedTime = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "elapsed_time_seconds",
-			Help:      "Elapsed Time of Gluster processes",
-		},
-		labels,
-	)
+	glusterElapsedTime = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "elapsed_time_seconds",
+		Help:      "Elapsed Time of Gluster processes in seconds",
+		LongHelp:  "Elapsed Time or Uptime of Gluster processes in seconds. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.",
+		Labels:    labels,
+	})
 )
 
 func getCmdLine(pid string) ([]string, error) {
@@ -232,6 +239,10 @@ func ps() {
 			continue
 		}
 
+		// Convert to bytes from kilo bytes
+		vsz = vsz * 1024
+		rsz = rsz * 1024
+
 		// Update the Metrics
 		glusterCPUPercentage.With(lbls).Set(pcpu)
 		glusterMemoryPercentage.With(lbls).Set(pmem)
@@ -242,13 +253,5 @@ func ps() {
 }
 
 func init() {
-	prometheus.MustRegister(glusterCPUPercentage)
-	prometheus.MustRegister(glusterMemoryPercentage)
-	prometheus.MustRegister(glusterResidentMemory)
-	prometheus.MustRegister(glusterVirtualMemory)
-	prometheus.MustRegister(glusterElapsedTime)
-
-	// Register to update this every 2 seconds
-	// Name, Callback Func, Interval Seconds
 	registerMetric("gluster_ps", ps)
 }

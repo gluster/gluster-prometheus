@@ -7,42 +7,44 @@ import (
 )
 
 var (
-	volumeLabels = []string{
-		"volume",
+	volumeLabels = []MetricLabel{
+		{
+			Name: "volume",
+			Help: "Volume Name",
+		},
 	}
 
-	glusterVolumeTotalCount = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "volume_total_count",
-			Help:      "Total no of volumes",
-		},
-		[]string{},
-	)
-	glusterVolumeCreatedCount = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "volume_created_count",
-			Help:      "Freshly created no of volumes",
-		},
-		[]string{},
-	)
-	glusterVolumeStartedCount = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "volume_started_count",
-			Help:      "Total no of started volumes",
-		},
-		[]string{},
-	)
-	glusterVolumeBrickCount = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "volume_brick_count",
-			Help:      "Total no of bricks in volume",
-		},
-		volumeLabels,
-	)
+	glusterVolumeTotalCount = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_total_count",
+		Help:      "Total no of volumes",
+		LongHelp:  "",
+		Labels:    []MetricLabel{},
+	})
+
+	glusterVolumeCreatedCount = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_created_count",
+		Help:      "Freshly created no of volumes",
+		LongHelp:  "",
+		Labels:    []MetricLabel{},
+	})
+
+	glusterVolumeStartedCount = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_started_count",
+		Help:      "Total no of started volumes",
+		LongHelp:  "",
+		Labels:    []MetricLabel{},
+	})
+
+	glusterVolumeBrickCount = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_brick_count",
+		Help:      "Total no of bricks in volume",
+		LongHelp:  "",
+		Labels:    volumeLabels,
+	})
 )
 
 func getVolumeLabels(volname string) prometheus.Labels {
@@ -90,10 +92,5 @@ func volumeCounts() {
 }
 
 func init() {
-	prometheus.MustRegister(glusterVolumeTotalCount)
-	prometheus.MustRegister(glusterVolumeStartedCount)
-	prometheus.MustRegister(glusterVolumeCreatedCount)
-	prometheus.MustRegister(glusterVolumeBrickCount)
-
 	registerMetric("gluster_volume_counts", volumeCounts)
 }

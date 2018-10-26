@@ -26,6 +26,7 @@ var (
 
 var (
 	showVersion                   = flag.Bool("version", false, "Show the version information")
+	docgen                        = flag.Bool("docgen", false, "Generate exported metrics documentation in Asciidoc format")
 	config                        = flag.String("config", defaultConfFile, "Config file path")
 	defaultInterval time.Duration = 5
 	glusterConfig   glusterutils.Config
@@ -58,6 +59,11 @@ func getDefaultGlusterdDir(mgmt string) string {
 
 func main() {
 	flag.Parse()
+
+	if *docgen {
+		generateMetricsDoc()
+		return
+	}
 
 	if *showVersion {
 		dumpVersionInfo()

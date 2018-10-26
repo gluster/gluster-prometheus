@@ -1,0 +1,290 @@
+= Metrics Exported by Gluster Prometheus exporter
+
+== brick_capacity_used_bytes
+
+Used capacity of gluster bricks in bytes
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|===
+
+== brick_capacity_free_bytes
+
+Free capacity of gluster bricks in bytes
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|===
+
+== brick_capacity_bytes_total
+
+Total capacity of gluster bricks in bytes
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|===
+
+== brick_inodes_total
+
+Total no of inodes of gluster brick disk
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|===
+
+== brick_inodes_free
+
+Free no of inodes of gluster brick disk
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|===
+
+== brick_inodes_used
+
+Used no of inodes of gluster brick disk
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|===
+
+== subvol_capacity_used_bytes
+
+Effective used capacity of gluster subvolume in bytes
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub volume name
+
+|===
+
+== cpu_percentage
+
+CPU percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the CPU time used divided by the time the process has been running (cputime/realtime ratio), expressed as a percentage.
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|peerid
+|Peer ID
+
+|brick_path
+|Brick Path
+
+|name
+|Name of the Gluster process(Ex: `glusterfsd`, `glusterd` etc)
+
+|===
+
+== memory_percentage
+
+Memory percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the ratio of the process's resident set size to the physical memory on the machine, expressed as a percentage
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|peerid
+|Peer ID
+
+|brick_path
+|Brick Path
+
+|name
+|Name of the Gluster process(Ex: `glusterfsd`, `glusterd` etc)
+
+|===
+
+== resident_memory_bytes
+
+Resident Memory of Gluster process in bytes. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|peerid
+|Peer ID
+
+|brick_path
+|Brick Path
+
+|name
+|Name of the Gluster process(Ex: `glusterfsd`, `glusterd` etc)
+
+|===
+
+== virtual_memory_bytes
+
+Virtual Memory of Gluster process in bytes. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|peerid
+|Peer ID
+
+|brick_path
+|Brick Path
+
+|name
+|Name of the Gluster process(Ex: `glusterfsd`, `glusterd` etc)
+
+|===
+
+== elapsed_time_seconds
+
+Elapsed Time or Uptime of Gluster processes in seconds. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|peerid
+|Peer ID
+
+|brick_path
+|Brick Path
+
+|name
+|Name of the Gluster process(Ex: `glusterfsd`, `glusterd` etc)
+
+|===
+
+== volume_total_count
+
+Total no of volumes
+
+== volume_created_count
+
+Freshly created no of volumes
+
+== volume_started_count
+
+Total no of started volumes
+
+== volume_brick_count
+
+Total no of bricks in volume
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|===
+

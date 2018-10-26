@@ -9,81 +9,95 @@ import (
 )
 
 var (
-	brickLabels = []string{
-		"host",
-		"id",
-		"brick_path",
-		"volume",
-		"subvolume",
+	brickLabels = []MetricLabel{
+		{
+			Name: "host",
+			Help: "Host name or IP",
+		},
+		{
+			Name: "id",
+			Help: "Brick ID",
+		},
+		{
+			Name: "brick_path",
+			Help: "Brick Path",
+		},
+		{
+			Name: "volume",
+			Help: "Volume Name",
+		},
+		{
+			Name: "subvolume",
+			Help: "Sub Volume name",
+		},
 	}
 
-	subvolLabels = []string{
-		"volume",
-		"subvolume",
+	glusterBrickCapacityUsed = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "brick_capacity_used_bytes",
+		Help:      "Used capacity of gluster bricks in bytes",
+		LongHelp:  "",
+		Labels:    brickLabels,
+	})
+
+	glusterBrickCapacityFree = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "brick_capacity_free_bytes",
+		Help:      "Free capacity of gluster bricks in bytes",
+		LongHelp:  "",
+		Labels:    brickLabels,
+	})
+
+	glusterBrickCapacityTotal = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "brick_capacity_bytes_total",
+		Help:      "Total capacity of gluster bricks in bytes",
+		LongHelp:  "",
+		Labels:    brickLabels,
+	})
+
+	glusterBrickInodesTotal = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "brick_inodes_total",
+		Help:      "Total no of inodes of gluster brick disk",
+		LongHelp:  "",
+		Labels:    brickLabels,
+	})
+
+	glusterBrickInodesFree = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "brick_inodes_free",
+		Help:      "Free no of inodes of gluster brick disk",
+		LongHelp:  "",
+		Labels:    brickLabels,
+	})
+
+	glusterBrickInodesUsed = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "brick_inodes_used",
+		Help:      "Used no of inodes of gluster brick disk",
+		LongHelp:  "",
+		Labels:    brickLabels,
+	})
+
+	subvolLabels = []MetricLabel{
+		{
+			Name: "volume",
+			Help: "Volume Name",
+		},
+		{
+			Name: "subvolume",
+			Help: "Sub volume name",
+		},
 	}
 
-	glusterBrickCapacityUsed = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "brick_capacity_used",
-			Help:      "Used capacity of gluster bricks",
-		},
-		brickLabels,
-	)
-
-	glusterBrickCapacityFree = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "brick_capacity_free",
-			Help:      "Free capacity of gluster bricks",
-		},
-		brickLabels,
-	)
-
-	glusterBrickCapacityTotal = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "brick_capacity_total",
-			Help:      "Total capacity of gluster bricks",
-		},
-		brickLabels,
-	)
-
-	glusterBrickInodesTotal = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "brick_inodes_total",
-			Help:      "Total no of inodes of gluster brick disk",
-		},
-		brickLabels,
-	)
-
-	glusterBrickInodesFree = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "brick_inodes_free",
-			Help:      "Free no of inodes of gluster brick disk",
-		},
-		brickLabels,
-	)
-
-	glusterBrickInodesUsed = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "brick_inodes_used",
-			Help:      "Used no of inodes of gluster brick disk",
-		},
-		brickLabels,
-	)
-
-	glusterSubvolCapacityUsed = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: "gluster",
-			Name:      "subvol_capacity_used",
-			Help:      "Effective used capacity of gluster subvolume",
-		},
-		subvolLabels,
-	)
+	glusterSubvolCapacityUsed = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "subvol_capacity_used_bytes",
+		Help:      "Effective used capacity of gluster subvolume in bytes",
+		LongHelp:  "",
+		Labels:    subvolLabels,
+	})
 )
 
 func getGlusterBrickLabels(brick glusterutils.Brick, subvol string) prometheus.Labels {
@@ -195,15 +209,5 @@ func brickUtilization() {
 }
 
 func init() {
-	prometheus.MustRegister(glusterBrickCapacityUsed)
-	prometheus.MustRegister(glusterBrickCapacityFree)
-	prometheus.MustRegister(glusterBrickCapacityTotal)
-	prometheus.MustRegister(glusterBrickInodesTotal)
-	prometheus.MustRegister(glusterBrickInodesFree)
-	prometheus.MustRegister(glusterBrickInodesUsed)
-	prometheus.MustRegister(glusterSubvolCapacityUsed)
-
-	// Register to update this every 2 seconds
-	// Name, Callback Func, Interval Seconds
 	registerMetric("gluster_brick", brickUtilization)
 }
