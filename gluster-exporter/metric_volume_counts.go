@@ -52,6 +52,13 @@ func getVolumeLabels(volname string) prometheus.Labels {
 }
 
 func volumeCounts() {
+	isLeader, err := gluster.IsLeader()
+	if !isLeader || err != nil {
+		// Unable to find out if the current node is leader
+		// Cannot register volume metrics at this node
+		// TODO: log the error
+		return
+	}
 	volumes, err := gluster.VolumeInfo()
 	if err != nil {
 		// TODO: Log error
@@ -88,13 +95,5 @@ func init() {
 	prometheus.MustRegister(glusterVolumeCreatedCount)
 	prometheus.MustRegister(glusterVolumeBrickCount)
 
-	// Name, Callback Func, Interval Seconds
-	isLeader, err := gluster.IsLeader()
-	if !isLeader || err != nil {
-		// Unable to find out if the current node is leader
-		// Cannot register volume metrics at this node
-		// TODO: log the error
-		return
-	}
 	registerMetric("gluster_volume_counts", volumeCounts)
 }
