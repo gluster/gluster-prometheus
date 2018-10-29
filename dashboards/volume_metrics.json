@@ -17,7 +17,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 6069,
-  "iteration": 1540811439730,
+  "iteration": 1540820683068,
   "links": [
     {
       "icon": "external link",
@@ -47,9 +47,9 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": [
-        "#bf1b00",
+        "#299c46",
         "#e0752d",
-        "#299c46"
+        "#bf1b00"
       ],
       "datasource": "storagemanager-1001",
       "decimals": 2,
@@ -107,14 +107,14 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "gluster_cluster_volume:gluster_node_size_free_bytes:avg_5m{volume=~\"[[volume]]\"}",
+          "expr": "gluster_volume:gluster_brick_capacity_used:percent_avg_3m{volume=~\"[[volume]]\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
           "target": ""
         }
       ],
-      "thresholds": "8,15",
+      "thresholds": "90,95",
       "title": "Volume $volume % Capacity Used",
       "transparent": true,
       "type": "singlestat",
@@ -127,14 +127,14 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": [
-        "#bf1b00",
+        "#299c46",
         "#e0752d",
-        "#299c46"
+        "#bf1b00"
       ],
       "datasource": "storagemanager-1001",
       "decimals": 2,
       "description": "Percentage of free space for the given volume.  Note that if one or more bricks become missing this metric does not report any value",
-      "format": "percent",
+      "format": "bytes",
       "gauge": {
         "maxValue": 3,
         "minValue": 0,
@@ -187,14 +187,14 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "gluster_cluster_volume:gluster_node_size_free_bytes:avg_5m{volume=~\"[[volume]]\"}",
+          "expr": "gluster_volume:gluster_subvol_capacity_used:diff_avg_3m{volume=~\"[[volume]]\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
           "target": ""
         }
       ],
-      "thresholds": "8,15",
+      "thresholds": "1025,4097",
       "title": "Sub-Volume $volume % Inodes Used",
       "transparent": true,
       "type": "singlestat",
@@ -207,9 +207,9 @@
       "colorBackground": true,
       "colorValue": false,
       "colors": [
-        "#bf1b00",
+        "#299c46",
         "#e0752d",
-        "#299c46"
+        "#bf1b00"
       ],
       "datasource": "storagemanager-1001",
       "decimals": 2,
@@ -267,14 +267,14 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "gluster_cluster_volume:gluster_node_size_free_bytes:avg_5m{volume=~\"[[volume]]\"}",
+          "expr": "gluster_volume:gluster_brick_inodes_used:percent_avg_3m{volume=~\"[[volume]]\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
           "target": ""
         }
       ],
-      "thresholds": "8,15",
+      "thresholds": "90,95",
       "title": "Volume $volume % Inodes Used",
       "transparent": true,
       "type": "singlestat",
@@ -1737,5 +1737,5 @@
   "timezone": "",
   "title": "Gluster  Statistics per Volume",
   "uid": "S4dQMiamz",
-  "version": 22
+  "version": 31
 }
