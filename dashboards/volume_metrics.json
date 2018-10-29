@@ -17,7 +17,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 6069,
-  "iteration": 1540820683068,
+  "iteration": 1540820683076,
   "links": [
     {
       "icon": "external link",
@@ -51,9 +51,9 @@
         "#e0752d",
         "#bf1b00"
       ],
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "decimals": 2,
-      "description": "Percentage of free space for the given volume.  Note that if one or more bricks become missing this metric does not report any value",
+      "description": "Percentage of used space for the given volume over a period of three minutes",
       "format": "percent",
       "gauge": {
         "maxValue": 3,
@@ -107,7 +107,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "gluster_volume:gluster_brick_capacity_used:percent_avg_3m{volume=~\"[[volume]]\"}",
+          "expr": "gluster_volume:gluster_brick_capacity_used:percent_avg_3m{job=~\"[[cluster]]\", volume=~\"[[volume]]\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
@@ -131,9 +131,9 @@
         "#e0752d",
         "#bf1b00"
       ],
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "decimals": 2,
-      "description": "Percentage of free space for the given volume.  Note that if one or more bricks become missing this metric does not report any value",
+      "description": "Difference between the subvolume used capacity and the brick used capacity over a 3 minutes period",
       "format": "bytes",
       "gauge": {
         "maxValue": 3,
@@ -187,7 +187,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "gluster_volume:gluster_subvol_capacity_used:diff_avg_3m{volume=~\"[[volume]]\"}",
+          "expr": "gluster_volume:gluster_subvol_capacity_used:diff_avg_3m{job=~\"[[cluster]]\", volume=~\"[[volume]]\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
@@ -195,7 +195,7 @@
         }
       ],
       "thresholds": "1025,4097",
-      "title": "Sub-Volume $volume % Inodes Used",
+      "title": "Sub-Volume Capacity Difference for $volume",
       "transparent": true,
       "type": "singlestat",
       "valueFontSize": "100%",
@@ -211,9 +211,9 @@
         "#e0752d",
         "#bf1b00"
       ],
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "decimals": 2,
-      "description": "Percentage of free space for the given volume.  Note that if one or more bricks become missing this metric does not report any value",
+      "description": "Percentage of used inodes in the given volume over a period of three minutes.",
       "format": "percent",
       "gauge": {
         "maxValue": 3,
@@ -267,7 +267,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "gluster_volume:gluster_brick_inodes_used:percent_avg_3m{volume=~\"[[volume]]\"}",
+          "expr": "gluster_volume:gluster_brick_inodes_used:percent_avg_3m{job=~\"[[cluster]]\", volume=~\"[[volume]]\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
@@ -300,7 +300,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Used capacity reported by volume in the given cluster.\nThis metric is the maximum value aggregated by cluster and volume",
       "fill": 1,
       "gridPos": {
@@ -357,7 +357,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Used  Capacity for $volume in $cluster",
+      "title": "Used  Capacity for $volume",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -401,7 +401,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Used sub-volume capacity in the given cluster.\nThis metric is the maximum value aggregated by cluster and volume",
       "fill": 1,
       "gridPos": {
@@ -502,7 +502,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Used inodes reported by volume in the given cluster.\nThis metric is the maximum value aggregated by cluster and volume",
       "fill": 1,
       "gridPos": {
@@ -559,7 +559,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Used Inodes for $volume in $cluster",
+      "title": "Used Inodes for $volume",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -603,7 +603,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Total volume capacity in the given cluster.\nThis metric is the maximum value aggregated by cluster and volume",
       "fill": 1,
       "gridPos": {
@@ -660,7 +660,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Total Capacity  for $volume in $cluster",
+      "title": "Total Capacity  for $volume",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -704,7 +704,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Free volume capacity reported in the given cluster.\nThis metric is the minimum value aggregated by cluster and volume",
       "fill": 1,
       "gridPos": {
@@ -761,7 +761,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Free  Capacity for $volume in $cluster",
+      "title": "Free  Capacity for $volume",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -805,7 +805,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Total  inodes reported by volume in the given cluster.\nThis metric is the maximum value aggregated by cluster and volume",
       "fill": 1,
       "gridPos": {
@@ -862,7 +862,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Total  Inodes for $volume in $cluster",
+      "title": "Total  Inodes for $volume",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -906,7 +906,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Free inodes reported by volume in the given cluster.\nThis metric is the minimum value aggregated by cluster and volume",
       "fill": 1,
       "gridPos": {
@@ -963,7 +963,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Free Inodes for $volume in $cluster",
+      "title": "Free Inodes for $volume",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1020,7 +1020,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Total brick capacity reported by brick in the given cluster",
       "fill": 1,
       "gridPos": {
@@ -1077,7 +1077,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Total Brick Capacity  for $brick in $cluster",
+      "title": "Total Brick Capacity  for $brick",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1121,7 +1121,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Free brick capacity reported by brick in the given cluster",
       "fill": 1,
       "gridPos": {
@@ -1178,7 +1178,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Free Brick Capacity for $brick in $cluster",
+      "title": "Free Brick Capacity for $brick",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1222,7 +1222,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Used brick capacity reported by brick in the given cluster",
       "fill": 1,
       "gridPos": {
@@ -1279,7 +1279,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Used Brick Capacity for $brick in $cluster",
+      "title": "Used Brick Capacity for $brick",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1323,7 +1323,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Total brick inodes reported by brick in the given cluster",
       "fill": 1,
       "gridPos": {
@@ -1380,7 +1380,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Total Brick Inodes for $brick in $cluster",
+      "title": "Total Brick Inodes for $brick",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1424,7 +1424,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Free brick inodes reported by each brick in the given cluster",
       "fill": 1,
       "gridPos": {
@@ -1481,7 +1481,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Free Brick Inodes for $brick in $cluster",
+      "title": "Free Brick Inodes for $brick",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1525,7 +1525,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager-1001",
+      "datasource": "storagemanager01",
       "description": "Used brick inodes reported by brick in the given cluster",
       "fill": 1,
       "gridPos": {
@@ -1582,7 +1582,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Used Brick Inodes for $brick in $cluster",
+      "title": "Used Brick Inodes for $brick",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1634,11 +1634,11 @@
       {
         "allValue": null,
         "current": {
-          "text": "glusterserver_fra4_101_stats",
-          "value": "glusterserver_fra4_101_stats"
+          "text": "glustercl01",
+          "value": "glustercl01"
         },
-        "datasource": "storagemanager-1001",
-        "hide": 2,
+        "datasource": "storagemanager01",
+        "hide": 0,
         "includeAll": false,
         "label": "Cluster",
         "multi": false,
@@ -1646,7 +1646,7 @@
         "options": [],
         "query": "label_values(job)",
         "refresh": 2,
-        "regex": "/stats/",
+        "regex": "",
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -1657,18 +1657,17 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "test01",
           "value": "test01"
         },
-        "datasource": "storagemanager-1001",
+        "datasource": "storagemanager01",
         "hide": 0,
         "includeAll": false,
         "label": "Volume",
         "multi": false,
         "name": "volume",
         "options": [],
-        "query": "label_values(volume) ",
+        "query": "label_values({job=~\"$cluster\"}, volume)",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -1681,18 +1680,19 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "All",
-          "value": "$__all"
+          "value": [
+            "$__all"
+          ]
         },
-        "datasource": "storagemanager-1001",
+        "datasource": "storagemanager01",
         "hide": 0,
         "includeAll": true,
         "label": "Brick",
         "multi": true,
         "name": "brick",
         "options": [],
-        "query": "label_values(brick_path) ",
+        "query": "label_values({volume=~\"$volume\"}, brick_path)",
         "refresh": 1,
         "regex": "/[[volume]]/",
         "sort": 5,
@@ -1737,5 +1737,5 @@
   "timezone": "",
   "title": "Gluster  Statistics per Volume",
   "uid": "S4dQMiamz",
-  "version": 31
+  "version": 37
 }
