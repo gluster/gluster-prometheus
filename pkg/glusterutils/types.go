@@ -96,12 +96,21 @@ type Volume struct {
 	ReplicaCount            int               `json:"replica-count"`
 }
 
+// HealEntry describe gluster heal info for each brick
+type HealEntry struct {
+	PeerID         string
+	Hostname       string
+	Brick          string
+	Connected      string
+	NumHealEntries int
+}
+
 // GInterface should be implemented in GD1 and GD2 structs
 type GInterface interface {
 	Peers() ([]Peer, error)
 	LocalPeerID() (string, error)
 	IsLeader() (bool, error)
-	//	HealInfo(vol string) ([]HealEntry, error)
+	HealInfo(vol string) ([]HealEntry, error)
 	VolumeInfo() ([]Volume, error)
 }
 
