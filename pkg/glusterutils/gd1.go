@@ -4,6 +4,19 @@ import (
 	"encoding/xml"
 )
 
+type healBricks struct {
+	XMLName     xml.Name         `xml:"cliOutput"`
+	Healentries []healEntriesXML `xml:"healInfo>bricks>brick"`
+}
+
+type healEntriesXML struct {
+	XMLName        xml.Name `xml:"brick"`
+	HostUUID       string   `xml:"hostUuid,attr"`
+	Brickname      string   `xml:"name"`
+	Connected      string   `xml:"status"`
+	NumHealEntries string   `xml:"numberOfEntries"`
+}
+
 type gd1Brick struct {
 	Name      string `xml:"name"`
 	PeerID    string `xml:"hostUuid"`
