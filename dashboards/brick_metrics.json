@@ -17,7 +17,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 6080,
-  "iteration": 1540823349232,
+  "iteration": 1541002281062,
   "links": [
     {
       "icon": "external link",
@@ -26,6 +26,17 @@
       "title": "Gluster Prometheus Project",
       "type": "link",
       "url": "https://github.com/gluster/gluster-prometheus"
+    },
+    {
+      "asDropdown": true,
+      "icon": "external link",
+      "tags": [
+        "gluster",
+        "glusterfs"
+      ],
+      "targetBlank": true,
+      "title": "Related Dashboards",
+      "type": "dashboards"
     }
   ],
   "panels": [
@@ -51,9 +62,9 @@
         "#e0752d",
         "#bf1b00"
       ],
-      "datasource": "storagemanager01",
+      "datasource": "prometheus101",
       "decimals": 2,
-      "description": "Gluster brick daemon CPU % used  for the given brick.",
+      "description": "Current Gluster brick daemon CPU % used  for the given brick.",
       "format": "percent",
       "gauge": {
         "maxValue": 100,
@@ -115,7 +126,7 @@
         }
       ],
       "thresholds": "85,95",
-      "title": "$process CPU Used for $node",
+      "title": "$process CPU % Used for $brick",
       "transparent": true,
       "type": "singlestat",
       "valueFontSize": "100%",
@@ -128,12 +139,12 @@
       "colorValue": true,
       "colors": [
         "#bf1b00",
-        "#e0752d",
+        "#508642",
         "#299c46"
       ],
-      "datasource": "storagemanager01",
-      "decimals": 2,
-      "description": "Gluster  brick daemon uptime for the given node.",
+      "datasource": "prometheus101",
+      "decimals": 0,
+      "description": "Gluster daemon uptime rate in the past five minutes for the given brick. A value below 1 means the daemon has been down. It is rounded to the neearest integer by Prometheus.",
       "format": "s",
       "gauge": {
         "maxValue": 100,
@@ -144,11 +155,11 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 11,
-        "x": 7,
+        "w": 9,
+        "x": 8,
         "y": 1
       },
-      "id": 55,
+      "id": 59,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -187,15 +198,15 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "gluster_elapsed_time_seconds{instance=~\"[[node]]\", brick_path=\"[[brick]]\", name=\"[[process]]\"}",
+          "expr": "gluster_process:gluster_elapsed_time_seconds:rate5m{instance=~\"[[node]]\", brick_path=\"[[brick]]\", name=\"[[process]]\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
           "target": ""
         }
       ],
-      "thresholds": "0,0",
-      "title": "$process Uptime for $node",
+      "thresholds": "1",
+      "title": "$process Uptime Rate for $brick",
       "transparent": true,
       "type": "singlestat",
       "valueFontSize": "100%",
@@ -211,9 +222,9 @@
         "#e0752d",
         "#bf1b00"
       ],
-      "datasource": "storagemanager01",
+      "datasource": "prometheus101",
       "decimals": 2,
-      "description": "Gluster brick daemon memory % used  for the given node.",
+      "description": "Current Gluster brick daemon memory % used  for the given brick.",
       "format": "percent",
       "gauge": {
         "maxValue": 100,
@@ -275,7 +286,167 @@
         }
       ],
       "thresholds": "75,85",
-      "title": "$process Memory Used for $node",
+      "title": "$process Memory % Used for $brick",
+      "transparent": true,
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "#e0752d",
+        "#bf1b00"
+      ],
+      "datasource": "prometheus101",
+      "decimals": 2,
+      "description": "Averae Gluster brick daemon CPU % utilization for the given brick in the past hour.",
+      "format": "percent",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 4,
+        "y": 8
+      },
+      "id": 62,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "minSpan": 15,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatDirection": "h",
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": true,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "gluster_process:gluster_cpu_percentage:avg1h{instance=~\"[[node]]\", brick_path=\"[[brick]]\", name=\"[[process]]\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "refId": "A",
+          "target": ""
+        }
+      ],
+      "thresholds": "85,95",
+      "title": "Avg $process CPU % for $brick",
+      "transparent": true,
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "#e0752d",
+        "#bf1b00"
+      ],
+      "datasource": "prometheus101",
+      "decimals": 2,
+      "description": "Average Gluster brick daemon Memory % utilization for the given brick in the past hour.",
+      "format": "percent",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 11,
+        "y": 8
+      },
+      "id": 63,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "minSpan": 15,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatDirection": "h",
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": true,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "gluster_process:gluster_memory_percentage:avg1h{instance=~\"[[node]]\", brick_path=\"[[brick]]\", name=\"[[process]]\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "refId": "A",
+          "target": ""
+        }
+      ],
+      "thresholds": "75,85",
+      "title": "Avg $process Memory % Utilization for $brick",
       "transparent": true,
       "type": "singlestat",
       "valueFontSize": "100%",
@@ -288,7 +459,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 15
       },
       "id": 29,
       "panels": [],
@@ -300,14 +471,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager01",
+      "datasource": "prometheus101",
       "description": "Used CPU % reported by brick in the given node",
       "fill": 1,
       "gridPos": {
         "h": 10,
         "w": 10,
         "x": 2,
-        "y": 9
+        "y": 16
       },
       "id": 40,
       "legend": {
@@ -376,7 +547,7 @@
       "yaxes": [
         {
           "decimals": 0,
-          "format": "short",
+          "format": "percent",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -398,119 +569,98 @@
       }
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "storagemanager01",
-      "description": "Gluster process uptime in seconds reported by each brick in the given node",
-      "fill": 1,
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#bf1b00",
+        "#e0752d",
+        "#299c46"
+      ],
+      "datasource": "prometheus101",
+      "decimals": 2,
+      "description": "Gluster  brick daemon uptime for the given node.",
+      "format": "s",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
       "gridPos": {
         "h": 10,
-        "w": 9,
+        "w": 10,
         "x": 12,
-        "y": 9
+        "y": 16
       },
-      "id": 49,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": true,
-        "hideEmpty": false,
-        "hideZero": false,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 3,
+      "id": 55,
+      "interval": null,
       "links": [],
-      "nullPointMode": "null as zero",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "minSpan": 15,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "repeatDirection": "h",
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
       "targets": [
         {
-          "expr": "gluster_elapsed_time_seconds{job=~\"[[cluster]]\", instance=~\"[[node]]\", brick_path=~\"[[brick]]\", name=\"[[process]]\"}",
+          "expr": "gluster_elapsed_time_seconds{instance=~\"[[node]]\", brick_path=\"[[brick]]\", name=\"[[process]]\"}",
           "format": "time_series",
-          "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "",
           "refId": "A",
           "target": ""
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": true,
-          "line": true,
-          "op": "gt",
-          "yaxis": "left"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "glusterfsd Uptime for $brick",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
+      "thresholds": "0,0",
+      "title": "$process Uptime for $node",
       "transparent": true,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": 0,
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "type": "singlestat",
+      "valueFontSize": "100%",
+      "valueMaps": [],
+      "valueName": "current"
     },
     {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager01",
+      "datasource": "prometheus101",
       "description": "Gluster memory utilization % reported by brick in the given node",
       "fill": 1,
       "gridPos": {
         "h": 10,
         "w": 8,
         "x": 0,
-        "y": 19
+        "y": 26
       },
       "id": 42,
       "legend": {
@@ -604,14 +754,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager01",
+      "datasource": "prometheus101",
       "description": "Gluster  resident memory utilization reported by brick in the given node",
       "fill": 1,
       "gridPos": {
         "h": 10,
         "w": 8,
         "x": 8,
-        "y": 19
+        "y": 26
       },
       "id": 51,
       "legend": {
@@ -705,14 +855,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "storagemanager01",
+      "datasource": "prometheus101",
       "description": "Gluster  virtual memory utilization reported by brick in the given node",
       "fill": 1,
       "gridPos": {
         "h": 10,
         "w": 8,
         "x": 16,
-        "y": 19
+        "y": 26
       },
       "id": 45,
       "legend": {
@@ -814,10 +964,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "glustercl01",
-          "value": "glustercl01"
+          "text": "glustercl101",
+          "value": "glustercl101"
         },
-        "datasource": "storagemanager01",
+        "datasource": "prometheus101",
         "hide": 0,
         "includeAll": false,
         "label": "Cluster",
@@ -837,10 +987,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "glusterserver02.com:8080",
-          "value": "glusterserver02.com:8080"
+          "text": "glusterserver101:8080",
+          "value": "glusterserver101:8080"
         },
-        "datasource": "storagemanager01",
+        "datasource": "prometheus101",
         "hide": 0,
         "includeAll": false,
         "label": "Node",
@@ -860,10 +1010,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "/srv/gfs/test02/brk02/bick",
-          "value": "/srv/gfs/test02/brk02/bick"
+          "text": "/srv/gfs/homes/brk01/brick",
+          "value": "/srv/gfs/homes/brk01/brick"
         },
-        "datasource": "storagemanager01",
+        "datasource": "prometheus101",
         "hide": 0,
         "includeAll": false,
         "label": "Brick",
@@ -886,7 +1036,7 @@
           "text": "glusterfsd",
           "value": "glusterfsd"
         },
-        "datasource": "storagemanager01",
+        "datasource": "prometheus101",
         "hide": 2,
         "includeAll": false,
         "label": "Process",
@@ -938,5 +1088,5 @@
   "timezone": "",
   "title": "Gluster  Statistics per Brick",
   "uid": "b5d6Bi-ik",
-  "version": 15
+  "version": 28
 }

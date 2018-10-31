@@ -1,5 +1,6 @@
-- name: gluster_volume
-  interval: 3m
+groups:
+- name: Gluster
+  interval: 5m
   rules:
   # capacity aggr
   - record: gluster_volume:gluster_brick_capacity_total:max
@@ -10,10 +11,6 @@
     expr: min(gluster_brick_capacity_free) by (job, volume)
   - record: gluster_volume:gluster_subvol_capacity_used:max
     expr: max(gluster_subvol_capacity_used) by (job, volume)
-  - record: gluster_volume:gluster_brick_capacity_used:percent_avg_3m
-    expr: avg_over_time(gluster_volume:gluster_brick_capacity_used:max[3m]) * 100 / avg_over_time(gluster_volume:gluster_brick_capacity_total:max[3m])
-  - record: gluster_volume:gluster_subvol_capacity_used:diff_avg_3m
-    expr:  avg_over_time(gluster_volume:gluster_subvol_capacity_used:max[3m]) - avg_over_time(gluster_volume:gluster_brick_capacity_used:max[3m])
   # inodes aggr
   - record: gluster_volume:gluster_brick_inodes_total:max
     expr: max(gluster_brick_inodes_total) by (job, volume)
@@ -21,5 +18,29 @@
     expr: max(gluster_brick_inodes_used) by (job, volume)
   - record: gluster_volume:gluster_brick_inodes_free:min
     expr: min(gluster_brick_inodes_free) by (job, volume)
-  - record: gluster_volume:gluster_brick_inodes_used:percent_avg_3m
-    expr: avg_over_time(gluster_volume:gluster_brick_inodes_used:max[3m]) * 100 / avg_over_time(gluster_volume:gluster_brick_inodes_total:max[3m])
+  # % used capacity and inodes
+  - record: gluster_volume:gluster_brick_capacity_used:percent
+    expr: gluster_volume:gluster_brick_capacity_used:max * 100 / gluster_volume:gluster_brick_capacity_total:max
+  - record: gluster_volume:gluster_brick_inodes_used:percent
+    expr: gluster_volume:gluster_brick_inodes_used:max * 100 / gluster_volume:gluster_brick_inodes_total:max
+  # diff between brick capacity and subvolume capacity
+  - record: gluster_volume:gluster_subvol_capacity_used:diff
+    expr:  gluster_volume:gluster_subvol_capacity_used:max - gluster_volume:gluster_brick_capacity_used:max
+  # 1h delta capacity and inodes
+  - record: gluster_volume:gluster_brick_capacity_used_percent:delta1h
+    expr: delta(gluster_volume:gluster_brick_capacity_used:percent[1h])
+  - record: gluster_volume:gluster_brick_inodes_used_percent:delta1h
+    expr: delta(gluster_volume:gluster_brick_inodes_used:percent[1h])
+  # predicted in 7 days capacity and inodes
+  - record: gluster_volume:gluster_brick_capacity_used_percent:predict_linear1h_7d
+    expr: predict_linear(gluster_volume:gluster_brick_capacity_used:percent[1h], 7*86400)
+  - record: gluster_volume:gluster_brick_inodes_used_percent:predict_linear1h_7d
+    expr: predict_linear(gluster_volume:gluster_brick_inodes_used:percent[1h], 7*86400)
+  # per-second rate of the gluster processes uptime
+  - record: gluster_process:gluster_elapsed_time_seconds:rate5m
+    expr: round(rate(gluster_elapsed_time_seconds[5m]))
+  # 1h avg gluster processes resource utilization
+  - record: gluster_process:gluster_cpu_percentage:avg1h
+    expr: avg_over_time(gluster_cpu_percentage[1h])
+  - record: gluster_process:gluster_memory_percentage:avg1h
+    expr: avg_over_time(gluster_memory_percentage[1h])
