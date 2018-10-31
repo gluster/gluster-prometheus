@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
@@ -80,6 +81,13 @@ func main() {
 			}
 		}
 	}
+
+	// If GD2_ENDPOINTS env variable is set, use that info
+	// for making REST API calls
+	if endpoint := os.Getenv("GD2_ENDPOINTS"); endpoint != "" {
+		glusterConfig.Glusterd2Endpoint = strings.Split(endpoint, ",")[0]
+	}
+
 	glusterConfig.GlusterdWorkdir = getDefaultGlusterdDir(glusterConfig.GlusterMgmt)
 	if exporterConf.GlobalConf.GlusterdDir != "" {
 		glusterConfig.GlusterdWorkdir = exporterConf.GlobalConf.GlusterdDir
