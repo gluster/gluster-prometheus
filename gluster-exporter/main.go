@@ -15,15 +15,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// ExporterVersion and GitSHA
-// These are set as flags during build time. The current values are just placeholders
+// Below variables are set as flags during build time. The current
+// values are just placeholders
 var (
-	ExporterVersion         = ""
-	GitSHA                  = ""
+	exporterVersion         = ""
 	defaultGlusterd1Workdir = ""
 	defaultGlusterd2Workdir = ""
 	defaultConfFile         = ""
 )
+
 var (
 	showVersion                   = flag.Bool("version", false, "Show the version information")
 	config                        = flag.String("config", defaultConfFile, "Config file path")
@@ -44,8 +44,7 @@ func registerMetric(name string, fn func()) {
 }
 
 func dumpVersionInfo() {
-	fmt.Printf("version   : %s\n", ExporterVersion)
-	fmt.Printf("git SHA   : %s\n", GitSHA)
+	fmt.Printf("version   : %s\n", exporterVersion)
 	fmt.Printf("go version: %s\n", runtime.Version())
 	fmt.Printf("go OS/arch: %s/%s\n", runtime.GOOS, runtime.GOARCH)
 }
@@ -60,15 +59,15 @@ func getDefaultGlusterdDir(mgmt string) string {
 func main() {
 	flag.Parse()
 
+	if *showVersion {
+		dumpVersionInfo()
+		return
+	}
+
 	exporterConf, err := conf.LoadConfig(*config)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Loading global config failed: %s\n", err.Error())
 		os.Exit(1)
-	}
-
-	if *showVersion {
-		dumpVersionInfo()
-		return
 	}
 
 	// Set the Gluster Configurations used in glusterutils

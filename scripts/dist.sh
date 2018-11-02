@@ -9,13 +9,14 @@ SIGN=${SIGN:-yes}
 
 VERSION=$("$(dirname "$0")/pkg-version" --full)
 
-BASENAME=gluster-exporter-$VERSION
-TARNAME=$BASENAME
+BASENAME=gluster-prometheus
+SUFFIX="exporter-$VERSION"
 case $VENDOR in
   yes|y|Y)
-    TARNAME+="-vendor"
+    SUFFIX="exporter-$VERSION-vendor"
     ;;
 esac
+TARNAME="${BASENAME}-${SUFFIX}"
 
 TARFILE=$OUTDIR/$TARNAME.tar
 ARCHIVE=$TARFILE.xz
@@ -29,12 +30,10 @@ if [[ -f $SIGNFILE ]]; then
   rm "$SIGNFILE"
 fi
 
-# Create the VERSION file first
-"$(dirname "$0")/gen-version.sh"
-
 echo "Creating dist archive $ARCHIVE"
 git archive -o "$TARFILE" --prefix "$BASENAME/" HEAD
 tar --transform "s/^\\./$BASENAME/" -rf "$TARFILE" ./VERSION || exit 1
+tar --transform "s/^\\./$BASENAME/" -rf "$TARFILE" ./GIT_SHA_FULL || exit 1
 case $VENDOR in
   yes|y|Y)
     tar --transform "s/^\\./$BASENAME/" -rf "$TARFILE" ./vendor || exit 1

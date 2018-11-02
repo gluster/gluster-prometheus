@@ -3,6 +3,8 @@
 TAR="tar"
 GOPATH=$(go env GOPATH)
 GOBINDIR=$GOPATH/bin
+INSTALL_GOMETALINTER=${INSTALL_GOMETALINTER:-yes}
+
 
 install_tools_darwin() {
   if type brew >/dev/null 2>&1; then
@@ -69,4 +71,6 @@ install_gometalinter() {
 
 bootstrap_platform
 install_dep
-install_gometalinter
+if [ "$INSTALL_GOMETALINTER" == "yes" ];then
+    install_gometalinter
+fi
