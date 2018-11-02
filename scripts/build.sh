@@ -26,12 +26,12 @@ REPO_PATH="github.com/gluster/gluster-prometheus"
 GOPKG="${REPO_PATH}/${PACKAGE}"
 BIN=$(basename "$PACKAGE")
 
-VERSION="$(git describe --dirty --always --tags | sed 's/-/./2' | sed 's/-/./2')"
-GIT_SHA=${GIT_SHA:-$(git rev-parse --short HEAD || echo "undefined")}
-GIT_SHA_FULL=${GIT_SHA_FULL:-$(git rev-parse HEAD || echo "undefined")}
-LDFLAGS="-X main.ExporterVersion=${VERSION} -X main.GitSHA=${GIT_SHA}"
-LDFLAGS="-X main.defaultGlusterd1Workdir=${GD1STATEDIR} -X main.defaultGlusterd2Workdir=${GD2STATEDIR}"
-LDFLAGS="-X main.defaultConfFile=${CONFFILE}"
+VERSION="$(./scripts/pkg-version --full)"
+GIT_SHA_FULL=$(cat GIT_SHA_FULL 2> /dev/null || git rev-parse HEAD)
+
+LDFLAGS="-X main.exporterVersion=${VERSION} "
+LDFLAGS+="-X main.defaultGlusterd1Workdir=${GD1STATEDIR} -X main.defaultGlusterd2Workdir=${GD2STATEDIR} "
+LDFLAGS+="-X main.defaultConfFile=${CONFFILE}"
 LDFLAGS+=" -B 0x${GIT_SHA_FULL}"
 
 if [ "$FASTBUILD" == "yes" ];then
@@ -39,7 +39,6 @@ if [ "$FASTBUILD" == "yes" ];then
   # allow faster rebuilds of gluster-exporter.
   INSTALLFLAG="-i"
 fi
-
 
 echo "Building $BIN $VERSION"
 

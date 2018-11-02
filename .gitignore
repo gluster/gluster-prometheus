@@ -13,10 +13,11 @@ releases/
 # ctags (if you use them)
 tags
 # Ignore dist tarballs
-gluster-exporter-*.tar.xz
-gluster-exporter-*.tar.xz.asc
+gluster-prometheus-exporter-*.tar.xz
+gluster-prometheus-exporter-*.tar.xz.asc
 # Ignore VERSION file
 VERSION
+GIT_SHA_FULL
 
 # Ignore vi backup files
 *~

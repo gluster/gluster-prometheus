@@ -46,7 +46,7 @@ DEPENV ?=
 
 FASTBUILD ?= yes
 
-.PHONY: all build binaries check check-go check-reqs install vendor-update vendor-install verify release check-protoc $(EXPORTER_BIN) $(EXPORTER_BUILD) test dist dist-vendor gen-service
+.PHONY: all build binaries check check-go check-reqs install vendor-update vendor-install verify release check-protoc $(EXPORTER_BIN) $(EXPORTER_BUILD) test dist dist-vendor gen-service gen-version
 
 all: build
 
@@ -92,12 +92,18 @@ test: check-reqs
 release: build
 	@./scripts/release.sh
 
-dist:
+dist: gen-version
 	@DISTDIR=$(DISTDIR) SIGN=$(SIGN) ./scripts/dist.sh
+	@rm -f ./VERSION ./GIT_SHA_FULL
 
-dist-vendor: vendor-install
+dist-vendor: vendor-install gen-version
 	@VENDOR=yes DISTDIR=$(DISTDIR) SIGN=$(SIGN) ./scripts/dist.sh
+	@rm -f ./VERSION ./GIT_SHA_FULL
 
 gen-service:
 	SBINDIR=$(SBINDIR) SYSCONFDIR=$(SYSCONFDIR) GLUSTER_MGMT=$(GLUSTER_MGMT) \
 		./scripts/gen-service.sh
+
+gen-version:
+	@git describe --tags --always --match "v[0-9]*" > ./VERSION
+	@git rev-parse HEAD > ./GIT_SHA_FULL
