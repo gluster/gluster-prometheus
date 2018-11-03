@@ -36,3 +36,7 @@ VERSION
 Session.vim
 .netrwhist
 
+# Generated Rpms
+rpms
+!extras/rpms
+nightlyrpm*
