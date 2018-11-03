@@ -37,3 +37,7 @@ GIT_SHA_FULL
 Session.vim
 .netrwhist
 
+# Generated Rpms
+rpms
+!extras/rpms
+nightlyrpm*

@@ -25,13 +25,15 @@ GPROMSRC=$GOPATH/src/github.com/gluster/gluster-prometheus
 mkdir -p "$GOPATH/src/github.com/gluster"
 ln -s "$GPROMCLONE" "$GPROMSRC"
 
-"$GPROMSRC/scripts/install-reqs.sh"
+INSTALL_GOMETALINTER=no "$GPROMSRC/scripts/install-reqs.sh"
 
 ##
 ## Prepare gluster-prometheus archives and specfile for building RPMs
 ##
 pushd "$GPROMSRC"
 
+VERSION=$(./scripts/pkg-version --version)
+RELEASE=$(./scripts/pkg-version --release)
 FULL_VERSION=$(./scripts/pkg-version --full)
 
 # Create a vendored dist archive
@@ -44,8 +46,18 @@ popd #GPROMSRC
 
 pushd "$BUILDDIR"
 
-DISTARCHIVE="gluster-exporter-$FULL_VERSION-vendor.tar.xz"
-SPEC=gluster-exporter.spec
+DISTARCHIVE="gluster-prometheus-exporter-$FULL_VERSION-vendor.tar.xz"
+SPEC=gluster-prometheus-exporter.spec
+sed -i -E "
+# Use bundled always
+s/with_bundled 0/with_bundled 1/;
+# Replace version with HEAD version
+s/^Version:[[:space:]]+([0-9]+\\.)*[0-9]+$/Version: $VERSION/;
+# Replace release with proper release
+s/^Release:[[:space:]]+.*%\\{\\?dist\\}/Release: 0.$RELEASE%{?dist}/;
+# Replace Source0 with generated archive
+s/^Source0:[[:space:]]+.*.tar.xz/Source0: $DISTARCHIVE/;
+" $SPEC
 
 # Create SRPM
 mkdir -p rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
