@@ -52,9 +52,9 @@ sed -i -E "
 # Use bundled always
 s/with_bundled 0/with_bundled 1/;
 # Replace version with HEAD version
-s/^Version:[[:space:]]+([0-9]+\\.)*[0-9]+$/Version: $VERSION/;
+s/%global gluster_prom_ver[[:space:]]+(.+)$/%global gluster_prom_ver $VERSION/;
 # Replace release with proper release
-s/^Release:[[:space:]]+.*%\\{\\?dist\\}/Release: 0.$RELEASE%{?dist}/;
+s/%global gluster_prom_rel[[:space:]]+(.+)$/%global gluster_prom_rel $RELEASE/;
 # Replace Source0 with generated archive
 s/^Source0:[[:space:]]+.*.tar.xz/Source0: $DISTARCHIVE/;
 " $SPEC
