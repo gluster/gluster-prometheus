@@ -26,9 +26,9 @@
 %global gluster_prom_ver 1
 %global gluster_prom_rel 0
 
-Name: %{repo}
+Name: %{repo}-exporter
 Version: %{gluster_prom_ver}
-Release: 0%{?dist}
+Release: %{gluster_prom_rel}%{?dist}
 Summary: The GlusterFS prometheus metrics collectors
 License: GPLv2 or LGPLv3+
 URL: https://%{provider_prefix}
