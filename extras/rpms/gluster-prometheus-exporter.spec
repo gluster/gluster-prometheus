@@ -20,7 +20,6 @@
 %global repo gluster-prometheus
 %global provider_prefix %{provider}.%{provider_tld}/%{project}/%{repo}
 %global import_path %{provider_prefix}
-%global gluster_mgmt %{getenv:GLUSTER_MGMT}
 
 %global gluster_prom_make %{__make} PREFIX=%{_prefix} EXEC_PREFIX=%{_exec_prefix} BINDIR=%{_bindir} SBINDIR=%{_sbindir} DATADIR=%{_datadir} LOCALSTATEDIR=%{_sharedstatedir} LOGDIR=%{_localstatedir}/log SYSCONFDIR=%{_sysconfdir} FASTBUILD=off
 
@@ -29,14 +28,14 @@
 
 Name: %{repo}
 Version: %{gluster_prom_ver}
-Release: %{?dist}
+Release: 0%{?dist}
 Summary: The GlusterFS prometheus metrics collectors
 License: GPLv2 or LGPLv3+
 URL: https://%{provider_prefix}
 %if 0%{?with_bundled}
-Source0: https://%{provider_prefix}/releases/download/v%{version}/gluster-exporter-v%{gluster_prom_ver}-%{gluster_prom_rel}-vendor.tar.xz
+Source0: https://%{provider_prefix}/releases/download/v%{version}/gluster-prometheus-exporter-v%{gluster_prom_ver}-%{gluster_prom_rel}-vendor.tar.xz
 %else
-Source0: https://%{provider_prefix}/releases/download/v%{version}/gluster-exporter-v%{gluster_prom_ver}-%{gluster_prom_rel}.tar.xz
+Source0: https://%{provider_prefix}/releases/download/v%{version}/gluster-prometheus-exporter-v%{gluster_prom_ver}-%{gluster_prom_rel}.tar.xz
 %endif
 
 ExclusiveArch: %{go_arches}
@@ -60,7 +59,7 @@ would be run on gluster storage nodes. These would generate metrics for
 consumption by prometheus server.
 
 %prep
-%setup -q -n gluster-exporter-v%{gluster_prom_ver}-%{gluster_prom_rel}
+%setup -q -n gluster-prometheus
 
 %build
 export GOPATH=$(pwd):%{gopath}
@@ -88,5 +87,9 @@ popd
 %{_sysconfdir}/gluster-exporter/gluster-exporter.toml
 
 %changelog
+* Sat Nov 3 2018 Aravinda VK <avishwan@redhat.com> - 1.0.0-1
+- Fixed version numbers and changed name from gluster-exporter to
+  gluster-prometheus-exporter
+
 * Thu Sep 27 2018 Shubhendu Ram Tripathi <shtripat@redhat.com> - 1.0.0-1
 - Initial spec
