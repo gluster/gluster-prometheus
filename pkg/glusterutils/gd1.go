@@ -51,6 +51,32 @@ type gd1Volumes struct {
 	List    []gd1Volume `xml:"volInfo>volumes>volume"`
 }
 
+type snapshotParentVolume struct {
+	Name          string `xml:"name"`
+	SnapCount     int    `xml:"snapCount"`
+	SnapRemaining int    `xml:"snapRemaining"`
+}
+
+type snapshotVolume struct {
+	Name         string               `xml:"name"`
+	Status       string               `xml:"status"`
+	OriginVolume snapshotParentVolume `xml:"originVolume"`
+}
+
+type gd1Snapshot struct {
+	Name        string         `xml:"name"`
+	UUID        string         `xml:"uuid"`
+	Description string         `xml:"description"`
+	CreateTime  string         `xml:"createTime"`
+	VolCount    string         `xml:"volCount"`
+	SnapVolume  snapshotVolume `xml:"snapVolume"`
+}
+
+type gd1Snapshots struct {
+	XMLName xml.Name      `xml:"cliOutput"`
+	List    []gd1Snapshot `xml:"snapInfo>snapshots>snapshot"`
+}
+
 func (t *gd1Transport) String() string {
 	// 0 - tcp
 	// 1 - rdma
