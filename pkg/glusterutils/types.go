@@ -105,6 +105,13 @@ type HealEntry struct {
 	NumHealEntries int
 }
 
+// Snapshot represents a Volume snapshot
+type Snapshot struct {
+	Name       string
+	VolumeName string
+	Started    bool
+}
+
 // GInterface should be implemented in GD1 and GD2 structs
 type GInterface interface {
 	Peers() ([]Peer, error)
@@ -112,6 +119,7 @@ type GInterface interface {
 	IsLeader() (bool, error)
 	HealInfo(vol string) ([]HealEntry, error)
 	VolumeInfo() ([]Volume, error)
+	Snapshots() ([]Snapshot, error)
 }
 
 // GD1 enables users to interact with gd1 version

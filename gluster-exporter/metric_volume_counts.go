@@ -46,6 +46,22 @@ var (
 		LongHelp:  "",
 		Labels:    volumeLabels,
 	})
+
+	glusterVolumeSnapshotBrickCountTotal = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_snapshot_brick_count_total",
+		Help:      "Total count of snapshots bricks for volume",
+		LongHelp:  "",
+		Labels:    volumeLabels,
+	})
+
+	glusterVolumeSnapshotBrickCountActive = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_snapshot_brick_count_active",
+		Help:      "Total active count of snapshots bricks for volume",
+		LongHelp:  "",
+		Labels:    volumeLabels,
+	})
 )
 
 func getVolumeLabels(volname string) prometheus.Labels {
@@ -63,6 +79,10 @@ func volumeCounts() error {
 		return err
 	}
 	volumes, err := gluster.VolumeInfo()
+	if err != nil {
+		return err
+	}
+	snapshots, err := gluster.Snapshots()
 	if err != nil {
 		return err
 	}
@@ -85,6 +105,18 @@ func volumeCounts() error {
 			volBrickCount += len(subvol.Bricks)
 		}
 		glusterVolumeBrickCount.With(getVolumeLabels(volume.Name)).Set(float64(volBrickCount))
+		volSnapBrickCountTotal := 0
+		volSnapBrickCountActive := 0
+		for _, snap := range snapshots {
+			if volume.Name == snap.VolumeName {
+				volSnapBrickCountTotal += volBrickCount
+				if snap.Started {
+					volSnapBrickCountActive += volBrickCount
+				}
+			}
+		}
+		glusterVolumeSnapshotBrickCountTotal.With(getVolumeLabels(volume.Name)).Set(float64(volSnapBrickCountTotal))
+		glusterVolumeSnapshotBrickCountActive.With(getVolumeLabels(volume.Name)).Set(float64(volSnapBrickCountActive))
 	}
 	glusterVolumeTotalCount.With(prometheus.Labels{}).Set(float64(volCount))
 	glusterVolumeStartedCount.With(prometheus.Labels{}).Set(float64(volStartCount))
