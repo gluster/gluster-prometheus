@@ -384,6 +384,24 @@ Elapsed Time or Uptime of Gluster processes in seconds. One metric will be expos
 
 |===
 
+== gluster_volume_heal_count
+
+self heal count for volume
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|brick_path
+|Brick Path
+
+|host
+|Hostname or IP
+
+|===
+
 == gluster_volume_total_count
 
 Total no of volumes

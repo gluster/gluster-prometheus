@@ -23,3 +23,9 @@ disabled = false
 name = "gluster_volume_counts"
 sync-interval = 5
 disabled = false
+
+[collectors.gluster_volume_heal]
+name = "gluster_volume_heal"
+sync-interval = 5
+disabled = false
+
