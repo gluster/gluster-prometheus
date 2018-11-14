@@ -1,0 +1,8 @@
+---
+# Rule to get the Volume utilization by aggregating
+# the exported subvolume utilization
+- name: gluster_volume_utilization
+  rules:
+  - record: gluster:volume_capacity_used_bytes_total:sum
+    expr: >
+      sum(max(subvol_capacity_used_bytes) by (volume, subvolume)) by (volume)
