@@ -60,6 +60,11 @@ func getDefaultGlusterdDir(mgmt string) string {
 }
 
 func main() {
+	// Init logger with stderr, will be reinitialized later
+	if err := logging.Init("", "-", "info"); err != nil {
+		log.Fatal("Init logging failed for stderr")
+	}
+
 	flag.Parse()
 
 	if *docgen {
@@ -74,8 +79,14 @@ func main() {
 
 	exporterConf, err := conf.LoadConfig(*config)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Loading global config failed: %s\n", err.Error())
-		os.Exit(1)
+		log.WithError(err).Fatal("Loading global config failed")
+	}
+
+	// Create Log dir
+	err = os.MkdirAll(exporterConf.GlobalConf.LogDir, 0750)
+	if err != nil {
+		log.WithError(err).WithField("logdir", exporterConf.GlobalConf.LogDir).
+			Fatal("Failed to create log directory")
 	}
 
 	if err := logging.Init(exporterConf.GlobalConf.LogDir, exporterConf.GlobalConf.LogFile, exporterConf.GlobalConf.LogLevel); err != nil {
