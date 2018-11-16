@@ -159,6 +159,21 @@ Effective used capacity of gluster subvolume in bytes
 
 |===
 
+== gluster_subvol_capacity_total_bytes
+
+Effective total capacity of gluster subvolume in bytes
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub volume name
+
+|===
+
 == gluster_brick_lv_size_bytes
 
 Bricks LV size Bytes
@@ -402,6 +417,135 @@ self heal count for volume
 
 |===
 
+== gluster_volume_profile_total_reads
+
+Total no of reads
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|===
+
+== gluster_volume_profile_total_writes
+
+Total no of writes
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|===
+
+== gluster_volume_profile_duration_secs
+
+Duration
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|===
+
+== gluster_volume_profile_fop_hits
+
+Duration
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
+== gluster_volume_profile_fop_avg_latency
+
+Duration
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
+== gluster_volume_profile_fop_min_latency
+
+Duration
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
+== gluster_volume_profile_fop_max_latency
+
+Duration
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
 == gluster_volume_total_count
 
 Total no of volumes
@@ -417,6 +561,30 @@ Total no of started volumes
 == gluster_volume_brick_count
 
 Total no of bricks in volume
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|===
+
+== gluster_volume_snapshot_brick_count_total
+
+Total count of snapshots bricks for volume
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|===
+
+== gluster_volume_snapshot_brick_count_active
+
+Total active count of snapshots bricks for volume
 
 |===
 |Label|Description

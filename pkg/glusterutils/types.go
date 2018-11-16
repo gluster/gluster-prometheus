@@ -102,7 +102,7 @@ type HealEntry struct {
 	Hostname       string
 	Brick          string
 	Connected      string
-	NumHealEntries int
+	NumHealEntries int64
 }
 
 // Snapshot represents a Volume snapshot
@@ -120,6 +120,25 @@ type GInterface interface {
 	HealInfo(vol string) ([]HealEntry, error)
 	VolumeInfo() ([]Volume, error)
 	Snapshots() ([]Snapshot, error)
+	VolumeProfileInfo(vol string) ([]ProfileInfo, error)
+}
+
+// FopStat defines file ops related details
+type FopStat struct {
+	Name       string
+	Hits       int
+	AvgLatency float64
+	MinLatency float64
+	MaxLatency float64
+}
+
+// ProfileInfo represents volume profile info brickwise
+type ProfileInfo struct {
+	BrickName   string
+	Duration    uint64
+	TotalReads  uint64
+	TotalWrites uint64
+	FopStats    []FopStat
 }
 
 // GD1 enables users to interact with gd1 version
