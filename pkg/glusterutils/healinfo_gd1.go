@@ -22,7 +22,7 @@ func (g GD1) HealInfo(vol string) ([]HealEntry, error) {
 	heals := make([]HealEntry, len(healop.Healentries))
 	for hidx, entry := range healop.Healentries {
 		if entry.Connected == "Connected" {
-			entries, err := strconv.Atoi(entry.NumHealEntries)
+			entries, err := strconv.ParseInt(entry.NumHealEntries, 10, 64)
 			if err != nil {
 				return nil, err
 			}
