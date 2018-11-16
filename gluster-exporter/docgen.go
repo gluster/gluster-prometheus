@@ -48,7 +48,7 @@ func generateMetricsDoc() {
 
 	fmt.Println(writer.h1("Metrics Exported by Gluster Prometheus exporter"))
 	for _, m := range metrics {
-		fmt.Println(writer.h2(m.Name))
+		fmt.Println(writer.h2(m.Namespace + "_" + m.Name))
 		desc := m.LongHelp
 		if desc == "" {
 			desc = m.Help

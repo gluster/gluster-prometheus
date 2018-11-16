@@ -5,4 +5,5 @@
   rules:
   - record: gluster:volume_capacity_used_bytes_total:sum
     expr: >
-      sum(max(subvol_capacity_used_bytes) by (volume, subvolume)) by (volume)
+      sum(max(gluster_subvol_capacity_used_bytes)
+      by (volume, subvolume)) by (volume)

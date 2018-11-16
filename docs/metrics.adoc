@@ -1,6 +1,6 @@
 = Metrics Exported by Gluster Prometheus exporter
 
-== brick_capacity_used_bytes
+== gluster_brick_capacity_used_bytes
 
 Used capacity of gluster bricks in bytes
 
@@ -24,7 +24,7 @@ Used capacity of gluster bricks in bytes
 
 |===
 
-== brick_capacity_free_bytes
+== gluster_brick_capacity_free_bytes
 
 Free capacity of gluster bricks in bytes
 
@@ -48,7 +48,7 @@ Free capacity of gluster bricks in bytes
 
 |===
 
-== brick_capacity_bytes_total
+== gluster_brick_capacity_bytes_total
 
 Total capacity of gluster bricks in bytes
 
@@ -72,7 +72,7 @@ Total capacity of gluster bricks in bytes
 
 |===
 
-== brick_inodes_total
+== gluster_brick_inodes_total
 
 Total no of inodes of gluster brick disk
 
@@ -96,7 +96,7 @@ Total no of inodes of gluster brick disk
 
 |===
 
-== brick_inodes_free
+== gluster_brick_inodes_free
 
 Free no of inodes of gluster brick disk
 
@@ -120,7 +120,7 @@ Free no of inodes of gluster brick disk
 
 |===
 
-== brick_inodes_used
+== gluster_brick_inodes_used
 
 Used no of inodes of gluster brick disk
 
@@ -144,7 +144,7 @@ Used no of inodes of gluster brick disk
 
 |===
 
-== subvol_capacity_used_bytes
+== gluster_subvol_capacity_used_bytes
 
 Effective used capacity of gluster subvolume in bytes
 
@@ -159,7 +159,127 @@ Effective used capacity of gluster subvolume in bytes
 
 |===
 
-== cpu_percentage
+== gluster_brick_lv_size_bytes
+
+Bricks LV size Bytes
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|vg_name
+|VG Name
+
+|lv_path
+|LV Path
+
+|===
+
+== gluster_brick_lv_percent
+
+Bricks LV usage percent
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|vg_name
+|VG Name
+
+|lv_path
+|LV Path
+
+|===
+
+== gluster_brick_lv_metadata_size_bytes
+
+Bricks LV metadata size Bytes
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|vg_name
+|VG Name
+
+|lv_path
+|LV Path
+
+|===
+
+== gluster_brick_lv_metadata_percent
+
+Bricks LV metadata usage percent
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|vg_name
+|VG Name
+
+|lv_path
+|LV Path
+
+|===
+
+== gluster_cpu_percentage
 
 CPU percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the CPU time used divided by the time the process has been running (cputime/realtime ratio), expressed as a percentage.
 
@@ -180,7 +300,7 @@ CPU percentage of Gluster process. One metric will be exposed for each process. 
 
 |===
 
-== memory_percentage
+== gluster_memory_percentage
 
 Memory percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the ratio of the process's resident set size to the physical memory on the machine, expressed as a percentage
 
@@ -201,7 +321,7 @@ Memory percentage of Gluster process. One metric will be exposed for each proces
 
 |===
 
-== resident_memory_bytes
+== gluster_resident_memory_bytes
 
 Resident Memory of Gluster process in bytes. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.
 
@@ -222,7 +342,7 @@ Resident Memory of Gluster process in bytes. One metric will be exposed for each
 
 |===
 
-== virtual_memory_bytes
+== gluster_virtual_memory_bytes
 
 Virtual Memory of Gluster process in bytes. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.
 
@@ -243,7 +363,7 @@ Virtual Memory of Gluster process in bytes. One metric will be exposed for each 
 
 |===
 
-== elapsed_time_seconds
+== gluster_elapsed_time_seconds
 
 Elapsed Time or Uptime of Gluster processes in seconds. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.
 
@@ -264,19 +384,19 @@ Elapsed Time or Uptime of Gluster processes in seconds. One metric will be expos
 
 |===
 
-== volume_total_count
+== gluster_volume_total_count
 
 Total no of volumes
 
-== volume_created_count
+== gluster_volume_created_count
 
 Freshly created no of volumes
 
-== volume_started_count
+== gluster_volume_started_count
 
 Total no of started volumes
 
-== volume_brick_count
+== gluster_volume_brick_count
 
 Total no of bricks in volume
 
