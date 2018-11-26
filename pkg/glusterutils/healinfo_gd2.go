@@ -17,7 +17,7 @@ func (g GD2) HealInfo(vol string) ([]HealEntry, error) {
 		hostPath := strings.Split(heal.Name, ":")
 		entry := HealEntry{PeerID: heal.HostID, Hostname: hostPath[0],
 			Brick: hostPath[1], Connected: heal.Status,
-			NumHealEntries: *(heal.Entries)}
+			NumHealEntries: int(*(heal.Entries))}
 		brickheal[hidx] = entry
 	}
 	return brickheal, herr
