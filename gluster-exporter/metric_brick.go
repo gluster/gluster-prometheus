@@ -82,6 +82,29 @@ var (
 		},
 	}
 
+	thinLvmLbls = []MetricLabel{
+		{
+			Name: "host",
+			Help: "Host name or IP",
+		},
+		{
+			Name: "thinpool_name",
+			Help: "Name of the thinpool LV",
+		},
+		{
+			Name: "vg_name",
+			Help: "Name of the Volume Group",
+		},
+		{
+			Name: "subvolume",
+			Help: "Name of the Subvolume",
+		},
+		{
+			Name: "brick_path",
+			Help: "Brick Path",
+		},
+	}
+
 	glusterBrickCapacityUsed = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "brick_capacity_used_bytes",
@@ -177,6 +200,54 @@ var (
 		LongHelp:  "",
 		Labels:    lvmLbls,
 	})
+
+	glusterVGExtentTotal = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "vg_extent_total_count",
+		Help:      "VG extent total count ",
+		LongHelp:  "",
+		Labels:    lvmLbls,
+	})
+
+	glusterVGExtentAlloc = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "vg_extent_alloc_count",
+		Help:      "VG extent allocated count ",
+		LongHelp:  "",
+		Labels:    lvmLbls,
+	})
+
+	glusterThinPoolDataTotal = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "thinpool_data_total_bytes",
+		Help:      "Thin pool size Bytes",
+		LongHelp:  "",
+		Labels:    thinLvmLbls,
+	})
+
+	glusterThinPoolDataUsed = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "thinpool_data_used_bytes",
+		Help:      "Thin pool data used Bytes",
+		LongHelp:  "",
+		Labels:    thinLvmLbls,
+	})
+
+	glusterThinPoolMetadataTotal = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "thinpool_metadata_total_bytes",
+		Help:      "Thin pool metadata size Bytes",
+		LongHelp:  "",
+		Labels:    thinLvmLbls,
+	})
+
+	glusterThinPoolMetadataUsed = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "thinpool_metadata_used_bytes",
+		Help:      "Thin pool metadata used Bytes",
+		LongHelp:  "",
+		Labels:    thinLvmLbls,
+	})
 )
 
 func getGlusterBrickLabels(brick glusterutils.Brick, subvol string) prometheus.Labels {
@@ -234,6 +305,18 @@ type LVMStat struct {
 	MetadataSize    float64
 	MetadataPercent float64
 	VGName          string
+	VGExtentTotal   float64
+	VGExtentAlloc   float64
+}
+
+// ThinPoolStat represents thin pool LV details
+type ThinPoolStat struct {
+	ThinPoolName          string
+	ThinPoolVGName        string
+	ThinPoolDataTotal     float64
+	ThinPoolDataUsed      float64
+	ThinPoolMetadataTotal float64
+	ThinPoolMetadataUsed  float64
 }
 
 // VGReport represents VG details
@@ -258,21 +341,25 @@ type VGDetails struct {
 	LVMetadataSize  string `json:"lv_metadata_size"`
 	MetadataPercent string `json:"metadata_percent"`
 	VGName          string `json:"vg_name"`
+	VGExtentTotal   string `json:"vg_extent_count"`
+	VGExtentFree    string `json:"vg_free_count"`
 }
 
-func getLVS() ([]LVMStat, error) {
-	cmd := "lvm vgs --unquoted --reportformat=json --noheading --nosuffix --units m -o lv_uuid,lv_name,data_percent,pool_lv,lv_attr,lv_size,lv_path,lv_metadata_size,metadata_percent,vg_name"
+func getLVS() ([]LVMStat, []ThinPoolStat, error) {
+	cmd := "lvm vgs --unquoted --reportformat=json --noheading --nosuffix --units m -o lv_uuid,lv_name,data_percent,pool_lv,lv_attr,lv_size,lv_path,lv_metadata_size,metadata_percent,vg_name,vg_extent_count,vg_free_count"
 
 	out, err := exec.Command("sh", "-c", cmd).Output()
 	lvmDet := []LVMStat{}
+	thinPool := []ThinPoolStat{}
+	var vgExtentFreeTemp float64
 	if err != nil {
 		log.WithError(err).Error("Error getting lvm usage details")
-		return lvmDet, err
+		return lvmDet, thinPool, err
 	}
 	var vgReport VGReport
 	if err1 := json.Unmarshal(out, &vgReport); err1 != nil {
 		log.WithError(err1).Error("Error parsing lvm usage details")
-		return lvmDet, err1
+		return lvmDet, thinPool, err1
 	}
 
 	for _, vg := range vgReport.Report[0].Vgs {
@@ -284,7 +371,7 @@ func getLVS() ([]LVMStat, error) {
 		} else {
 			if obj.DataPercent, err = strconv.ParseFloat(vg.DataPercent, 64); err != nil {
 				log.WithError(err).Error("Error parsing DataPercent value of lvm usage")
-				return lvmDet, err
+				return lvmDet, thinPool, err
 			}
 		}
 		obj.PoolLV = vg.PoolLV
@@ -294,7 +381,7 @@ func getLVS() ([]LVMStat, error) {
 		} else {
 			if obj.Size, err = strconv.ParseFloat(vg.LVSize, 64); err != nil {
 				log.WithError(err).Error("Error parsing LVSize value of lvm usage")
-				return lvmDet, err
+				return lvmDet, thinPool, err
 			}
 		}
 		obj.Path = vg.LVPath
@@ -303,7 +390,7 @@ func getLVS() ([]LVMStat, error) {
 		} else {
 			if obj.MetadataSize, err = strconv.ParseFloat(vg.LVMetadataSize, 64); err != nil {
 				log.WithError(err).Error("Error parsing LVMetadataSize value of lvm usage")
-				return lvmDet, err
+				return lvmDet, thinPool, err
 			}
 		}
 		if vg.MetadataPercent == "" {
@@ -312,24 +399,51 @@ func getLVS() ([]LVMStat, error) {
 			obj.MetadataPercent, err = strconv.ParseFloat(vg.MetadataPercent, 64)
 			if err != nil {
 				log.WithError(err).Error("Error parsing MetadataPercent value of lvm usage")
-				return lvmDet, err
+				return lvmDet, thinPool, err
 			}
 		}
+		if vg.VGExtentTotal == "" {
+			obj.VGExtentTotal = 0.0
+		} else {
+			obj.VGExtentTotal, err = strconv.ParseFloat(vg.VGExtentTotal, 64)
+			if err != nil {
+				log.WithError(err).Error("Error parsing VGExtenTotal value of lvm usage")
+				return lvmDet, thinPool, err
+			}
+		}
+		if vg.VGExtentFree == "" {
+			vgExtentFreeTemp = 0.0
+		} else {
+			vgExtentFreeTemp, err = strconv.ParseFloat(vg.VGExtentFree, 64)
+			if err != nil {
+				log.WithError(err).Error("Error parsing VGExtentAlloc value of lvm usage")
+				return lvmDet, thinPool, err
+			}
+		}
+		obj.VGExtentAlloc = obj.VGExtentTotal - vgExtentFreeTemp
 		obj.VGName = vg.VGName
 		if obj.Attr[0] == 't' {
 			obj.Device = fmt.Sprintf("%s/%s", obj.VGName, obj.Name)
+			var TPUsage ThinPoolStat
+			TPUsage.ThinPoolName = obj.Name
+			TPUsage.ThinPoolVGName = obj.VGName
+			TPUsage.ThinPoolDataTotal = obj.Size
+			TPUsage.ThinPoolDataUsed = (obj.Size * obj.DataPercent) / 100
+			TPUsage.ThinPoolMetadataTotal = obj.MetadataSize
+			TPUsage.ThinPoolMetadataUsed = (obj.MetadataSize * obj.MetadataPercent) / 100
+			thinPool = append(thinPool, TPUsage)
 		} else {
 			obj.Device, err = filepath.EvalSymlinks(obj.Path)
 			if err != nil {
 				log.WithError(err).WithFields(log.Fields{
 					"path": obj.Path,
 				}).Error("Error evaluating realpath")
-				return lvmDet, err
+				return lvmDet, thinPool, err
 			}
 		}
 		lvmDet = append(lvmDet, obj)
 	}
-	return lvmDet, nil
+	return lvmDet, thinPool, nil
 }
 
 // ProcMounts represents list of items from /proc/mounts
@@ -368,14 +482,25 @@ func getGlusterLVMLabels(brick glusterutils.Brick, subvol string, stat LVMStat) 
 	}
 }
 
-func lvmUsage(path string) (stats []LVMStat, err error) {
+func getGlusterThinPoolLabels(brick glusterutils.Brick, subvol string, thinStat ThinPoolStat) prometheus.Labels {
+	return prometheus.Labels{
+		"host":          brick.Host,
+		"thinpool_name": thinStat.ThinPoolName,
+		"vg_name":       thinStat.ThinPoolVGName,
+		"subvolume":     subvol,
+		"brick_path":    brick.Path,
+	}
+}
+
+func lvmUsage(path string) (stats []LVMStat, thinPoolStats []ThinPoolStat, err error) {
 	mountPoints, err := parseProcMounts()
 	if err != nil {
-		return stats, err
+		return stats, thinPoolStats, err
 	}
-	lvs, err := getLVS()
+	var thinPoolNames []string
+	lvs, tpStats, err := getLVS()
 	if err != nil {
-		return stats, err
+		return stats, thinPoolStats, err
 	}
 	for _, lv := range lvs {
 		for _, mount := range mountPoints {
@@ -386,12 +511,27 @@ func lvmUsage(path string) (stats []LVMStat, err error) {
 				}).Error("Error evaluating realpath")
 				continue
 			}
-			if lv.Device == dev {
+			// Check if the logical volume is mounted as a gluster brick
+			if lv.Device == dev && path == mount.Name {
+				// Check if the LV is a thinly provisioned volume and if yes then get the thin pool LV name
+				if lv.Attr[0] == 'V' {
+					tpName := lv.PoolLV
+					thinPoolNames = append(thinPoolNames, tpName)
+				}
 				stats = append(stats, lv)
 			}
 		}
 	}
-	return stats, nil
+	// Iterate and select only those thin pool LVs whose thinly provisioned volumes are mounted as gluster bricks
+	for _, tpName := range thinPoolNames {
+		for _, tpStat := range tpStats {
+			if tpName == tpStat.ThinPoolName {
+				thinPoolStats = append(thinPoolStats, tpStat)
+			}
+		}
+	}
+
+	return stats, thinPoolStats, nil
 }
 
 func brickUtilization() error {
@@ -448,7 +588,7 @@ func brickUtilization() error {
 						}
 					}
 					// Get lvm usage details
-					stats, err := lvmUsage(brick.Path)
+					stats, thinStats, err := lvmUsage(brick.Path)
 					if err != nil {
 						log.WithError(err).WithFields(log.Fields{
 							"volume":     volume.Name,
@@ -465,6 +605,15 @@ func brickUtilization() error {
 						// Convert to bytes
 						glusterBrickLVMetadataSize.With(lvmLbls).Set(stat.MetadataSize * 1024 * 1024)
 						glusterBrickLVMetadataPercent.With(lvmLbls).Set(stat.MetadataPercent)
+						glusterVGExtentTotal.With(lvmLbls).Set(stat.VGExtentTotal)
+						glusterVGExtentAlloc.With(lvmLbls).Set(stat.VGExtentAlloc)
+					}
+					for _, thinStat := range thinStats {
+						var thinLvmLbls = getGlusterThinPoolLabels(brick, subvol.Name, thinStat)
+						glusterThinPoolDataTotal.With(thinLvmLbls).Set(thinStat.ThinPoolDataTotal * 1024 * 1024)
+						glusterThinPoolDataUsed.With(thinLvmLbls).Set(thinStat.ThinPoolDataUsed * 1024 * 1024)
+						glusterThinPoolMetadataTotal.With(thinLvmLbls).Set(thinStat.ThinPoolMetadataTotal * 1024 * 1024)
+						glusterThinPoolMetadataUsed.With(thinLvmLbls).Set(thinStat.ThinPoolMetadataUsed * 1024 * 1024)
 					}
 				}
 			}
