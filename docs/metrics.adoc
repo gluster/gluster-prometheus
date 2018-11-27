@@ -279,6 +279,162 @@ Bricks LV metadata usage percent
 
 |===
 
+== gluster_vg_extent_total_count
+
+VG extent total count 
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|vg_name
+|VG Name
+
+|lv_path
+|LV Path
+
+|===
+
+== gluster_vg_extent_alloc_count
+
+VG extent allocated count 
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|id
+|Brick ID
+
+|brick_path
+|Brick Path
+
+|volume
+|Volume Name
+
+|subvolume
+|Sub Volume name
+
+|vg_name
+|VG Name
+
+|lv_path
+|LV Path
+
+|===
+
+== gluster_thinpool_data_total_bytes
+
+Thin pool size Bytes
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|thinpool_name
+|Name of the thinpool LV
+
+|vg_name
+|Name of the Volume Group
+
+|subvolume
+|Name of the Subvolume
+
+|brick_path
+|Brick Path
+
+|===
+
+== gluster_thinpool_data_used_bytes
+
+Thin pool data used Bytes
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|thinpool_name
+|Name of the thinpool LV
+
+|vg_name
+|Name of the Volume Group
+
+|subvolume
+|Name of the Subvolume
+
+|brick_path
+|Brick Path
+
+|===
+
+== gluster_thinpool_metadata_total_bytes
+
+Thin pool metadata size Bytes
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|thinpool_name
+|Name of the thinpool LV
+
+|vg_name
+|Name of the Volume Group
+
+|subvolume
+|Name of the Subvolume
+
+|brick_path
+|Brick Path
+
+|===
+
+== gluster_thinpool_metadata_used_bytes
+
+Thin pool metadata used Bytes
+
+|===
+|Label|Description
+
+|host
+|Host name or IP
+
+|thinpool_name
+|Name of the thinpool LV
+
+|vg_name
+|Name of the Volume Group
+
+|subvolume
+|Name of the Subvolume
+
+|brick_path
+|Brick Path
+
+|===
+
 == gluster_cpu_percentage
 
 CPU percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the CPU time used divided by the time the process has been running (cputime/realtime ratio), expressed as a percentage.
