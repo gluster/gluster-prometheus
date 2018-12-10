@@ -138,6 +138,14 @@ var (
 		Labels:    subvolLabels,
 	})
 
+	glusterSubvolCapacityTotal = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "subvol_capacity_total_bytes",
+		Help:      "Effective total capacity of gluster subvolume in bytes",
+		LongHelp:  "",
+		Labels:    subvolLabels,
+	})
+
 	glusterBrickLVSize = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "brick_lv_size_bytes",
@@ -409,6 +417,7 @@ func brickUtilization() error {
 		for _, subvol := range subvols {
 			bricks := subvol.Bricks
 			var maxBrickUsed float64
+			var leastBrickTotal float64
 			for _, brick := range bricks {
 				if brick.PeerID == localPeerID {
 					usage, err := diskUsage(brick.Path)
@@ -433,6 +442,11 @@ func brickUtilization() error {
 					if brick.Type != glusterutils.BrickTypeArbiter && usage.Used >= maxBrickUsed {
 						maxBrickUsed = usage.Used
 					}
+					if brick.Type != glusterutils.BrickTypeArbiter {
+						if leastBrickTotal == 0 || usage.All <= leastBrickTotal {
+							leastBrickTotal = usage.All
+						}
+					}
 					// Get lvm usage details
 					stats, err := lvmUsage(brick.Path)
 					if err != nil {
@@ -455,11 +469,13 @@ func brickUtilization() error {
 				}
 			}
 			effectiveCapacity := maxBrickUsed
+			effectiveTotalCapacity := leastBrickTotal
 			var subvolLabels = getGlusterSubvolLabels(volume.Name, subvol.Name)
 			if subvol.Type == glusterutils.SubvolTypeDisperse {
 				// In disperse volume data bricks contribute to the sub
 				// volume size
 				effectiveCapacity = maxBrickUsed * float64(subvol.DisperseDataCount)
+				effectiveTotalCapacity = leastBrickTotal * float64(subvol.DisperseDataCount)
 			}
 
 			// Export the metric only if available. it will be zero if the subvolume
@@ -467,6 +483,9 @@ func brickUtilization() error {
 			// this node
 			if effectiveCapacity > 0 {
 				glusterSubvolCapacityUsed.With(subvolLabels).Set(effectiveCapacity)
+			}
+			if effectiveTotalCapacity > 0 {
+				glusterSubvolCapacityTotal.With(subvolLabels).Set(effectiveTotalCapacity)
 			}
 		}
 	}
