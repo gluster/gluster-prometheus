@@ -116,6 +116,32 @@ type gd1ProfileInfo struct {
 	VolProfile volumeProfile `xml:"volProfile"`
 }
 
+type gd1ProtocolPorts struct {
+	TCPPort  string `xml:"tcp"`
+	RDMAPort string `xml:"rdma"`
+}
+
+type gd1Process struct {
+	Hostname      string           `xml:"hostname"`
+	Path          string           `xml:"path"`
+	PeerID        string           `xml:"peerid"`
+	Status        int              `xml:"status"`
+	Port          int              `xml:"port"`
+	ProtocolPorts gd1ProtocolPorts `xml:"ports"`
+	PID           int              `xml:"pid"`
+}
+
+type gd1VolumeStatusInfo struct {
+	Name          string       `xml:"volName"`
+	NodeCount     int          `xml:"nodeCount"`
+	NodeProcesses []gd1Process `xml:"node"`
+}
+
+type gd1VolumeStatus struct {
+	XMLName xml.Name              `xml:"cliOutput"`
+	List    []gd1VolumeStatusInfo `xml:"volStatus>volumes>volume"`
+}
+
 func (t *gd1Transport) String() string {
 	// 0 - tcp
 	// 1 - rdma

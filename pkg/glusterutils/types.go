@@ -112,6 +112,16 @@ type Snapshot struct {
 	Started    bool
 }
 
+// BrickStatus describes the status details of volume brick
+type BrickStatus struct {
+	Hostname string
+	PeerID   string
+	Status   int
+	PID      int
+	Path     string
+	Volume   string
+}
+
 // GInterface should be implemented in GD1 and GD2 structs
 type GInterface interface {
 	Peers() ([]Peer, error)
@@ -121,6 +131,7 @@ type GInterface interface {
 	VolumeInfo() ([]Volume, error)
 	Snapshots() ([]Snapshot, error)
 	VolumeProfileInfo(vol string) ([]ProfileInfo, error)
+	VolumeBrickStatus(vol string) ([]BrickStatus, error)
 }
 
 // FopStat defines file ops related details
