@@ -82,6 +82,29 @@ var (
 		},
 	}
 
+	brickStatusLbls = []MetricLabel{
+		{
+			Name: "volume",
+			Help: "Volume Name",
+		},
+		{
+			Name: "hostname",
+			Help: "Host name or IP",
+		},
+		{
+			Name: "brick_path",
+			Help: "Brick Path",
+		},
+		{
+			Name: "peer_id",
+			Help: "Peer ID",
+		},
+		{
+			Name: "pid",
+			Help: "Process ID of brick",
+		},
+	}
+
 	thinLvmLbls = []MetricLabel{
 		{
 			Name: "host",
@@ -247,6 +270,14 @@ var (
 		Help:      "Thin pool metadata used Bytes",
 		LongHelp:  "",
 		Labels:    thinLvmLbls,
+	})
+
+	glusterBrickUp = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "brick_up",
+		Help:      "Brick up (1-up, 0-down)",
+		LongHelp:  "",
+		Labels:    brickStatusLbls,
 	})
 )
 
@@ -641,6 +672,66 @@ func brickUtilization() error {
 	return nil
 }
 
+func getBrickStatusLabels(vol string, host string, brickPath string, peerID string, pid int) prometheus.Labels {
+	return prometheus.Labels{
+		"volume":     vol,
+		"hostname":   host,
+		"brick_path": brickPath,
+		"peer_id":    peerID,
+		"pid":        strconv.Itoa(pid),
+	}
+}
+
+func brickStatus() error {
+	isLeader, err := gluster.IsLeader()
+	if err != nil {
+		log.WithError(err).Error("Unable to find if the current node is leader")
+		return err
+	}
+	if !isLeader {
+		return nil
+	}
+
+	volumes, err := gluster.VolumeInfo()
+	if err != nil {
+		return err
+	}
+	for _, volume := range volumes {
+		// If volume is down, the bricks should be marked down
+		var brickStatus []glusterutils.BrickStatus
+		if volume.State != glusterutils.VolumeStateStarted {
+			for _, subvol := range volume.SubVolumes {
+				for _, brick := range subvol.Bricks {
+					status := glusterutils.BrickStatus{
+						Hostname: brick.Host,
+						PeerID:   brick.PeerID,
+						Status:   0,
+						PID:      0,
+						Path:     brick.Path,
+						Volume:   volume.Name,
+					}
+					brickStatus = append(brickStatus, status)
+				}
+			}
+		} else {
+			brickStatus, err = gluster.VolumeBrickStatus(volume.Name)
+			if err != nil {
+				log.WithError(err).WithFields(log.Fields{
+					"volume": volume.Name,
+				}).Error("Error getting bricks status")
+				continue
+			}
+		}
+		for _, entry := range brickStatus {
+			labels := getBrickStatusLabels(volume.Name, entry.Hostname, entry.Path, entry.PeerID, entry.PID)
+			glusterBrickUp.With(labels).Set(float64(entry.Status))
+		}
+	}
+
+	return nil
+}
+
 func init() {
 	registerMetric("gluster_brick", brickUtilization)
+	registerMetric("gluster_brick_status", brickStatus)
 }

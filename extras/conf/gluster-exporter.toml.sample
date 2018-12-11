@@ -33,3 +33,8 @@ disabled = false
 name = "gluster_volume_profile"
 sync-interval = 5
 disabled = false
+
+[collectors.gluster_brick_status]
+name = "gluster_brick_status"
+sync-interval = 15
+disabled = false

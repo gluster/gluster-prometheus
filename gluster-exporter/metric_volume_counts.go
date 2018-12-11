@@ -62,6 +62,14 @@ var (
 		LongHelp:  "",
 		Labels:    volumeLabels,
 	})
+
+	glusterVolumeUp = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_up",
+		Help:      "Volume is started or not (1-started, 0-not started)",
+		LongHelp:  "",
+		Labels:    volumeLabels,
+	})
 )
 
 func getVolumeLabels(volname string) prometheus.Labels {
@@ -91,8 +99,10 @@ func volumeCounts() error {
 
 	volCount = len(volumes)
 	for _, volume := range volumes {
+		up := 0
 		switch volume.State {
 		case glusterutils.VolumeStateStarted:
+			up = 1
 			volStartCount++
 		case glusterutils.VolumeStateCreated:
 			volCreatedCount++
@@ -100,6 +110,7 @@ func volumeCounts() error {
 			// Volume is stopped, nothing to do as the stopped count
 			// could be derived using total - started - created
 		}
+		glusterVolumeUp.With(getVolumeLabels(volume.Name)).Set(float64(up))
 		volBrickCount := 0
 		for _, subvol := range volume.SubVolumes {
 			volBrickCount += len(subvol.Bricks)
