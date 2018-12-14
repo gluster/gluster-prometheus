@@ -91,9 +91,12 @@ func NewPeerMetrics() (*PeerMetrics, error) {
 			if count, convErr := strconv.Atoi(strings.TrimSpace(vg.PVCount)); convErr == nil {
 				pMetrics.PVCount += count
 			}
-			// even if a parse error happens,
-			// the function will return Zero by default
-			pMetrics.LVCountMap[vg.VGName], _ = strconv.Atoi(strings.TrimSpace(vg.LVCount))
+			// by default set the LV count to Zero
+			pMetrics.LVCountMap[vg.VGName] = 0
+			if count, convErr := strconv.Atoi(strings.TrimSpace(vg.LVCount)); convErr == nil {
+				// if there are no errors, update the LV count
+				pMetrics.LVCountMap[vg.VGName] = count
+			}
 		}
 		// logic to collect thinpool count in each Volume Group
 		if vg.PoolLVUUID != "" {
