@@ -10,7 +10,7 @@ import (
 // HealInfo gets gluster vol heal info (GD1)
 func (g GD1) HealInfo(vol string) ([]HealEntry, error) {
 	cmd := fmt.Sprintf("%s vol heal %s info --xml", g.config.GlusterCmd, vol)
-	out, err := executeCmd(cmd)
+	out, err := ExecuteCmd(cmd)
 	if err != nil {
 		return nil, err
 	}

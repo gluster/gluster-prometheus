@@ -125,7 +125,7 @@ func (g *GD2) LocalPeerID() (string, error) {
 // GetGlusterVersion gets the glusterfs version
 func GetGlusterVersion() (string, error) {
 	cmd := "glusterfs --version | head -1"
-	bytes, err := executeCmd(cmd)
+	bytes, err := ExecuteCmd(cmd)
 	if err != nil {
 		return "", err
 	}
@@ -134,10 +134,13 @@ func GetGlusterVersion() (string, error) {
 	return fields[1], err
 }
 
-// executeCmd enables to execute system cmds and returns stdout, err
-func executeCmd(cmd string) ([]byte, error) {
+// ExecuteCmd enables to execute system cmds and returns stdout, err
+func ExecuteCmd(cmd string) ([]byte, error) {
 	cmdfields := strings.Fields(cmd)
 	cmdstr := cmdfields[0]
+	if fullcmd, err := exec.LookPath(cmdfields[0]); err == nil {
+		cmdstr = fullcmd
+	}
 	args := cmdfields[1:]
 	out, err := exec.Command(cmdstr, args...).Output()
 	return out, err

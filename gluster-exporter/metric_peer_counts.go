@@ -5,25 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"os/exec"
 	"strconv"
 	"strings"
 
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
-
-// executes the command 'cmdStr'
-// returns the byte array as output or error
-func execCommand(cmdStr string) ([]byte, error) {
-	cmdArr := strings.Fields(strings.TrimSpace(cmdStr))
-	mainCmd, err := exec.LookPath(cmdArr[0])
-	if err != nil {
-		mainCmd = cmdArr[0]
-	}
-	outB, err := exec.Command(mainCmd, cmdArr[1:]...).Output()
-	return outB, err
-}
 
 // PeerMetrics : exposes PV, LV, VG counts
 type PeerMetrics struct {
@@ -47,7 +35,7 @@ type myVGDetails struct {
 // NewPeerMetrics : provides a way to get the consolidated metrics (such PV, LV, VG counts)
 func NewPeerMetrics() (*PeerMetrics, error) {
 	cmdStr := "lvm vgs --noheading --reportformat=json -o lv_uuid,lv_name,pool_lv,vg_name,lv_path,lv_count,pv_count,pool_lv_uuid"
-	outBs, err := execCommand(cmdStr)
+	outBs, err := glusterutils.ExecuteCmd(cmdStr)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +115,7 @@ var (
 		},
 	}
 	// an additional information of 'vgName' is added
-	// this specifies which Volume Group the LV count belongs
+	// this specifies which Volume Group the LV or ThinPool count belongs
 	withVgMetricLabels = []MetricLabel{
 		{
 			Name: "name",
@@ -146,21 +134,21 @@ var (
 	glusterPVCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "pv_count",
-		Help:      "No: of physical volumes, got through pvs command",
+		Help:      "No: of Physical Volumes",
 		LongHelp:  "",
 		Labels:    gnrlMetricLabels,
 	})
 	glusterLVCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "lv_count",
-		Help:      "No: of logical volumes, got through lvs command",
+		Help:      "No: of Logical Volumes in a Volume Group",
 		LongHelp:  "",
 		Labels:    withVgMetricLabels,
 	})
 	glusterVGCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "vg_count",
-		Help:      "No: of volume groups, got through vgs command",
+		Help:      "No: of Volume Groups",
 		LongHelp:  "",
 		Labels:    gnrlMetricLabels,
 	})
@@ -185,7 +173,9 @@ func peerCounts() (err error) {
 	pMetrics, err := NewPeerMetrics()
 	if err != nil {
 		// log the error and then return
-		log.Errorln("[Peer_Metric_Count] Error:", err)
+		log.WithError(err).WithFields(log.Fields{
+			"peer": peerID,
+		}).Errorln("[Peer_Metric_Count] Error:", err)
 		return err
 	}
 	genrlLbls := prometheus.Labels{
