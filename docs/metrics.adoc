@@ -450,6 +450,72 @@ Thin pool metadata used Bytes
 
 |===
 
+== gluster_pv_count
+
+No: of Physical Volumes
+
+|===
+|Label|Description
+
+|name
+|Metric name, for which data is collected
+
+|peerID
+|Peer ID of the host on which this metric is collected
+
+|===
+
+== gluster_lv_count
+
+No: of Logical Volumes in a Volume Group
+
+|===
+|Label|Description
+
+|name
+|Metric name, for which the data is collected
+
+|peerID
+|Peer ID of the host on which this metric is collected
+
+|vgName
+|Volume Group Name associated with the metric
+
+|===
+
+== gluster_vg_count
+
+No: of Volume Groups
+
+|===
+|Label|Description
+
+|name
+|Metric name, for which data is collected
+
+|peerID
+|Peer ID of the host on which this metric is collected
+
+|===
+
+== gluster_thinpool_count
+
+No: of thinpools in a Volume Group
+
+|===
+|Label|Description
+
+|name
+|Metric name, for which the data is collected
+
+|peerID
+|Peer ID of the host on which this metric is collected
+
+|vgName
+|Volume Group Name associated with the metric
+
+|===
+
 == gluster_cpu_percentage
 
 CPU percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the CPU time used divided by the time the process has been running (cputime/realtime ratio), expressed as a percentage.

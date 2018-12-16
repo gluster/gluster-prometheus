@@ -107,7 +107,7 @@ var (
 	gnrlMetricLabels = []MetricLabel{
 		{
 			Name: "name",
-			Help: "Name of the metric, whose count is collected (PV or LV or VG etc)",
+			Help: "Metric name, for which data is collected",
 		},
 		{
 			Name: "peerID",
@@ -119,7 +119,7 @@ var (
 	withVgMetricLabels = []MetricLabel{
 		{
 			Name: "name",
-			Help: "Logical Volume Metric details",
+			Help: "Metric name, for which the data is collected",
 		},
 		{
 			Name: "peerID",
