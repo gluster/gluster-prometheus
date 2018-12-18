@@ -33,6 +33,15 @@ const (
 	VolumeStateStarted = "Started"
 	// VolumeStateStopped represents Volume stopped state
 	VolumeStateStopped = "Stopped"
+
+	// CountFOPHitsGD1 represents volume option name for fop hits counts
+	CountFOPHitsGD1 = "diagnostics.count-fop-hits"
+	// LatencyMeasurementGD1 represents volume option for latency measurement
+	LatencyMeasurementGD1 = "diagnostics.latency-measurement"
+	// CountFOPHitsGD2 represents volume option name for fop hits counts
+	CountFOPHitsGD2 = "debug/io-stats.count-fop-hits"
+	// LatencyMeasurementGD2 represents volume option for latency measurement
+	LatencyMeasurementGD2 = "debug/io-stats.latency-measurement"
 )
 
 // Config represents Glusterd1/Glusterd2 configurations
@@ -132,6 +141,7 @@ type GInterface interface {
 	Snapshots() ([]Snapshot, error)
 	VolumeProfileInfo(vol string) ([]ProfileInfo, error)
 	VolumeBrickStatus(vol string) ([]BrickStatus, error)
+	EnableVolumeProfiling(volinfo Volume) error
 }
 
 // FopStat defines file ops related details

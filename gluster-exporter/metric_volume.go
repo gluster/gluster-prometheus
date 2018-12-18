@@ -205,7 +205,22 @@ func profileInfo() error {
 	if err != nil {
 		return err
 	}
+	volOption := glusterutils.CountFOPHitsGD1
+	if glusterConfig.GlusterMgmt == glusterutils.MgmtGlusterd2 {
+		volOption = glusterutils.CountFOPHitsGD2
+	}
 	for _, volume := range volumes {
+		err := gluster.EnableVolumeProfiling(volume)
+		if err != nil {
+			log.WithError(err).WithFields(log.Fields{
+				"volume": volume.Name,
+			}).Error("Error enabling profiling for volume")
+			continue
+		}
+		if value, exists := volume.Options[volOption]; !exists || value == "off" {
+			// Volume profiling is explicitly switched off for volume, dont collect profile metrics
+			continue
+		}
 		name := volume.Name
 		profileinfo, err := gluster.VolumeProfileInfo(name)
 		if err != nil {
