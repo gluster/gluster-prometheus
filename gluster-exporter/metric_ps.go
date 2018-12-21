@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
-
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,6 +21,7 @@ var (
 	}
 
 	labels = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "volume",
 			Help: "Volume Name",
@@ -94,6 +94,7 @@ func getCmdLine(pid string) ([]string, error) {
 
 func getGlusterdLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
 	return prometheus.Labels{
+		"cluster_id": clusterID,
 		"name":       cmd,
 		"volume":     "",
 		"peerid":     peerID,
@@ -117,6 +118,7 @@ func getGlusterFsdLabels(peerID, cmd string, args []string) (prometheus.Labels, 
 	}
 
 	return prometheus.Labels{
+		"cluster_id": clusterID,
 		"name":       cmd,
 		"volume":     volume,
 		"peerid":     peerID,
@@ -126,6 +128,7 @@ func getGlusterFsdLabels(peerID, cmd string, args []string) (prometheus.Labels, 
 
 func getUnknownLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
 	return prometheus.Labels{
+		"cluster_id": clusterID,
 		"name":       cmd,
 		"volume":     "",
 		"peerid":     peerID,

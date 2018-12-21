@@ -101,6 +101,7 @@ func NewPeerMetrics() (*PeerMetrics, error) {
 var (
 	// general metric labels
 	gnrlMetricLabels = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "name",
 			Help: "Metric name, for which data is collected",
@@ -113,6 +114,7 @@ var (
 	// an additional information of 'vgName' is added
 	// this specifies which Volume Group the LV or ThinPool count belongs
 	withVgMetricLabels = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "name",
 			Help: "Metric name, for which the data is collected",
@@ -175,30 +177,34 @@ func peerCounts(gluster glusterutils.GInterface) (err error) {
 		return err
 	}
 	genrlLbls := prometheus.Labels{
-		"name":   "Physical_Volumes",
-		"peerID": peerID,
+		"cluster_id": clusterID,
+		"name":       "Physical_Volumes",
+		"peerID":     peerID,
 	}
 	glusterPVCount.With(genrlLbls).Set(float64(pMetrics.PVCount))
 	genrlLbls = prometheus.Labels{
-		"name":   "Volume_Groups",
-		"peerID": peerID,
+		"cluster_id": clusterID,
+		"name":       "Volume_Groups",
+		"peerID":     peerID,
 	}
 	glusterVGCount.With(genrlLbls).Set(float64(pMetrics.VGCount))
 	// logical volume counts are added specific to each VG
 	for vgName, lvCount := range pMetrics.LVCountMap {
 		genrlLbls = prometheus.Labels{
-			"name":   "Logical_Volumes",
-			"peerID": peerID,
-			"vgName": vgName,
+			"cluster_id": clusterID,
+			"name":       "Logical_Volumes",
+			"peerID":     peerID,
+			"vgName":     vgName,
 		}
 		glusterLVCount.With(genrlLbls).Set(float64(lvCount))
 	}
 	// similarly thinpool counts are also added per VG
 	for vgName, tpCount := range pMetrics.ThinPoolCountMap {
 		genrlLbls = prometheus.Labels{
-			"name":   "ThinPool_Count",
-			"peerID": peerID,
-			"vgName": vgName,
+			"cluster_id": clusterID,
+			"name":       "ThinPool_Count",
+			"peerID":     peerID,
+			"vgName":     vgName,
 		}
 		glusterTPCount.With(genrlLbls).Set(float64(tpCount))
 	}

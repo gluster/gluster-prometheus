@@ -9,6 +9,7 @@ import (
 
 var (
 	volumeLabels = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "volume",
 			Help: "Volume Name",
@@ -74,7 +75,8 @@ var (
 
 func getVolumeLabels(volname string) prometheus.Labels {
 	return prometheus.Labels{
-		"volume": volname,
+		"cluster_id": clusterID,
+		"volume":     volname,
 	}
 }
 
@@ -129,9 +131,15 @@ func volumeCounts(gluster glusterutils.GInterface) error {
 		glusterVolumeSnapshotBrickCountTotal.With(getVolumeLabels(volume.Name)).Set(float64(volSnapBrickCountTotal))
 		glusterVolumeSnapshotBrickCountActive.With(getVolumeLabels(volume.Name)).Set(float64(volSnapBrickCountActive))
 	}
-	glusterVolumeTotalCount.With(prometheus.Labels{}).Set(float64(volCount))
-	glusterVolumeStartedCount.With(prometheus.Labels{}).Set(float64(volStartCount))
-	glusterVolumeCreatedCount.With(prometheus.Labels{}).Set(float64(volCreatedCount))
+	glusterVolumeTotalCount.With(prometheus.Labels{
+		"cluster_id": clusterID,
+	}).Set(float64(volCount))
+	glusterVolumeStartedCount.With(prometheus.Labels{
+		"cluster_id": clusterID,
+	}).Set(float64(volStartCount))
+	glusterVolumeCreatedCount.With(prometheus.Labels{
+		"cluster_id": clusterID,
+	}).Set(float64(volCreatedCount))
 	return nil
 }
 

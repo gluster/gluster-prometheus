@@ -15,7 +15,8 @@ import (
 )
 
 var (
-	peerIDPattern = regexp.MustCompile("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
+	peerIDPattern    = regexp.MustCompile("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
+	defaultClusterID = "default"
 )
 
 // IsLeader returns true or false based on whether the node is the leader of the cluster or not
@@ -128,6 +129,14 @@ func (g *GD2) LocalPeerID() (string, error) {
 		return "", err
 	}
 	return readPeerID(fileStream, keywordID)
+}
+
+// GetClusterID returns local clusterd ID
+func GetClusterID() string {
+	if clusterid := os.Getenv("GLUSTER_CLUSTER_ID"); clusterid != "" {
+		return clusterid
+	}
+	return defaultClusterID
 }
 
 // GetGlusterVersion gets the glusterfs version
