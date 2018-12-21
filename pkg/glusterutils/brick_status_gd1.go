@@ -19,17 +19,19 @@ func (g GD1) VolumeBrickStatus(vol string) ([]BrickStatus, error) {
 	}
 
 	var brickstatus []BrickStatus
-	for _, process := range volStatus.List[0].NodeProcesses {
-		if process.Hostname != "Self-heal Daemon" {
-			brickStatusObj := BrickStatus{
-				Hostname: process.Hostname,
-				PeerID:   process.PeerID,
-				Status:   process.Status,
-				PID:      process.PID,
-				Path:     process.Path,
-				Volume:   vol,
+	if len(volStatus.List) > 0 {
+		for _, process := range volStatus.List[0].NodeProcesses {
+			if process.Hostname != "Self-heal Daemon" {
+				brickStatusObj := BrickStatus{
+					Hostname: process.Hostname,
+					PeerID:   process.PeerID,
+					Status:   process.Status,
+					PID:      process.PID,
+					Path:     process.Path,
+					Volume:   vol,
+				}
+				brickstatus = append(brickstatus, brickStatusObj)
 			}
-			brickstatus = append(brickstatus, brickStatusObj)
 		}
 	}
 	return brickstatus, nil
