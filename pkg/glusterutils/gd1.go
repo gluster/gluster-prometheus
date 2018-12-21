@@ -99,9 +99,18 @@ type cumulativeStats struct {
 	FopStats   []gd1FopStat `xml:"fopStats>fop"`
 }
 
+type intervalStats struct {
+	BlkStats   []blockStat  `xml:"blokcStats>block"`
+	Duration   uint64       `xml:"duration"`
+	TotalRead  uint64       `xml:"totalRead"`
+	TotalWrite uint64       `xml:"totalWrite"`
+	FopStats   []gd1FopStat `xml:"fopStats>fop"`
+}
+
 type brickProfileInfo struct {
-	Name  string          `xml:"brickName"`
-	Stats cumulativeStats `xml:"cumulativeStats"`
+	Name     string          `xml:"brickName"`
+	Stats    cumulativeStats `xml:"cumulativeStats"`
+	IntStats intervalStats   `xml:"intervalStats"`
 }
 
 type volumeProfile struct {

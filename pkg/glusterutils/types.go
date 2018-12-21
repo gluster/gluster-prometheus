@@ -155,11 +155,15 @@ type FopStat struct {
 
 // ProfileInfo represents volume profile info brickwise
 type ProfileInfo struct {
-	BrickName   string
-	Duration    uint64
-	TotalReads  uint64
-	TotalWrites uint64
-	FopStats    []FopStat
+	BrickName      string
+	Duration       uint64
+	TotalReads     uint64
+	TotalWrites    uint64
+	FopStats       []FopStat
+	DurationInt    uint64
+	TotalReadsInt  uint64
+	TotalWritesInt uint64
+	FopStatsInt    []FopStat
 }
 
 // GD1 enables users to interact with gd1 version

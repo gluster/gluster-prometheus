@@ -67,6 +67,30 @@ var (
 		Labels:    volumeProfileInfoLabels,
 	})
 
+	glusterVolumeProfileTotalReadsInt = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_profile_total_reads_interval",
+		Help:      "Total no of reads for interval stats",
+		LongHelp:  "",
+		Labels:    volumeProfileInfoLabels,
+	})
+
+	glusterVolumeProfileTotalWritesInt = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_profile_total_writes_interval",
+		Help:      "Total no of writes for interval stats",
+		LongHelp:  "",
+		Labels:    volumeProfileInfoLabels,
+	})
+
+	glusterVolumeProfileDurationInt = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_profile_duration_secs_interval",
+		Help:      "Duration for interval stats",
+		LongHelp:  "",
+		Labels:    volumeProfileInfoLabels,
+	})
+
 	volumeProfileFopInfoLabels = []MetricLabel{
 		{
 			Name: "volume",
@@ -89,7 +113,7 @@ var (
 	glusterVolumeProfileFopHits = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_hits",
-		Help:      "Duration",
+		Help:      "Cumulative FOP hits",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
 	})
@@ -97,7 +121,7 @@ var (
 	glusterVolumeProfileFopAvgLatency = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_avg_latency",
-		Help:      "Duration",
+		Help:      "Cumulative FOP avergae latency",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
 	})
@@ -105,7 +129,7 @@ var (
 	glusterVolumeProfileFopMinLatency = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_min_latency",
-		Help:      "Duration",
+		Help:      "Cumulative FOP min latency",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
 	})
@@ -113,7 +137,39 @@ var (
 	glusterVolumeProfileFopMaxLatency = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_max_latency",
-		Help:      "Duration",
+		Help:      "Cumulative FOP max latency",
+		LongHelp:  "",
+		Labels:    volumeProfileFopInfoLabels,
+	})
+
+	glusterVolumeProfileFopHitsInt = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_profile_fop_hits_interval",
+		Help:      "Interval based FOP hits",
+		LongHelp:  "",
+		Labels:    volumeProfileFopInfoLabels,
+	})
+
+	glusterVolumeProfileFopAvgLatencyInt = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_profile_fop_avg_latency_interval",
+		Help:      "Interval based FOP average latency",
+		LongHelp:  "",
+		Labels:    volumeProfileFopInfoLabels,
+	})
+
+	glusterVolumeProfileFopMinLatencyInt = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_profile_fop_min_latency_interval",
+		Help:      "Interval based FOP min latency",
+		LongHelp:  "",
+		Labels:    volumeProfileFopInfoLabels,
+	})
+
+	glusterVolumeProfileFopMaxLatencyInt = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_profile_fop_max_latency_interval",
+		Help:      "Interval based FOP max latency",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
 	})
@@ -234,6 +290,9 @@ func profileInfo() error {
 			glusterVolumeProfileTotalReads.With(labels).Set(float64(entry.TotalReads))
 			glusterVolumeProfileTotalWrites.With(labels).Set(float64(entry.TotalWrites))
 			glusterVolumeProfileDuration.With(labels).Set(float64(entry.Duration))
+			glusterVolumeProfileTotalReadsInt.With(labels).Set(float64(entry.TotalReadsInt))
+			glusterVolumeProfileTotalWritesInt.With(labels).Set(float64(entry.TotalWritesInt))
+			glusterVolumeProfileDurationInt.With(labels).Set(float64(entry.DurationInt))
 			brickhost := getBrickHost(volume, entry.BrickName)
 			for _, fopInfo := range entry.FopStats {
 				fopLbls := getVolumeProfileFopInfoLabels(name, entry.BrickName, brickhost, fopInfo.Name)
@@ -241,6 +300,13 @@ func profileInfo() error {
 				glusterVolumeProfileFopAvgLatency.With(fopLbls).Set(fopInfo.AvgLatency)
 				glusterVolumeProfileFopMinLatency.With(fopLbls).Set(fopInfo.MinLatency)
 				glusterVolumeProfileFopMaxLatency.With(fopLbls).Set(fopInfo.MaxLatency)
+			}
+			for _, fopInfo := range entry.FopStatsInt {
+				fopLbls := getVolumeProfileFopInfoLabels(name, entry.BrickName, brickhost, fopInfo.Name)
+				glusterVolumeProfileFopHitsInt.With(fopLbls).Set(float64(fopInfo.Hits))
+				glusterVolumeProfileFopAvgLatencyInt.With(fopLbls).Set(fopInfo.AvgLatency)
+				glusterVolumeProfileFopMinLatencyInt.With(fopLbls).Set(fopInfo.MinLatency)
+				glusterVolumeProfileFopMaxLatencyInt.With(fopLbls).Set(fopInfo.MaxLatency)
 			}
 		}
 	}

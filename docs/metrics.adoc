@@ -450,6 +450,30 @@ Thin pool metadata used Bytes
 
 |===
 
+== gluster_brick_up
+
+Brick up (1-up, 0-down)
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|hostname
+|Host name or IP
+
+|brick_path
+|Brick Path
+
+|peer_id
+|Peer ID
+
+|pid
+|Process ID of brick
+
+|===
+
 == gluster_pv_count
 
 No: of Physical Volumes
@@ -684,9 +708,54 @@ Duration
 
 |===
 
+== gluster_volume_profile_total_reads_interval
+
+Total no of reads for interval stats
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|===
+
+== gluster_volume_profile_total_writes_interval
+
+Total no of writes for interval stats
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|===
+
+== gluster_volume_profile_duration_secs_interval
+
+Duration for interval stats
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|===
+
 == gluster_volume_profile_fop_hits
 
-Duration
+Cumulative FOP hits
 
 |===
 |Label|Description
@@ -707,7 +776,7 @@ Duration
 
 == gluster_volume_profile_fop_avg_latency
 
-Duration
+Cumulative FOP avergae latency
 
 |===
 |Label|Description
@@ -728,7 +797,7 @@ Duration
 
 == gluster_volume_profile_fop_min_latency
 
-Duration
+Cumulative FOP min latency
 
 |===
 |Label|Description
@@ -749,7 +818,91 @@ Duration
 
 == gluster_volume_profile_fop_max_latency
 
-Duration
+Cumulative FOP max latency
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
+== gluster_volume_profile_fop_hits_interval
+
+Interval based FOP hits
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
+== gluster_volume_profile_fop_avg_latency_interval
+
+Interval based FOP average latency
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
+== gluster_volume_profile_fop_min_latency_interval
+
+Interval based FOP min latency
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
+== gluster_volume_profile_fop_max_latency_interval
+
+Interval based FOP max latency
 
 |===
 |Label|Description
@@ -807,6 +960,18 @@ Total count of snapshots bricks for volume
 == gluster_volume_snapshot_brick_count_active
 
 Total active count of snapshots bricks for volume
+
+|===
+|Label|Description
+
+|volume
+|Volume Name
+
+|===
+
+== gluster_volume_up
+
+Volume is started or not (1-started, 0-not started)
 
 |===
 |Label|Description
