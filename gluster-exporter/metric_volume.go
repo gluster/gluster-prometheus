@@ -11,6 +11,7 @@ import (
 
 var (
 	volumeHealLabels = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "volume",
 			Help: "Volume Name",
@@ -44,6 +45,7 @@ var (
 	})
 
 	volumeProfileInfoLabels = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "volume",
 			Help: "Volume name",
@@ -105,6 +107,7 @@ var (
 	}, &volumeProfileGaugeVecs)
 
 	volumeProfileFopInfoLabels = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "volume",
 			Help: "Volume name",
@@ -297,6 +300,7 @@ func newEntryOpType() opType {
 
 func getVolumeHealLabels(volname string, host string, brick string) prometheus.Labels {
 	return prometheus.Labels{
+		"cluster_id": clusterID,
 		"volume":     volname,
 		"brick_path": brick,
 		"host":       host,
@@ -363,17 +367,19 @@ func healCounts(gluster glusterutils.GInterface) error {
 
 func getVolumeProfileInfoLabels(volname string, brick string) prometheus.Labels {
 	return prometheus.Labels{
-		"volume": volname,
-		"brick":  brick,
+		"cluster_id": clusterID,
+		"volume":     volname,
+		"brick":      brick,
 	}
 }
 
 func getVolumeProfileFopInfoLabels(volname string, brick string, host string, fop string) prometheus.Labels {
 	return prometheus.Labels{
-		"volume": volname,
-		"brick":  brick,
-		"host":   host,
-		"fop":    fop,
+		"cluster_id": clusterID,
+		"volume":     volname,
+		"brick":      brick,
+		"host":       host,
+		"fop":        fop,
 	}
 }
 

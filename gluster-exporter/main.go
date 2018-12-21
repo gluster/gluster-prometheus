@@ -32,6 +32,11 @@ var (
 	config                        = flag.String("config", defaultConfFile, "Config file path")
 	defaultInterval time.Duration = 5
 	glusterConfig   glusterutils.Config
+	clusterIDLabel  = MetricLabel{
+		Name: "cluster_id",
+		Help: "Cluster ID",
+	}
+	clusterID string
 )
 
 type glusterMetric struct {
@@ -123,6 +128,7 @@ func main() {
 			if !collectorConf.Disabled {
 				go func(m glusterMetric, gi glusterutils.GInterface) {
 					for {
+						clusterID = glusterutils.GetClusterID()
 						err := m.fn(gi)
 						interval := defaultInterval
 						if collectorConf.SyncInterval > 0 {

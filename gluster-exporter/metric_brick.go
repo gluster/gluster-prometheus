@@ -18,6 +18,7 @@ import (
 
 var (
 	brickLabels = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "host",
 			Help: "Host name or IP",
@@ -41,6 +42,7 @@ var (
 	}
 
 	subvolLabels = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "volume",
 			Help: "Volume Name",
@@ -52,6 +54,7 @@ var (
 	}
 
 	lvmLbls = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "host",
 			Help: "Host name or IP",
@@ -87,6 +90,7 @@ var (
 	}
 
 	brickStatusLbls = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "volume",
 			Help: "Volume Name",
@@ -110,6 +114,7 @@ var (
 	}
 
 	thinLvmLbls = []MetricLabel{
+		clusterIDLabel,
 		{
 			Name: "host",
 			Help: "Host name or IP",
@@ -295,6 +300,7 @@ var (
 
 func getGlusterBrickLabels(brick glusterutils.Brick, subvol string) prometheus.Labels {
 	return prometheus.Labels{
+		"cluster_id": clusterID,
 		"host":       brick.Host,
 		"id":         brick.ID,
 		"brick_path": brick.Path,
@@ -305,8 +311,9 @@ func getGlusterBrickLabels(brick glusterutils.Brick, subvol string) prometheus.L
 
 func getGlusterSubvolLabels(volname string, subvol string) prometheus.Labels {
 	return prometheus.Labels{
-		"volume":    volname,
-		"subvolume": subvol,
+		"cluster_id": clusterID,
+		"volume":     volname,
+		"subvolume":  subvol,
 	}
 }
 
@@ -515,6 +522,7 @@ func parseProcMounts() ([]ProcMounts, error) {
 
 func getGlusterLVMLabels(brick glusterutils.Brick, subvol string, stat LVMStat) prometheus.Labels {
 	return prometheus.Labels{
+		"cluster_id": clusterID,
 		"host":       brick.Host,
 		"id":         brick.ID,
 		"brick_path": brick.Path,
@@ -528,6 +536,7 @@ func getGlusterLVMLabels(brick glusterutils.Brick, subvol string, stat LVMStat) 
 
 func getGlusterThinPoolLabels(brick glusterutils.Brick, vol string, subvol string, thinStat ThinPoolStat) prometheus.Labels {
 	return prometheus.Labels{
+		"cluster_id":    clusterID,
 		"host":          brick.Host,
 		"thinpool_name": thinStat.ThinPoolName,
 		"vg_name":       thinStat.ThinPoolVGName,
@@ -694,6 +703,7 @@ func brickUtilization(gluster glusterutils.GInterface) error {
 
 func getBrickStatusLabels(vol string, host string, brickPath string, peerID string, pid int) prometheus.Labels {
 	return prometheus.Labels{
+		"cluster_id": clusterID,
 		"volume":     vol,
 		"hostname":   host,
 		"brick_path": brickPath,
