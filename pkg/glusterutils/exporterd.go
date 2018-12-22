@@ -15,6 +15,12 @@ var (
 	peerIDPattern = regexp.MustCompile("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
 )
 
+// Config returns the configuration associated with it
+// and makes it compatible with 'GDConfigInterface'
+func (g *GD1) Config() *Config {
+	return g.config
+}
+
 // IsLeader returns true or false based on whether the node is the leader of the cluster or not
 func (g *GD1) IsLeader() (bool, error) {
 	setDefaultConfig(g.config)
@@ -40,6 +46,12 @@ func (g *GD1) IsLeader() (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+// Config returns the configuration associated with it
+// and makes it compatible with 'GDConfigInterface'
+func (g *GD2) Config() *Config {
+	return g.config
 }
 
 // IsLeader returns true or false based on whether the node is the leader of the cluster or not
