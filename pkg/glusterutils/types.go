@@ -33,6 +33,15 @@ const (
 	VolumeStateStarted = "Started"
 	// VolumeStateStopped represents Volume stopped state
 	VolumeStateStopped = "Stopped"
+
+	// CountFOPHitsGD1 represents volume option name for fop hits counts
+	CountFOPHitsGD1 = "diagnostics.count-fop-hits"
+	// LatencyMeasurementGD1 represents volume option for latency measurement
+	LatencyMeasurementGD1 = "diagnostics.latency-measurement"
+	// CountFOPHitsGD2 represents volume option name for fop hits counts
+	CountFOPHitsGD2 = "debug/io-stats.count-fop-hits"
+	// LatencyMeasurementGD2 represents volume option for latency measurement
+	LatencyMeasurementGD2 = "debug/io-stats.latency-measurement"
 )
 
 // Config represents Glusterd1/Glusterd2 configurations
@@ -132,6 +141,7 @@ type GInterface interface {
 	Snapshots() ([]Snapshot, error)
 	VolumeProfileInfo(vol string) ([]ProfileInfo, error)
 	VolumeBrickStatus(vol string) ([]BrickStatus, error)
+	EnableVolumeProfiling(volinfo Volume) error
 }
 
 // GDConfigInterface returns the configuration of the GD
@@ -150,11 +160,15 @@ type FopStat struct {
 
 // ProfileInfo represents volume profile info brickwise
 type ProfileInfo struct {
-	BrickName   string
-	Duration    uint64
-	TotalReads  uint64
-	TotalWrites uint64
-	FopStats    []FopStat
+	BrickName      string
+	Duration       uint64
+	TotalReads     uint64
+	TotalWrites    uint64
+	FopStats       []FopStat
+	DurationInt    uint64
+	TotalReadsInt  uint64
+	TotalWritesInt uint64
+	FopStatsInt    []FopStat
 }
 
 // GD1 enables users to interact with gd1 version

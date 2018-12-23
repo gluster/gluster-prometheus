@@ -61,6 +61,35 @@ func (g *GD2) VolumeProfileInfo(vol string) ([]ProfileInfo, error) {
 			}
 			obj.FopStats = fopStats
 		}
+		if info.IntervalStats.StatsInfo != nil {
+			fopStats := make([]FopStat, len(info.IntervalStats.StatsInfo))
+			for fopName, stat := range info.IntervalStats.StatsInfo {
+				var hits int
+				var avgLatency, minLatency, maxLatency float64
+				if hits, err = strconv.Atoi(stat["hits"]); err != nil {
+					hits = 0
+				}
+				if avgLatency, err = strconv.ParseFloat(stat["avglatency"], 10); err != nil {
+					avgLatency = 0.0
+				}
+				if minLatency, err = strconv.ParseFloat(stat["minlatency"], 10); err != nil {
+					minLatency = 0.0
+				}
+				if maxLatency, err = strconv.ParseFloat(stat["maxlatency"], 10); err != nil {
+					maxLatency = 0.0
+				}
+
+				fopStat := FopStat{
+					Name:       fopName,
+					Hits:       hits,
+					AvgLatency: avgLatency,
+					MinLatency: minLatency,
+					MaxLatency: maxLatency,
+				}
+				fopStats = append(fopStats, fopStat)
+			}
+			obj.FopStatsInt = fopStats
+		}
 		profileinfo[idx] = obj
 	}
 
