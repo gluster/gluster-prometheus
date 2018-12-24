@@ -15,6 +15,16 @@ var (
 	peerIDPattern = regexp.MustCompile("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
 )
 
+// GDConfigFromInterface checks the given interface is compatible with 'GDConfigInterface'
+// and returns a pointer to glusterutils.Config
+func GDConfigFromInterface(iFace interface{}) (*Config, error) {
+	if gdConf, ok := iFace.(GDConfigInterface); ok {
+		return gdConf.Config(), nil
+	}
+	return nil, errors.New("Incompatible interface type, " +
+		"cannot be converted to 'GDConfigInterface'")
+}
+
 // Config returns the configuration associated with it
 // and makes it compatible with 'GDConfigInterface'
 func (g *GD1) Config() *Config {
