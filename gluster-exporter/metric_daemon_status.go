@@ -26,6 +26,7 @@ func gdStatus(conf *glusterutils.Config) error {
 			return errors.New("[" + GDaemonLabel + "] Empty GD2 Endpoint")
 		}
 		pingURL := strings.Join([]string{conf.Glusterd2Endpoint, "ping"}, "/")
+		// #nosec
 		resp, err := http.Get(pingURL)
 		if err != nil {
 			return errors.New("[" + GDaemonLabel + "]" + "Endpoint Get Error: " + err.Error())
