@@ -135,7 +135,7 @@ type gd1Process struct {
 	Path          string           `xml:"path"`
 	PeerID        string           `xml:"peerid"`
 	Status        int              `xml:"status"`
-	Port          int              `xml:"port"`
+	Port          string           `xml:"port"` // can contain 'N/A' entries
 	ProtocolPorts gd1ProtocolPorts `xml:"ports"`
 	PID           int              `xml:"pid"`
 }
