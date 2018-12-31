@@ -30,11 +30,12 @@ type myVGDetails struct {
 	LVCount    string `json:"lv_count"`
 	PVCount    string `json:"pv_count"`
 	PoolLVUUID string `json:"pool_lv_uuid"`
+	LVAttr     string `json:"lv_attr"`
 }
 
 // NewPeerMetrics : provides a way to get the consolidated metrics (such PV, LV, VG counts)
 func NewPeerMetrics() (*PeerMetrics, error) {
-	cmdStr := "lvm vgs --noheading --reportformat=json -o lv_uuid,lv_name,pool_lv,vg_name,lv_path,lv_count,pv_count,pool_lv_uuid"
+	cmdStr := "lvm vgs --noheading --reportformat=json -o lv_uuid,lv_name,pool_lv,vg_name,lv_path,lv_count,pv_count,pool_lv_uuid,lv_attr"
 	outBs, err := glusterutils.ExecuteCmd(cmdStr)
 	if err != nil {
 		return nil, err
@@ -67,8 +68,6 @@ func NewPeerMetrics() (*PeerMetrics, error) {
 		ThinPoolCountMap: make(map[string]int),
 	}
 	var vgMap = make(map[string]myVGDetails)
-	var thinPoolMap = make(map[string]myVGDetails)
-	delim := "<<>>"
 	for _, vg := range vgs {
 		// collect the unique vgs into the map
 		if _, ok := vgMap[vg.VGName]; !ok {
@@ -86,17 +85,14 @@ func NewPeerMetrics() (*PeerMetrics, error) {
 				pMetrics.LVCountMap[vg.VGName] = count
 			}
 		}
-		// logic to collect thinpool count in each Volume Group
-		if vg.PoolLVUUID != "" {
-			// in a Volume Group (VG), pool ID should be unique,
-			// that means, combination of 'VGName + poolID' should be unique
-			idsCombined := vg.VGName + delim + vg.PoolLVUUID
-			if _, ok := thinPoolMap[idsCombined]; !ok {
-				thinPoolMap[idsCombined] = vg
-				// whenever a new unique 'VG+poolID' comes
-				// increase the thin pool count for that particular VG
-				pMetrics.ThinPoolCountMap[vg.VGName]++
-			}
+		// before adding into 'thinPoolMap', check the attribute
+		// if attribute string starts with 't', consider it as thinpool
+		//
+		// converting to a rune array because of 'utf-8' enconded
+		// string handling in 'Go'
+		if len(vg.LVAttr) > 0 && []rune(vg.LVAttr)[0] == 't' {
+			// increment the thin pool count for that particular VG
+			pMetrics.ThinPoolCountMap[vg.VGName]++
 		}
 	}
 	return pMetrics, nil
