@@ -2,12 +2,11 @@ package main
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
-
-	"strings"
 )
 
 var (
@@ -195,21 +194,21 @@ var (
 	})
 )
 
-// OpType represents aggregated operations like
+// opType represents aggregated operations like
 // READ_WRITE_OPS, INODE_OPS, ENTRY_OPS, LOCK_OPS etc...
-type OpType struct {
+type opType struct {
 	opName       string
 	opsSupported map[string]struct{}
 }
 
-// String method returns the name of the common 'OpType'
+// String method returns the name of the common 'opType'
 // makes it compatible with 'Stringer' interface
-func (ot OpType) String() string {
+func (ot opType) String() string {
 	return ot.opName
 }
 
-// ListSupportedOps method returns a list of supported operations
-func (ot OpType) ListSupportedOps() []string {
+// listSupportedOps method returns a list of supported operations
+func (ot opType) listSupportedOps() []string {
 	var supportedOps = make([]string, 0, len(ot.opsSupported))
 	for opLabel := range ot.opsSupported {
 		supportedOps = append(supportedOps, opLabel)
@@ -217,38 +216,38 @@ func (ot OpType) ListSupportedOps() []string {
 	return supportedOps
 }
 
-// OpSupported method checks whether the given operation is supported in this OpType
-func (ot OpType) OpSupported(opLabel string) bool {
+// opSupported method checks whether the given operation is supported in this opType
+func (ot opType) opSupported(opLabel string) bool {
 	if _, ok := ot.opsSupported[opLabel]; ok {
 		return true
 	}
 	return false
 }
 
-// AppendOp method allow others to extend the existing OpTypes
-func (ot OpType) AppendOp(opLabel string) {
+// appendOp method allow others to extend the existing OpTypes
+func (ot opType) appendOp(opLabel string) {
 	if ot.opsSupported == nil {
 		ot.opsSupported = make(map[string]struct{})
 	}
 	ot.opsSupported[opLabel] = struct{}{}
 }
 
-// OpHits calculates total number of 'ot' type operations in a list of 'FopStat's
+// opHits calculates total number of 'ot' type operations in a list of 'FopStat's
 // and returns the total number of hits
-func (ot OpType) OpHits(fopStats []glusterutils.FopStat) float64 {
+func (ot opType) opHits(fopStats []glusterutils.FopStat) float64 {
 	var totalOpHits float64 // default ZERO value is assigned
 	for _, eachFopS := range fopStats {
-		if ot.OpSupported(eachFopS.Name) {
+		if ot.opSupported(eachFopS.Name) {
 			totalOpHits += float64(eachFopS.Hits)
 		}
 	}
 	return totalOpHits
 }
 
-// NewOperationType creates a 'OpType' object
-func NewOperationType(commonOpName string, supportedOpLabels []string) (OpType, error) {
+// newOperationType creates a 'opType' object
+func newOperationType(commonOpName string, supportedOpLabels []string) (opType, error) {
 	commonOpName = strings.TrimSpace(commonOpName)
-	var opT = OpType{opName: commonOpName}
+	var opT = opType{opName: commonOpName}
 	if len(supportedOpLabels) == 0 {
 		return opT, errors.New("Supported operation labels should not be empty")
 	} else if commonOpName == "" {
@@ -262,42 +261,42 @@ func NewOperationType(commonOpName string, supportedOpLabels []string) (OpType, 
 	return opT, nil
 }
 
-// NewReadWriteOpType creates a 'READ_WRITE_OPS' type,
+// newReadWriteOpType creates a 'READ_WRITE_OPS' type,
 // which aggregates all the read/write operations
-func NewReadWriteOpType() OpType {
+func newReadWriteOpType() opType {
 	var opsSupported = []string{"CREATE", "DISCARD", "FALLOCATE", "FLUSH", "FSYNC",
 		"FSYNCDIR", "RCHECKSUM", "READ", "READDIR", "READDIRP", "READY",
 		"WRITE", "ZEROFILL",
 	}
-	var rwOT, _ = NewOperationType("READ_WRITE_OPS", opsSupported)
+	var rwOT, _ = newOperationType("READ_WRITE_OPS", opsSupported)
 	return rwOT
 }
 
-// NewLockOpType creates a 'LOCK_OPS' type,
+// newLockOpType creates a 'LOCK_OPS' type,
 // which aggregates all the lock operations
-func NewLockOpType() OpType {
+func newLockOpType() opType {
 	var opsSupported = []string{"ENTRYLK", "FENTRYLK", "FINODELK", "INODELK", "LK"}
-	var lockOT, _ = NewOperationType("LOCK_OPS", opsSupported)
+	var lockOT, _ = newOperationType("LOCK_OPS", opsSupported)
 	return lockOT
 }
 
-// NewINodeOpType creates a 'INODE_OPS' type,
+// newINodeOpType creates a 'INODE_OPS' type,
 // which aggregates all the iNode associated operations
-func NewINodeOpType() OpType {
+func newINodeOpType() opType {
 	var opsSupported = []string{"ACCESS", "FGETXATTR", "FREMOVEXATTR", "FSETATTR",
 		"FSETXATTR", "FSTAT", "FTRUNCATE", "FXATTROP", "GETXATTR", "LOOKUP", "OPEN",
 		"OPENDIR", "READLINK", "REMOVEXATTR", "SEEK", "SETATTR", "SETXATTR", "STAT",
 		"STATFS", "TRUNCATE", "XATTROP"}
-	var iNodeOT, _ = NewOperationType("INODE_OPS", opsSupported)
+	var iNodeOT, _ = newOperationType("INODE_OPS", opsSupported)
 	return iNodeOT
 }
 
-// NewEntryOpType creates a 'ENTRY_OPS' type,
+// newEntryOpType creates a 'ENTRY_OPS' type,
 // which aggregates all the file entry related operations
-func NewEntryOpType() OpType {
+func newEntryOpType() opType {
 	var opsSupported = []string{"LINK", "MKDIR", "MKNOD", "RENAME",
 		"RMDIR", "SYMLINK", "UNLINK"}
-	var entryOT, _ = NewOperationType("ENTRY_OPS", opsSupported)
+	var entryOT, _ = newOperationType("ENTRY_OPS", opsSupported)
 	return entryOT
 }
 
@@ -394,8 +393,8 @@ func profileInfo() error {
 	var (
 		// supported aggregated operations are,
 		// READ_WRITE_OPS, LOCK_OPS, ENTRY_OPS, INODE_OPS
-		aggregatedOps = []OpType{NewReadWriteOpType(), NewLockOpType(),
-			NewEntryOpType(), NewINodeOpType()}
+		aggregatedOps = []opType{newReadWriteOpType(), newLockOpType(),
+			newEntryOpType(), newINodeOpType()}
 	)
 	for _, volume := range volumes {
 		err := gluster.EnableVolumeProfiling(volume)
@@ -429,8 +428,8 @@ func profileInfo() error {
 			for _, eachOp := range aggregatedOps {
 				fopLbls := getVolumeProfileFopInfoLabels(name, entry.BrickName,
 					brickhost, eachOp.String())
-				glusterVolumeProfileFopTotalHitsAggregatedOps.With(fopLbls).Set(eachOp.OpHits(entry.FopStats))
-				glusterVolumeProfileFopTotalHitsAggregatedOpsInt.With(fopLbls).Set(eachOp.OpHits(entry.FopStatsInt))
+				glusterVolumeProfileFopTotalHitsAggregatedOps.With(fopLbls).Set(eachOp.opHits(entry.FopStats))
+				glusterVolumeProfileFopTotalHitsAggregatedOpsInt.With(fopLbls).Set(eachOp.opHits(entry.FopStatsInt))
 			}
 			for _, fopInfo := range entry.FopStats {
 				fopLbls := getVolumeProfileFopInfoLabels(name, entry.BrickName, brickhost, fopInfo.Name)
