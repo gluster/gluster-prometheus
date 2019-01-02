@@ -119,6 +119,10 @@ var (
 			Help: "Name of the Volume Group",
 		},
 		{
+			Name: "volume",
+			Help: "Volume Name",
+		},
+		{
 			Name: "subvolume",
 			Help: "Name of the Subvolume",
 		},
@@ -513,11 +517,12 @@ func getGlusterLVMLabels(brick glusterutils.Brick, subvol string, stat LVMStat) 
 	}
 }
 
-func getGlusterThinPoolLabels(brick glusterutils.Brick, subvol string, thinStat ThinPoolStat) prometheus.Labels {
+func getGlusterThinPoolLabels(brick glusterutils.Brick, vol string, subvol string, thinStat ThinPoolStat) prometheus.Labels {
 	return prometheus.Labels{
 		"host":          brick.Host,
 		"thinpool_name": thinStat.ThinPoolName,
 		"vg_name":       thinStat.ThinPoolVGName,
+		"volume":        vol,
 		"subvolume":     subvol,
 		"brick_path":    brick.Path,
 	}
@@ -640,7 +645,7 @@ func brickUtilization() error {
 						glusterVGExtentAlloc.With(lvmLbls).Set(stat.VGExtentAlloc)
 					}
 					for _, thinStat := range thinStats {
-						var thinLvmLbls = getGlusterThinPoolLabels(brick, subvol.Name, thinStat)
+						var thinLvmLbls = getGlusterThinPoolLabels(brick, volume.Name, subvol.Name, thinStat)
 						glusterThinPoolDataTotal.With(thinLvmLbls).Set(thinStat.ThinPoolDataTotal * 1024 * 1024)
 						glusterThinPoolDataUsed.With(thinLvmLbls).Set(thinStat.ThinPoolDataUsed * 1024 * 1024)
 						glusterThinPoolMetadataTotal.With(thinLvmLbls).Set(thinStat.ThinPoolMetadataTotal * 1024 * 1024)
