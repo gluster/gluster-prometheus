@@ -33,7 +33,9 @@ func (g *GD2) VolumeProfileInfo(vol string) ([]ProfileInfo, error) {
 			TotalWrites: uint64(writes),
 		}
 		if info.CumulativeStats.StatsInfo != nil {
-			fopStats := make([]FopStat, len(info.CumulativeStats.StatsInfo))
+			// length field, in 'make' method, is initialized to ZERO
+			// so that the append operation adds data from the start
+			fopStats := make([]FopStat, 0, len(info.CumulativeStats.StatsInfo))
 			for fopName, stat := range info.CumulativeStats.StatsInfo {
 				var hits int
 				var avgLatency, minLatency, maxLatency float64
@@ -62,7 +64,9 @@ func (g *GD2) VolumeProfileInfo(vol string) ([]ProfileInfo, error) {
 			obj.FopStats = fopStats
 		}
 		if info.IntervalStats.StatsInfo != nil {
-			fopStats := make([]FopStat, len(info.IntervalStats.StatsInfo))
+			// length field, in 'make' method, is initialized to ZERO
+			// so that the append operation adds data from the start
+			fopStats := make([]FopStat, 0, len(info.IntervalStats.StatsInfo))
 			for fopName, stat := range info.IntervalStats.StatsInfo {
 				var hits int
 				var avgLatency, minLatency, maxLatency float64
