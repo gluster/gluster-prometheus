@@ -137,6 +137,7 @@ type GInterface interface {
 	LocalPeerID() (string, error)
 	IsLeader() (bool, error)
 	HealInfo(vol string) ([]HealEntry, error)
+	SplitBrainHealInfo(vol string) ([]HealEntry, error)
 	VolumeInfo() ([]Volume, error)
 	Snapshots() ([]Snapshot, error)
 	VolumeProfileInfo(vol string) ([]ProfileInfo, error)

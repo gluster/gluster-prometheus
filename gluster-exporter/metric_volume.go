@@ -33,6 +33,14 @@ var (
 		Labels:    volumeHealLabels,
 	})
 
+	glusterVolumeSplitBrainHealCount = newPrometheusGaugeVec(Metric{
+		Namespace: "gluster",
+		Name:      "volume_split_brain_heal_count",
+		Help:      "self heal count for volume in split brain",
+		LongHelp:  "",
+		Labels:    volumeHealLabels,
+	})
+
 	volumeProfileInfoLabels = []MetricLabel{
 		{
 			Name: "volume",
@@ -309,19 +317,36 @@ func healCounts(gluster glusterutils.GInterface) error {
 		return err
 	}
 
-	for _, volume := range volumes {
-		name := volume.Name
-		heals, err := gluster.HealInfo(name)
+	// locHealInfoFunc is a function literal, which takes
+	// arg1: f1 a function which takes a string and returns ([]HealEntry, error)
+	// (can be 'HealInfo' or 'SplitBrainHealInfo')
+	// arg2: gVect a pointer to GaugeVec
+	// (can be either 'glusterVolumeHealCount' or 'glusterVolumeSplitBrainHealCount')
+	// arg3: volName a string representing the volume name
+	// arg4: errStr the error string in case of error
+	locHealInfoFunc := func(f1 func(string) ([]glusterutils.HealEntry, error), gVect *prometheus.GaugeVec, volName string, errStr string) {
+		// Get the heal count
+		heals, err := f1(volName)
 		if err != nil {
 			log.WithError(err).WithFields(log.Fields{
-				"volume": name,
-			}).Error("Error getting heal info")
-
-			continue
+				"volume": volName,
+			}).Error(errStr)
+			return
 		}
 		for _, healinfo := range heals {
-			labels := getVolumeHealLabels(name, healinfo.Hostname, healinfo.Brick)
-			glusterVolumeHealCount.With(labels).Set(float64(healinfo.NumHealEntries))
+			labels := getVolumeHealLabels(volName, healinfo.Hostname, healinfo.Brick)
+			gVect.With(labels).Set(float64(healinfo.NumHealEntries))
+		}
+	}
+
+	for _, volume := range volumes {
+		name := volume.Name
+		if strings.Contains(volume.Type, "Replicate") {
+			locHealInfoFunc(gluster.HealInfo, glusterVolumeHealCount, name, "Error getting heal info")
+			locHealInfoFunc(gluster.SplitBrainHealInfo, glusterVolumeSplitBrainHealCount, name, "Error getting split brain heal info")
+		}
+		if strings.Contains(volume.Type, "Disperse") {
+			locHealInfoFunc(gluster.HealInfo, glusterVolumeHealCount, name, "Error getting heal info")
 		}
 	}
 	return nil

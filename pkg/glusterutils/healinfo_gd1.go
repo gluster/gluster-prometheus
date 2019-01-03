@@ -7,9 +7,7 @@ import (
 	"strings"
 )
 
-// HealInfo gets gluster vol heal info (GD1)
-func (g GD1) HealInfo(vol string) ([]HealEntry, error) {
-	cmd := fmt.Sprintf("%s vol heal %s info --xml", g.config.GlusterCmd, vol)
+func getHealDetails(cmd string) ([]HealEntry, error) {
 	out, err := ExecuteCmd(cmd)
 	if err != nil {
 		return nil, err
@@ -36,4 +34,27 @@ func (g GD1) HealInfo(vol string) ([]HealEntry, error) {
 	}
 
 	return heals, nil
+}
+
+// HealInfo gets gluster vol heal info (GD1)
+func (g GD1) HealInfo(vol string) ([]HealEntry, error) {
+	// Get the overall heal count
+	cmd := fmt.Sprintf("%s vol heal %s info --xml", g.config.GlusterCmd, vol)
+	heals, err := getHealDetails(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return heals, nil
+}
+
+// SplitBrainHealInfo gets gluster vol heal info (GD1)
+func (g GD1) SplitBrainHealInfo(vol string) ([]HealEntry, error) {
+	cmd := fmt.Sprintf("%s vol heal %s info split-brain --xml", g.config.GlusterCmd, vol)
+	splitBrainHeals, err := getHealDetails(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return splitBrainHeals, nil
 }
