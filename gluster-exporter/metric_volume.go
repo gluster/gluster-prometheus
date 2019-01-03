@@ -207,29 +207,12 @@ func (ot opType) String() string {
 	return ot.opName
 }
 
-// listSupportedOps method returns a list of supported operations
-func (ot opType) listSupportedOps() []string {
-	var supportedOps = make([]string, 0, len(ot.opsSupported))
-	for opLabel := range ot.opsSupported {
-		supportedOps = append(supportedOps, opLabel)
-	}
-	return supportedOps
-}
-
 // opSupported method checks whether the given operation is supported in this opType
 func (ot opType) opSupported(opLabel string) bool {
 	if _, ok := ot.opsSupported[opLabel]; ok {
 		return true
 	}
 	return false
-}
-
-// appendOp method allow others to extend the existing OpTypes
-func (ot opType) appendOp(opLabel string) {
-	if ot.opsSupported == nil {
-		ot.opsSupported = make(map[string]struct{})
-	}
-	ot.opsSupported[opLabel] = struct{}{}
 }
 
 // opHits calculates total number of 'ot' type operations in a list of 'FopStat's
