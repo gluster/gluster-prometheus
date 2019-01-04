@@ -202,6 +202,9 @@ Bricks LV size Bytes
 |lv_path
 |LV Path
 
+|lv_uuid
+|UUID of LV
+
 |===
 
 == gluster_brick_lv_percent
@@ -231,6 +234,9 @@ Bricks LV usage percent
 
 |lv_path
 |LV Path
+
+|lv_uuid
+|UUID of LV
 
 |===
 
@@ -262,6 +268,9 @@ Bricks LV metadata size Bytes
 |lv_path
 |LV Path
 
+|lv_uuid
+|UUID of LV
+
 |===
 
 == gluster_brick_lv_metadata_percent
@@ -291,6 +300,9 @@ Bricks LV metadata usage percent
 
 |lv_path
 |LV Path
+
+|lv_uuid
+|UUID of LV
 
 |===
 
@@ -322,6 +334,9 @@ VG extent total count
 |lv_path
 |LV Path
 
+|lv_uuid
+|UUID of LV
+
 |===
 
 == gluster_vg_extent_alloc_count
@@ -352,6 +367,9 @@ VG extent allocated count
 |lv_path
 |LV Path
 
+|lv_uuid
+|UUID of LV
+
 |===
 
 == gluster_thinpool_data_total_bytes
@@ -369,6 +387,9 @@ Thin pool size Bytes
 
 |vg_name
 |Name of the Volume Group
+
+|volume
+|Volume Name
 
 |subvolume
 |Name of the Subvolume
@@ -394,6 +415,9 @@ Thin pool data used Bytes
 |vg_name
 |Name of the Volume Group
 
+|volume
+|Volume Name
+
 |subvolume
 |Name of the Subvolume
 
@@ -418,6 +442,9 @@ Thin pool metadata size Bytes
 |vg_name
 |Name of the Volume Group
 
+|volume
+|Volume Name
+
 |subvolume
 |Name of the Subvolume
 
@@ -441,6 +468,9 @@ Thin pool metadata used Bytes
 
 |vg_name
 |Name of the Volume Group
+
+|volume
+|Volume Name
 
 |subvolume
 |Name of the Subvolume
@@ -903,6 +933,48 @@ Interval based FOP min latency
 == gluster_volume_profile_fop_max_latency_interval
 
 Interval based FOP max latency
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
+== gluster_volume_profile_fop_total_hits_on_aggregated_fops
+
+Cumulative total hits on aggregated FOPs like READ_WRIET_OPS, LOCK_OPS, INODE_OPS etc
+
+|===
+|Label|Description
+
+|volume
+|Volume name
+
+|brick
+|Brick Name
+
+|host
+|Hostname or IP
+
+|fop
+|File Operation name
+
+|===
+
+== gluster_volume_profile_fop_total_hits_on_aggregated_fops_interval
+
+Interval based total hits on aggregated FOPs like READ_WRIET_OPS, LOCK_OPS, INODE_OPS etc
 
 |===
 |Label|Description
