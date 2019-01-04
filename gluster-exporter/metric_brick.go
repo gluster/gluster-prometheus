@@ -553,7 +553,7 @@ func lvmUsage(path string) (stats []LVMStat, thinPoolStats []ThinPoolStat, err e
 				continue
 			}
 			// Check if the logical volume is mounted as a gluster brick
-			if lv.Device == dev && path == mount.Name {
+			if lv.Device == dev && strings.HasPrefix(path, mount.Name) {
 				// Check if the LV is a thinly provisioned volume and if yes then get the thin pool LV name
 				if lv.Attr[0] == 'V' {
 					tpName := lv.PoolLV
