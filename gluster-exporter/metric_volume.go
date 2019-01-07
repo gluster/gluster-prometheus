@@ -321,7 +321,7 @@ func healCounts(gluster glusterutils.GInterface) error {
 	if err != nil {
 		// Unable to find out if the current node is leader
 		// Cannot register volume metrics at this node
-		log.WithError(err).Error("Unable to find if the current node is leader")
+		log.WithError(err).Debug("Unable to find if the current node is leader")
 		return err
 	}
 	if !isLeader {
@@ -345,7 +345,7 @@ func healCounts(gluster glusterutils.GInterface) error {
 		if err != nil {
 			log.WithError(err).WithFields(log.Fields{
 				"volume": volName,
-			}).Error(errStr)
+			}).Debug(errStr)
 			return
 		}
 		for _, healinfo := range heals {
@@ -406,7 +406,7 @@ func profileInfo(gluster glusterutils.GInterface) error {
 	isLeader, err := gluster.IsLeader()
 
 	if err != nil {
-		log.WithError(err).Error("Unable to find if the current node is leader")
+		log.WithError(err).Debug("Unable to find if the current node is leader")
 		return err
 	}
 	if !isLeader {
@@ -436,7 +436,7 @@ func profileInfo(gluster glusterutils.GInterface) error {
 		if err != nil {
 			log.WithError(err).WithFields(log.Fields{
 				"volume": volume.Name,
-			}).Error("Error enabling profiling for volume")
+			}).Debug("Error enabling profiling for volume")
 			continue
 		}
 		if value, exists := volume.Options[volOption]; !exists || value == "off" {
@@ -448,7 +448,7 @@ func profileInfo(gluster glusterutils.GInterface) error {
 		if err != nil {
 			log.WithError(err).WithFields(log.Fields{
 				"volume": name,
-			}).Error("Error getting profile info")
+			}).Debug("Error getting profile info")
 			continue
 		}
 		for _, entry := range profileinfo {

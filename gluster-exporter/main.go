@@ -121,7 +121,7 @@ func main() {
 						if err != nil {
 							log.WithError(err).WithFields(log.Fields{
 								"name": m.name,
-							}).Error("failed to export metric")
+							}).Debug("failed to export metric")
 						}
 						time.Sleep(time.Second * interval)
 					}

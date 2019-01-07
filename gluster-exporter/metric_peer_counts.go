@@ -181,7 +181,7 @@ func peerCounts(gluster glusterutils.GInterface) (err error) {
 		// log the error and then return
 		log.WithError(err).WithFields(log.Fields{
 			"peer": peerID,
-		}).Errorln("[Peer_Metric_Count] Error:", err)
+		}).Debug("[Peer_Metric_Count] Error:", err)
 		return err
 	}
 	genrlLbls := prometheus.Labels{

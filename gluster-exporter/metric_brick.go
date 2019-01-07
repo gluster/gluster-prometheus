@@ -404,12 +404,12 @@ func getLVS() ([]LVMStat, []ThinPoolStat, error) {
 	thinPool := []ThinPoolStat{}
 	var vgExtentFreeTemp float64
 	if err != nil {
-		log.WithError(err).Error("Error getting lvm usage details")
+		log.WithError(err).Debug("Error getting lvm usage details")
 		return lvmDet, thinPool, err
 	}
 	var vgReport VGReport
 	if err1 := json.Unmarshal(out, &vgReport); err1 != nil {
-		log.WithError(err1).Error("Error parsing lvm usage details")
+		log.WithError(err1).Debug("Error parsing lvm usage details")
 		return lvmDet, thinPool, err1
 	}
 
@@ -421,7 +421,7 @@ func getLVS() ([]LVMStat, []ThinPoolStat, error) {
 			obj.DataPercent = 0.0
 		} else {
 			if obj.DataPercent, err = strconv.ParseFloat(vg.DataPercent, 64); err != nil {
-				log.WithError(err).Error("Error parsing DataPercent value of lvm usage")
+				log.WithError(err).Debug("Error parsing DataPercent value of lvm usage")
 				return lvmDet, thinPool, err
 			}
 		}
@@ -431,7 +431,7 @@ func getLVS() ([]LVMStat, []ThinPoolStat, error) {
 			obj.Size = 0.0
 		} else {
 			if obj.Size, err = strconv.ParseFloat(vg.LVSize, 64); err != nil {
-				log.WithError(err).Error("Error parsing LVSize value of lvm usage")
+				log.WithError(err).Debug("Error parsing LVSize value of lvm usage")
 				return lvmDet, thinPool, err
 			}
 		}
@@ -440,7 +440,7 @@ func getLVS() ([]LVMStat, []ThinPoolStat, error) {
 			obj.MetadataSize = 0.0
 		} else {
 			if obj.MetadataSize, err = strconv.ParseFloat(vg.LVMetadataSize, 64); err != nil {
-				log.WithError(err).Error("Error parsing LVMetadataSize value of lvm usage")
+				log.WithError(err).Debug("Error parsing LVMetadataSize value of lvm usage")
 				return lvmDet, thinPool, err
 			}
 		}
@@ -449,7 +449,7 @@ func getLVS() ([]LVMStat, []ThinPoolStat, error) {
 		} else {
 			obj.MetadataPercent, err = strconv.ParseFloat(vg.MetadataPercent, 64)
 			if err != nil {
-				log.WithError(err).Error("Error parsing MetadataPercent value of lvm usage")
+				log.WithError(err).Debug("Error parsing MetadataPercent value of lvm usage")
 				return lvmDet, thinPool, err
 			}
 		}
@@ -458,7 +458,7 @@ func getLVS() ([]LVMStat, []ThinPoolStat, error) {
 		} else {
 			obj.VGExtentTotal, err = strconv.ParseFloat(vg.VGExtentTotal, 64)
 			if err != nil {
-				log.WithError(err).Error("Error parsing VGExtenTotal value of lvm usage")
+				log.WithError(err).Debug("Error parsing VGExtenTotal value of lvm usage")
 				return lvmDet, thinPool, err
 			}
 		}
@@ -467,7 +467,7 @@ func getLVS() ([]LVMStat, []ThinPoolStat, error) {
 		} else {
 			vgExtentFreeTemp, err = strconv.ParseFloat(vg.VGExtentFree, 64)
 			if err != nil {
-				log.WithError(err).Error("Error parsing VGExtentAlloc value of lvm usage")
+				log.WithError(err).Debug("Error parsing VGExtentAlloc value of lvm usage")
 				return lvmDet, thinPool, err
 			}
 		}
@@ -488,7 +488,7 @@ func getLVS() ([]LVMStat, []ThinPoolStat, error) {
 			if err != nil {
 				log.WithError(err).WithFields(log.Fields{
 					"path": obj.Path,
-				}).Error("Error evaluating realpath")
+				}).Debug("Error evaluating realpath")
 				return lvmDet, thinPool, err
 			}
 		}
@@ -563,7 +563,7 @@ func lvmUsage(path string) (stats []LVMStat, thinPoolStats []ThinPoolStat, err e
 			if err != nil {
 				log.WithError(err).WithFields(log.Fields{
 					"path": mount.Device,
-				}).Error("Error evaluating realpath")
+				}).Debug("Error evaluating realpath")
 				continue
 			}
 			// Check if the logical volume is mounted as a gluster brick
@@ -626,7 +626,7 @@ func brickUtilization(gluster glusterutils.GInterface) error {
 						log.WithError(err).WithFields(log.Fields{
 							"volume":     volume.Name,
 							"brick_path": brick.Path,
-						}).Error("Error getting disk usage")
+						}).Debug("Error getting disk usage")
 						continue
 					}
 					var lbls = getGlusterBrickLabels(brick, subvol.Name)
@@ -654,7 +654,7 @@ func brickUtilization(gluster glusterutils.GInterface) error {
 						log.WithError(err).WithFields(log.Fields{
 							"volume":     volume.Name,
 							"brick_path": brick.Path,
-						}).Error("Error getting lvm usage")
+						}).Debug("Error getting lvm usage")
 						continue
 					}
 					// Add metrics
@@ -722,7 +722,7 @@ func brickStatus(gluster glusterutils.GInterface) error {
 	isLeader, err := gluster.IsLeader()
 
 	if err != nil {
-		log.WithError(err).Error("Unable to find if the current node is leader")
+		log.WithError(err).Debug("Unable to find if the current node is leader")
 		return err
 	}
 
@@ -757,7 +757,7 @@ func brickStatus(gluster glusterutils.GInterface) error {
 			if err != nil {
 				log.WithError(err).WithFields(log.Fields{
 					"volume": volume.Name,
-				}).Error("Error getting bricks status")
+				}).Debug("Error getting bricks status")
 				continue
 			}
 		}

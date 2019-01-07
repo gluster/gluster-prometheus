@@ -92,7 +92,7 @@ func volumeCounts(gluster glusterutils.GInterface) error {
 	isLeader, err := gluster.IsLeader()
 
 	if err != nil {
-		log.WithError(err).Error("Unable to find if the current node is leader")
+		log.WithError(err).Debug("Unable to find if the current node is leader")
 		return err
 	}
 	if !isLeader {
