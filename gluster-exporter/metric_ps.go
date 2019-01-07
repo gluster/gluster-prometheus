@@ -185,7 +185,7 @@ func ps(gluster glusterutils.GInterface) error {
 			log.WithError(err).WithFields(log.Fields{
 				"command": lineData[6],
 				"pid":     lineData[0],
-			}).Error("Error getting command line")
+			}).Debug("Error getting command line")
 			continue
 		}
 
@@ -199,25 +199,25 @@ func ps(gluster glusterutils.GInterface) error {
 		case "glusterd":
 			lbls, err = getGlusterdLabels(peerID, lineData[6], cmdlineArgs)
 			if err != nil {
-				log.WithError(err).Error("Unable to get glusterd labels")
+				log.WithError(err).Debug("Unable to get glusterd labels")
 				continue
 			}
 		case "glusterd2":
 			lbls, err = getGlusterdLabels(peerID, lineData[6], cmdlineArgs)
 			if err != nil {
-				log.WithError(err).Error("Unable to get glusterd2 labels")
+				log.WithError(err).Debug("Unable to get glusterd2 labels")
 				continue
 			}
 		case "glusterfsd":
 			lbls, err = getGlusterFsdLabels(peerID, lineData[6], cmdlineArgs)
 			if err != nil {
-				log.WithError(err).Error("Unable to get glusterfsd labels")
+				log.WithError(err).Debug("Unable to get glusterfsd labels")
 				continue
 			}
 		default:
 			lbls, err = getUnknownLabels(peerID, lineData[6], cmdlineArgs)
 			if err != nil {
-				log.WithError(err).Error("Unable to get default labels")
+				log.WithError(err).Debug("Unable to get default labels")
 				continue
 			}
 		}
@@ -228,7 +228,7 @@ func ps(gluster glusterutils.GInterface) error {
 				"value":   lineData[1],
 				"command": lineData[6],
 				"pid":     lineData[0],
-			}).Error("Unable to parse pcpu value")
+			}).Debug("Unable to parse pcpu value")
 			continue
 		}
 
@@ -238,7 +238,7 @@ func ps(gluster glusterutils.GInterface) error {
 				"value":   lineData[2],
 				"command": lineData[6],
 				"pid":     lineData[0],
-			}).Error("Unable to parse pmem value")
+			}).Debug("Unable to parse pmem value")
 			continue
 		}
 		rsz, err := strconv.ParseFloat(lineData[3], 64)
@@ -247,7 +247,7 @@ func ps(gluster glusterutils.GInterface) error {
 				"value":   lineData[3],
 				"command": lineData[6],
 				"pid":     lineData[0],
-			}).Error("Unable to parse rsz value")
+			}).Debug("Unable to parse rsz value")
 			continue
 		}
 
@@ -257,7 +257,7 @@ func ps(gluster glusterutils.GInterface) error {
 				"value":   lineData[4],
 				"command": lineData[6],
 				"pid":     lineData[0],
-			}).Error("Unable to parse vsz value")
+			}).Debug("Unable to parse vsz value")
 			continue
 		}
 
@@ -267,7 +267,7 @@ func ps(gluster glusterutils.GInterface) error {
 				"value":   lineData[5],
 				"command": lineData[6],
 				"pid":     lineData[0],
-			}).Error("Unable to parse etimes value")
+			}).Debug("Unable to parse etimes value")
 			continue
 		}
 
