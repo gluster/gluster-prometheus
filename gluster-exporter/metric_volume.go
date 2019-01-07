@@ -292,7 +292,7 @@ func getVolumeHealLabels(volname string, host string, brick string) prometheus.L
 
 }
 
-func healCounts() error {
+func healCounts(gluster glusterutils.GInterface) error {
 	isLeader, err := gluster.IsLeader()
 
 	if err != nil {
@@ -355,7 +355,7 @@ func getBrickHost(vol glusterutils.Volume, brickname string) string {
 	return ""
 }
 
-func profileInfo() error {
+func profileInfo(gluster glusterutils.GInterface) error {
 	isLeader, err := gluster.IsLeader()
 	if err != nil {
 		log.WithError(err).Error("Unable to find if the current node is leader")
