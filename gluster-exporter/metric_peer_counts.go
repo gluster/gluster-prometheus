@@ -157,7 +157,7 @@ var (
 	})
 )
 
-func peerCounts() (err error) {
+func peerCounts(gluster glusterutils.GInterface) (err error) {
 	var peerID string
 	// 'gluster' is initialized inside 'main' function,
 	// so it is better to check whether it is available or not

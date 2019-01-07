@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
+
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
@@ -90,13 +92,7 @@ func getCmdLine(pid string) ([]string, error) {
 	return strings.Split(strings.Trim(string(out), "\x00"), "\x00"), nil
 }
 
-func getGlusterdLabels(cmd string, args []string) (prometheus.Labels, error) {
-
-	peerID, err := gluster.LocalPeerID()
-	if err != nil {
-		return nil, err
-	}
-
+func getGlusterdLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
 	return prometheus.Labels{
 		"name":       cmd,
 		"volume":     "",
@@ -105,16 +101,11 @@ func getGlusterdLabels(cmd string, args []string) (prometheus.Labels, error) {
 	}, nil
 }
 
-func getGlusterFsdLabels(cmd string, args []string) (prometheus.Labels, error) {
+func getGlusterFsdLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
 	bpath := ""
 	volume := ""
 
 	prevArg := ""
-
-	peerID, err := gluster.LocalPeerID()
-	if err != nil {
-		return nil, err
-	}
 
 	for _, a := range args {
 		if prevArg == "--brick-name" {
@@ -133,13 +124,7 @@ func getGlusterFsdLabels(cmd string, args []string) (prometheus.Labels, error) {
 	}, nil
 }
 
-func getUnknownLabels(cmd string, args []string) (prometheus.Labels, error) {
-
-	peerID, err := gluster.LocalPeerID()
-	if err != nil {
-		return nil, err
-	}
-
+func getUnknownLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
 	return prometheus.Labels{
 		"name":       cmd,
 		"volume":     "",
@@ -148,7 +133,7 @@ func getUnknownLabels(cmd string, args []string) (prometheus.Labels, error) {
 	}, nil
 }
 
-func ps() error {
+func ps(gluster glusterutils.GInterface) error {
 	args := []string{
 		"--no-header", // No header in the output
 		"-ww",         // To set unlimited width to avoid crop
@@ -162,6 +147,11 @@ func ps() error {
 
 	if err != nil {
 		// Return without exporting metrics in this cycle
+		return err
+	}
+
+	peerID, err := gluster.LocalPeerID()
+	if err != nil {
 		return err
 	}
 
@@ -197,25 +187,25 @@ func ps() error {
 		var lbls prometheus.Labels
 		switch lineData[6] {
 		case "glusterd":
-			lbls, err = getGlusterdLabels(lineData[6], cmdlineArgs)
+			lbls, err = getGlusterdLabels(peerID, lineData[6], cmdlineArgs)
 			if err != nil {
 				log.WithError(err).Error("Unable to get glusterd labels")
 				continue
 			}
 		case "glusterd2":
-			lbls, err = getGlusterdLabels(lineData[6], cmdlineArgs)
+			lbls, err = getGlusterdLabels(peerID, lineData[6], cmdlineArgs)
 			if err != nil {
 				log.WithError(err).Error("Unable to get glusterd2 labels")
 				continue
 			}
 		case "glusterfsd":
-			lbls, err = getGlusterFsdLabels(lineData[6], cmdlineArgs)
+			lbls, err = getGlusterFsdLabels(peerID, lineData[6], cmdlineArgs)
 			if err != nil {
 				log.WithError(err).Error("Unable to get glusterfsd labels")
 				continue
 			}
 		default:
-			lbls, err = getUnknownLabels(lineData[6], cmdlineArgs)
+			lbls, err = getUnknownLabels(peerID, lineData[6], cmdlineArgs)
 			if err != nil {
 				log.WithError(err).Error("Unable to get default labels")
 				continue
