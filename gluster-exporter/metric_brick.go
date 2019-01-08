@@ -575,7 +575,7 @@ func lvmUsage(path string) (stats []LVMStat, thinPoolStats []ThinPoolStat, err e
 	return stats, thinPoolStats, nil
 }
 
-func brickUtilization() error {
+func brickUtilization(gluster glusterutils.GInterface) error {
 	volumes, err := gluster.VolumeInfo()
 	if err != nil {
 		// Return without exporting metric in this cycle
@@ -692,7 +692,7 @@ func getBrickStatusLabels(vol string, host string, brickPath string, peerID stri
 	}
 }
 
-func brickStatus() error {
+func brickStatus(gluster glusterutils.GInterface) error {
 	isLeader, err := gluster.IsLeader()
 	if err != nil {
 		log.WithError(err).Error("Unable to find if the current node is leader")

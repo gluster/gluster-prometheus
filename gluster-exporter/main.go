@@ -31,17 +31,16 @@ var (
 	docgen                        = flag.Bool("docgen", false, "Generate exported metrics documentation in Asciidoc format")
 	config                        = flag.String("config", defaultConfFile, "Config file path")
 	defaultInterval time.Duration = 5
-	gluster         glusterutils.GInterface
 )
 
 type glusterMetric struct {
 	name string
-	fn   func() error
+	fn   func(glusterutils.GInterface) error
 }
 
 var glusterMetrics []glusterMetric
 
-func registerMetric(name string, fn func() error) {
+func registerMetric(name string, fn func(glusterutils.GInterface) error) {
 	glusterMetrics = append(glusterMetrics, glusterMetric{name: name, fn: fn})
 }
 
@@ -76,6 +75,7 @@ func main() {
 		return
 	}
 
+	var gluster glusterutils.GInterface
 	exporterConf, err := conf.LoadConfig(*config)
 	if err != nil {
 		log.WithError(err).Fatal("Loading global config failed")
@@ -121,9 +121,9 @@ func main() {
 	for _, m := range glusterMetrics {
 		if collectorConf, ok := exporterConf.CollectorsConf[m.name]; ok {
 			if !collectorConf.Disabled {
-				go func(m glusterMetric) {
+				go func(m glusterMetric, gi glusterutils.GInterface) {
 					for {
-						err := m.fn()
+						err := m.fn(gi)
 						interval := defaultInterval
 						if collectorConf.SyncInterval > 0 {
 							interval = time.Duration(collectorConf.SyncInterval)
@@ -135,7 +135,7 @@ func main() {
 						}
 						time.Sleep(time.Second * interval)
 					}
-				}(m)
+				}(m, gluster)
 			}
 		}
 	}
