@@ -144,6 +144,13 @@ type GInterface interface {
 	EnableVolumeProfiling(volinfo Volume) error
 }
 
+// GConfigInterface enables to get configuration,
+// with which the gluster management object is made of.
+// This should be implemented by both GD1 or GD2
+type GConfigInterface interface {
+	Config() *Config
+}
+
 // FopStat defines file ops related details
 type FopStat struct {
 	Name       string

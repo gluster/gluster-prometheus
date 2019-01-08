@@ -122,6 +122,26 @@ func (g *GD2) LocalPeerID() (string, error) {
 	return readPeerID(fileStream, keywordID)
 }
 
+// Config method returns the configuration, and
+// makes it compatible with 'GConfigInterface'
+func (g *GD1) Config() *Config {
+	return g.config
+}
+
+// Config method returns the configuration, and
+// makes it compatible with 'GConfigInterface'
+func (g *GD2) Config() *Config {
+	return g.config
+}
+
+// GConfigFromInterface method returns a 'glusterutils.Config' pointer
+func GConfigFromInterface(iFace interface{}) (*Config, error) {
+	if gConfI, ok := iFace.(GConfigInterface); ok {
+		return gConfI.Config(), nil
+	}
+	return nil, errors.New("Provided interface don't implement 'GConfigInterface'")
+}
+
 // GetGlusterVersion gets the glusterfs version
 func GetGlusterVersion() (string, error) {
 	cmd := "glusterfs --version | head -1"

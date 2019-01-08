@@ -370,6 +370,10 @@ func profileInfo() error {
 		return err
 	}
 	volOption := glusterutils.CountFOPHitsGD1
+	glusterConfig, err := glusterutils.GConfigFromInterface(gluster)
+	if err != nil {
+		return err
+	}
 	if glusterConfig.GlusterMgmt == glusterutils.MgmtGlusterd2 {
 		volOption = glusterutils.CountFOPHitsGD2
 	}

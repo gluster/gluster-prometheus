@@ -31,7 +31,6 @@ var (
 	docgen                        = flag.Bool("docgen", false, "Generate exported metrics documentation in Asciidoc format")
 	config                        = flag.String("config", defaultConfFile, "Config file path")
 	defaultInterval time.Duration = 5
-	glusterConfig   glusterutils.Config
 	gluster         glusterutils.GInterface
 )
 
@@ -93,6 +92,7 @@ func main() {
 		log.WithError(err).Fatal("Failed to initialize logging")
 	}
 
+	var glusterConfig glusterutils.Config
 	// Set the Gluster Configurations used in glusterutils
 	glusterConfig.GlusterMgmt = "glusterd"
 	if exporterConf.GlobalConf.GlusterMgmt != "" {
