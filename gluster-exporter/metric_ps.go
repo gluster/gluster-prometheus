@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -133,7 +134,7 @@ func getUnknownLabels(peerID, cmd string, args []string) (prometheus.Labels, err
 	}, nil
 }
 
-func ps(gluster glusterutils.GInterface) error {
+func ps(gluster glusterutils.GInterface, glusterConf *glusterutils.Config, exporterConf *conf.Config) error {
 	args := []string{
 		"--no-header", // No header in the output
 		"-ww",         // To set unlimited width to avoid crop

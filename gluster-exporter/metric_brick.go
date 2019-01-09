@@ -10,6 +10,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -575,8 +576,8 @@ func lvmUsage(path string) (stats []LVMStat, thinPoolStats []ThinPoolStat, err e
 	return stats, thinPoolStats, nil
 }
 
-func brickUtilization(gluster glusterutils.GInterface) error {
-	volumes, err := gluster.VolumeInfo()
+func brickUtilization(gluster glusterutils.GInterface, glusterConf *glusterutils.Config, exporterConf *conf.Config) error {
+	volumes, err := cachedVolumeInfo(gluster, exporterConf.GlobalConf.CacheTTL)
 	if err != nil {
 		// Return without exporting metric in this cycle
 		return err
@@ -692,8 +693,8 @@ func getBrickStatusLabels(vol string, host string, brickPath string, peerID stri
 	}
 }
 
-func brickStatus(gluster glusterutils.GInterface) error {
-	isLeader, err := gluster.IsLeader()
+func brickStatus(gluster glusterutils.GInterface, glusterConf *glusterutils.Config, exporterConf *conf.Config) error {
+	isLeader, err := cachedIsLeader(gluster, exporterConf.GlobalConf.CacheTTL)
 	if err != nil {
 		log.WithError(err).Error("Unable to find if the current node is leader")
 		return err
@@ -702,7 +703,7 @@ func brickStatus(gluster glusterutils.GInterface) error {
 		return nil
 	}
 
-	volumes, err := gluster.VolumeInfo()
+	volumes, err := cachedVolumeInfo(gluster, exporterConf.GlobalConf.CacheTTL)
 	if err != nil {
 		return err
 	}

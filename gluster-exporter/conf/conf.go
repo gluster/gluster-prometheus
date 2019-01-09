@@ -18,6 +18,7 @@ type Globals struct {
 	LogDir            string `toml:"log-dir"`
 	LogFile           string `toml:"log-file"`
 	LogLevel          string `toml:"log-level"`
+	CacheTTL          int    `toml:"cache-ttl"`
 }
 
 // Collectors struct defines the structure of collectors configuration

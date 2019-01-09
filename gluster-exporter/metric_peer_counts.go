@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
+
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
@@ -157,7 +159,7 @@ var (
 	})
 )
 
-func peerCounts(gluster glusterutils.GInterface) (err error) {
+func peerCounts(gluster glusterutils.GInterface, glusterConf *glusterutils.Config, exporterConf *conf.Config) (err error) {
 	var peerID string
 	// 'gluster' is initialized inside 'main' function,
 	// so it is better to check whether it is available or not

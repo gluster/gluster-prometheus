@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -78,15 +79,15 @@ func getVolumeLabels(volname string) prometheus.Labels {
 	}
 }
 
-func volumeCounts(gluster glusterutils.GInterface) error {
-	isLeader, err := gluster.IsLeader()
+func volumeCounts(gluster glusterutils.GInterface, glusterConf *glusterutils.Config, exporterConf *conf.Config) error {
+	isLeader, err := cachedIsLeader(gluster, exporterConf.GlobalConf.CacheTTL)
 	if !isLeader || err != nil {
 		// Unable to find out if the current node is leader
 		// Cannot register volume metrics at this node
 		log.WithError(err).Error("Unable to find if the current node is leader")
 		return err
 	}
-	volumes, err := gluster.VolumeInfo()
+	volumes, err := cachedVolumeInfo(gluster, exporterConf.GlobalConf.CacheTTL)
 	if err != nil {
 		return err
 	}

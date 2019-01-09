@@ -4,7 +4,9 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
+
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
@@ -292,8 +294,8 @@ func getVolumeHealLabels(volname string, host string, brick string) prometheus.L
 
 }
 
-func healCounts(gluster glusterutils.GInterface) error {
-	isLeader, err := gluster.IsLeader()
+func healCounts(gluster glusterutils.GInterface, glusterConf *glusterutils.Config, exporterConf *conf.Config) error {
+	isLeader, err := cachedIsLeader(gluster, exporterConf.GlobalConf.CacheTTL)
 
 	if err != nil {
 		// Unable to find out if the current node is leader
@@ -304,7 +306,7 @@ func healCounts(gluster glusterutils.GInterface) error {
 	if !isLeader {
 		return nil
 	}
-	volumes, err := gluster.VolumeInfo()
+	volumes, err := cachedVolumeInfo(gluster, exporterConf.GlobalConf.CacheTTL)
 	if err != nil {
 		return err
 	}
@@ -355,8 +357,8 @@ func getBrickHost(vol glusterutils.Volume, brickname string) string {
 	return ""
 }
 
-func profileInfo(gluster glusterutils.GInterface) error {
-	isLeader, err := gluster.IsLeader()
+func profileInfo(gluster glusterutils.GInterface, glusterConf *glusterutils.Config, exporterConf *conf.Config) error {
+	isLeader, err := cachedIsLeader(gluster, exporterConf.GlobalConf.CacheTTL)
 	if err != nil {
 		log.WithError(err).Error("Unable to find if the current node is leader")
 		return err
@@ -365,12 +367,12 @@ func profileInfo(gluster glusterutils.GInterface) error {
 		return nil
 	}
 
-	volumes, err := gluster.VolumeInfo()
+	volumes, err := cachedVolumeInfo(gluster, exporterConf.GlobalConf.CacheTTL)
 	if err != nil {
 		return err
 	}
 	volOption := glusterutils.CountFOPHitsGD1
-	if glusterConfig.GlusterMgmt == glusterutils.MgmtGlusterd2 {
+	if glusterConf.GlusterMgmt == glusterutils.MgmtGlusterd2 {
 		volOption = glusterutils.CountFOPHitsGD2
 	}
 	var (

@@ -31,17 +31,16 @@ var (
 	docgen                        = flag.Bool("docgen", false, "Generate exported metrics documentation in Asciidoc format")
 	config                        = flag.String("config", defaultConfFile, "Config file path")
 	defaultInterval time.Duration = 5
-	glusterConfig   glusterutils.Config
 )
 
 type glusterMetric struct {
 	name string
-	fn   func(glusterutils.GInterface) error
+	fn   func(glusterutils.GInterface, *glusterutils.Config, *conf.Config) error
 }
 
 var glusterMetrics []glusterMetric
 
-func registerMetric(name string, fn func(glusterutils.GInterface) error) {
+func registerMetric(name string, fn func(glusterutils.GInterface, *glusterutils.Config, *conf.Config) error) {
 	glusterMetrics = append(glusterMetrics, glusterMetric{name: name, fn: fn})
 }
 
@@ -93,6 +92,7 @@ func main() {
 		log.WithError(err).Fatal("Failed to initialize logging")
 	}
 
+	var glusterConfig glusterutils.Config
 	// Set the Gluster Configurations used in glusterutils
 	glusterConfig.GlusterMgmt = "glusterd"
 	if exporterConf.GlobalConf.GlusterMgmt != "" {
@@ -123,7 +123,7 @@ func main() {
 			if !collectorConf.Disabled {
 				go func(m glusterMetric, gi glusterutils.GInterface) {
 					for {
-						err := m.fn(gi)
+						err := m.fn(gi, &glusterConfig, exporterConf)
 						interval := defaultInterval
 						if collectorConf.SyncInterval > 0 {
 							interval = time.Duration(collectorConf.SyncInterval)

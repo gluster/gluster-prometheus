@@ -8,6 +8,7 @@ metrics-path = "/metrics"
 log-dir = "/var/log/gluster-exporter"
 log-file = "exporter.log"
 log-level = "info"
+cache-ttl = 10
 
 [collectors.gluster_ps]
 name = "gluster_ps"
