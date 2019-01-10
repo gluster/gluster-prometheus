@@ -8,6 +8,7 @@ metrics-path = "/metrics"
 log-dir = "/var/log/gluster-exporter"
 log-file = "exporter.log"
 log-level = "info"
+# cache-ttl-in-sec = 0, disables caching
 cache-ttl-in-sec = 30
 # by default caching is turned off
 # to enable caching, add the function-name to 'cache-enabled-funcs' list

@@ -16,7 +16,8 @@ type GCache struct {
 	cacheEnabledFuncs map[string]struct{}
 }
 
-// NewGCacheWithTTL method creates a new GCache wrapper instance
+// NewGCacheWithTTL method creates a new GCache wrapper instance.
+// Caching will be disabled if ttl is ZERO
 func NewGCacheWithTTL(gd GInterface, ttl time.Duration) *GCache {
 	var gc = new(GCache)
 	gc.gd = gd
@@ -43,8 +44,8 @@ func (gc *GCache) TTL() time.Duration {
 
 // SetTTL method sets a new time_to_live
 func (gc *GCache) SetTTL(ttl time.Duration) {
-	// accepts only if the given ttl is greater than a second
-	if ttl > time.Second {
+	// accepts 0 or durations in Seconds
+	if ttl == time.Duration(0) || ttl >= time.Second {
 		gc.ttl = ttl
 	}
 }
