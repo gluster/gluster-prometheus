@@ -8,12 +8,12 @@ import (
 
 // GCache is a wrapper around 'GInterface' object
 type GCache struct {
-	gd                 GInterface
-	ttl                time.Duration
-	lock               sync.Mutex
-	lastCallValueMap   map[string]interface{}
-	lastCallTimeMap    map[string]time.Time
-	cacheDisabledFuncs map[string]struct{}
+	gd                GInterface
+	ttl               time.Duration
+	lock              sync.Mutex
+	lastCallValueMap  map[string]interface{}
+	lastCallTimeMap   map[string]time.Time
+	cacheEnabledFuncs map[string]struct{}
 }
 
 // NewGCacheWithTTL method creates a new GCache wrapper instance
@@ -24,7 +24,12 @@ func NewGCacheWithTTL(gd GInterface, ttl time.Duration) *GCache {
 	gc.SetTTL(ttl)
 	gc.lastCallValueMap = make(map[string]interface{})
 	gc.lastCallTimeMap = make(map[string]time.Time)
-	gc.cacheDisabledFuncs = make(map[string]struct{})
+	// by default we are enabling cache only for a few functions
+	gc.cacheEnabledFuncs = map[string]struct{}{
+		"IsLeader":    {},
+		"LocalPeerID": {},
+		"VolumeInfo":  {},
+	}
 	return gc
 }
 
@@ -47,12 +52,12 @@ func (gc *GCache) SetTTL(ttl time.Duration) {
 	}
 }
 
-// DisableCacheForFuncs method will disable the caching functionalities
-// for the provided list of functions.
+// EnableCacheForFuncs method will enable caching
+// for the given list of functions.
 // If the provided function is not there in the existing list, it will be ignored
-func (gc *GCache) DisableCacheForFuncs(fNames []string) {
+func (gc *GCache) EnableCacheForFuncs(fNames []string) {
 	for _, fName := range fNames {
-		gc.cacheDisabledFuncs[fName] = struct{}{}
+		gc.cacheEnabledFuncs[fName] = struct{}{}
 	}
 }
 
@@ -61,8 +66,9 @@ func (gc *GCache) timeForNewCall(funcName string, origFuncName string) (ret bool
 		origFuncName = funcName
 	}
 	ret = true
-	// if the function is disabled, always return true
-	if _, ok := gc.cacheDisabledFuncs[origFuncName]; ok {
+	// if the caching is not enabled for this function, always return true
+	// that means, it is always time for a new call
+	if _, ok := gc.cacheEnabledFuncs[origFuncName]; !ok {
 		return
 	}
 	if _, ok := gc.lastCallTimeMap[funcName]; !ok {
