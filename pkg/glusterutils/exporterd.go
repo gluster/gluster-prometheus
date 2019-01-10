@@ -69,8 +69,8 @@ func (g *GD2) IsLeader() (bool, error) {
 
 // MakeGluster returns respective gluster obj based on configuration
 func MakeGluster(config *Config, expConf *conf.Config) GInterface {
-	setDefaultConfig(config)
 	var gi GInterface
+	setDefaultConfig(config)
 	gi = &GD2{config: config}
 	if config.GlusterMgmt == "" || config.GlusterMgmt == MgmtGlusterd {
 		gi = &GD1{config: config}
