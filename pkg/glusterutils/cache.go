@@ -56,21 +56,22 @@ func (gc *GCache) DisableCacheForFuncs(fNames []string) {
 	}
 }
 
-func (gc *GCache) timeForNewCall(funcName string, origFuncName string) bool {
+func (gc *GCache) timeForNewCall(funcName string, origFuncName string) (ret bool) {
 	if origFuncName == "" {
 		origFuncName = funcName
 	}
+	ret = true
 	// if the function is disabled, always return true
 	if _, ok := gc.cacheDisabledFuncs[origFuncName]; ok {
-		return true
+		return
 	}
 	if _, ok := gc.lastCallTimeMap[funcName]; !ok {
-		return true
+		return
 	}
 	nowT := time.Now()
 	// if the last called time is BEFORE 'now - ttl', then call again
 	if gc.lastCallTimeMap[funcName].Before(nowT.Add(-gc.ttl)) {
-		return true
+		return
 	}
 	return false
 }
