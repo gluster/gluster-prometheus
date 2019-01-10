@@ -24,12 +24,9 @@ func NewGCacheWithTTL(gd GInterface, ttl time.Duration) *GCache {
 	gc.SetTTL(ttl)
 	gc.lastCallValueMap = make(map[string]interface{})
 	gc.lastCallTimeMap = make(map[string]time.Time)
-	// by default we are enabling cache only for a few functions
-	gc.cacheEnabledFuncs = map[string]struct{}{
-		"IsLeader":    {},
-		"LocalPeerID": {},
-		"VolumeInfo":  {},
-	}
+	// functions for which caching have to be enabled
+	// are added to the below map
+	gc.cacheEnabledFuncs = make(map[string]struct{})
 	return gc
 }
 

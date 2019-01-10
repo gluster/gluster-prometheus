@@ -9,14 +9,13 @@ log-dir = "/var/log/gluster-exporter"
 log-file = "exporter.log"
 log-level = "info"
 cache-ttl-in-sec = 30
-# by default caching is enabled only for the below functions,
-# 'IsLeader', 'LocalPeerID', 'VolumeInfo'
-#
+# by default caching is turned off
 # to enable caching, add the function-name to 'cache-enabled-funcs' list
-# other supported functions are,
+# supported functions are,
+# 'IsLeader', 'LocalPeerID', 'VolumeInfo'
 # 'EnableVolumeProfiling', 'HealInfo', 'Peers',
 # 'Snapshots', 'VolumeBrickStatus', 'VolumeProfileInfo'
-cache-enabled-funcs = []
+cache-enabled-funcs = [ 'IsLeader', 'LocalPeerID', 'VolumeInfo' ]
 
 [collectors.gluster_ps]
 name = "gluster_ps"
