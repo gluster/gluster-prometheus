@@ -114,7 +114,7 @@ func main() {
 	if exporterConf.GlobalConf.GlusterdDir != "" {
 		glusterConfig.GlusterdWorkdir = exporterConf.GlobalConf.GlusterdDir
 	}
-	gluster = glusterutils.MakeGluster(&glusterConfig)
+	gluster = glusterutils.MakeGluster(&glusterConfig, exporterConf)
 
 	// start := time.Now()
 

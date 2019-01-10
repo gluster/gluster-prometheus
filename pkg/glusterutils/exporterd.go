@@ -9,6 +9,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
+
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 )
 
 var (
@@ -65,14 +68,19 @@ func (g *GD2) IsLeader() (bool, error) {
 }
 
 // MakeGluster returns respective gluster obj based on configuration
-func MakeGluster(config *Config) GInterface {
+func MakeGluster(config *Config, expConf *conf.Config) GInterface {
 	setDefaultConfig(config)
+	var gi GInterface
+	gi = &GD2{config: config}
 	if config.GlusterMgmt == "" || config.GlusterMgmt == MgmtGlusterd {
-		return &GD1{config: config}
+		gi = &GD1{config: config}
 	}
-	return &GD2{config: config}
-
+	cacheTTL := time.Duration(expConf.GlobalConf.CacheTTL) * time.Second
+	cachedGI := NewGCacheWithTTL(gi, cacheTTL)
+	cachedGI.DisableCacheForFuncs(expConf.GlobalConf.CacheDisabledFuncs)
+	return cachedGI
 }
+
 func readPeerID(fileStream io.ReadCloser, keywordID string) (string, error) {
 	defer func() {
 		err := fileStream.Close()
