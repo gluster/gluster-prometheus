@@ -77,7 +77,7 @@ func MakeGluster(config *Config, expConf *conf.Config) GInterface {
 	}
 	cacheTTL := time.Duration(expConf.GlobalConf.CacheTTL) * time.Second
 	cachedGI := NewGCacheWithTTL(gi, cacheTTL)
-	cachedGI.DisableCacheForFuncs(expConf.GlobalConf.CacheDisabledFuncs)
+	cachedGI.EnableCacheForFuncs(expConf.GlobalConf.CacheEnabledFuncs)
 	return cachedGI
 }
 
