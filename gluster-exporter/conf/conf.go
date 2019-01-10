@@ -9,15 +9,17 @@ import (
 
 // Globals maintains the global system configurations
 type Globals struct {
-	GlusterMgmt       string `toml:"gluster-mgmt"`
-	GlusterdDir       string `toml:"glusterd-dir"`
-	GlusterBinaryPath string `toml:"gluster-binary-path"`
-	GD2RESTEndpoint   string `toml:"gd2-rest-endpoint"`
-	Port              int    `toml:"port"`
-	MetricsPath       string `toml:"metrics-path"`
-	LogDir            string `toml:"log-dir"`
-	LogFile           string `toml:"log-file"`
-	LogLevel          string `toml:"log-level"`
+	GlusterMgmt        string   `toml:"gluster-mgmt"`
+	GlusterdDir        string   `toml:"glusterd-dir"`
+	GlusterBinaryPath  string   `toml:"gluster-binary-path"`
+	GD2RESTEndpoint    string   `toml:"gd2-rest-endpoint"`
+	Port               int      `toml:"port"`
+	MetricsPath        string   `toml:"metrics-path"`
+	LogDir             string   `toml:"log-dir"`
+	LogFile            string   `toml:"log-file"`
+	LogLevel           string   `toml:"log-level"`
+	CacheTTL           uint64   `toml:"cache-ttl-in-sec"`
+	CacheDisabledFuncs []string `toml:"cache-disabled-funcs"`
 }
 
 // Collectors struct defines the structure of collectors configuration
