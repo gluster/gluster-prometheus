@@ -64,10 +64,10 @@ func (gc *GCache) timeForNewCall(funcName string, origFuncName string) bool {
 	if _, ok := gc.cacheDisabledFuncs[origFuncName]; ok {
 		return true
 	}
-	nowT := time.Now()
 	if _, ok := gc.lastCallTimeMap[funcName]; !ok {
 		return true
 	}
+	nowT := time.Now()
 	// if the last called time is BEFORE 'now - ttl', then call again
 	if gc.lastCallTimeMap[funcName].Before(nowT.Add(-gc.ttl)) {
 		return true
