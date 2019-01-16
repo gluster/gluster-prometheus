@@ -80,11 +80,12 @@ func getVolumeLabels(volname string) prometheus.Labels {
 
 func volumeCounts(gluster glusterutils.GInterface) error {
 	isLeader, err := gluster.IsLeader()
-	if !isLeader || err != nil {
-		// Unable to find out if the current node is leader
-		// Cannot register volume metrics at this node
+	if err != nil {
 		log.WithError(err).Error("Unable to find if the current node is leader")
 		return err
+	}
+	if !isLeader {
+		return nil
 	}
 	volumes, err := gluster.VolumeInfo()
 	if err != nil {
