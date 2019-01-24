@@ -32,7 +32,9 @@ func (m *Metric) LabelNames() []string {
 // newPrometheusGaugeVec is wrapper around prometheus.NewGaugeVec. Additionally
 // it registers with global map which can be used for documentation,
 // listing supported metrics via CLI etc.
-func newPrometheusGaugeVec(m Metric) *prometheus.GaugeVec {
+// 'gaugeVecArrPtr' helps to collect all the 'GaugeVec' pertaining to a metric
+// group.  Ignored if 'nil'
+func newPrometheusGaugeVec(m Metric, gaugeVecArrPtr *[]*prometheus.GaugeVec) *prometheus.GaugeVec {
 	gaugeVec := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: m.Namespace,
@@ -44,6 +46,10 @@ func newPrometheusGaugeVec(m Metric) *prometheus.GaugeVec {
 
 	// Register the metric with Prometheus
 	prometheus.MustRegister(gaugeVec)
+
+	if gaugeVecArrPtr != nil {
+		*gaugeVecArrPtr = append(*gaugeVecArrPtr, gaugeVec)
+	}
 
 	// Add the metric to the global queue
 	metrics = append(metrics, m)

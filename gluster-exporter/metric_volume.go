@@ -25,13 +25,15 @@ var (
 		},
 	}
 
+	volumeHealGaugeVecs []*prometheus.GaugeVec
+
 	glusterVolumeHealCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_heal_count",
 		Help:      "self heal count for volume",
 		LongHelp:  "",
 		Labels:    volumeHealLabels,
-	})
+	}, &volumeHealGaugeVecs)
 
 	volumeProfileInfoLabels = []MetricLabel{
 		{
@@ -44,13 +46,15 @@ var (
 		},
 	}
 
+	volumeProfileGaugeVecs []*prometheus.GaugeVec
+
 	glusterVolumeProfileTotalReads = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_total_reads",
 		Help:      "Total no of reads",
 		LongHelp:  "",
 		Labels:    volumeProfileInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileTotalWrites = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -58,7 +62,7 @@ var (
 		Help:      "Total no of writes",
 		LongHelp:  "",
 		Labels:    volumeProfileInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileDuration = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -66,7 +70,7 @@ var (
 		Help:      "Duration",
 		LongHelp:  "",
 		Labels:    volumeProfileInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileTotalReadsInt = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -74,7 +78,7 @@ var (
 		Help:      "Total no of reads for interval stats",
 		LongHelp:  "",
 		Labels:    volumeProfileInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileTotalWritesInt = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -82,7 +86,7 @@ var (
 		Help:      "Total no of writes for interval stats",
 		LongHelp:  "",
 		Labels:    volumeProfileInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileDurationInt = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -90,7 +94,7 @@ var (
 		Help:      "Duration for interval stats",
 		LongHelp:  "",
 		Labels:    volumeProfileInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	volumeProfileFopInfoLabels = []MetricLabel{
 		{
@@ -117,7 +121,7 @@ var (
 		Help:      "Cumulative FOP hits",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileFopAvgLatency = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -125,7 +129,7 @@ var (
 		Help:      "Cumulative FOP avergae latency",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileFopMinLatency = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -133,7 +137,7 @@ var (
 		Help:      "Cumulative FOP min latency",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileFopMaxLatency = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -141,7 +145,7 @@ var (
 		Help:      "Cumulative FOP max latency",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileFopHitsInt = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -149,7 +153,7 @@ var (
 		Help:      "Interval based FOP hits",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileFopAvgLatencyInt = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -157,7 +161,7 @@ var (
 		Help:      "Interval based FOP average latency",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileFopMinLatencyInt = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -165,7 +169,7 @@ var (
 		Help:      "Interval based FOP min latency",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileFopMaxLatencyInt = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -173,7 +177,7 @@ var (
 		Help:      "Interval based FOP max latency",
 		LongHelp:  "",
 		Labels:    volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileFopTotalHitsAggregatedOps = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -182,7 +186,7 @@ var (
 			" like READ_WRIET_OPS, LOCK_OPS, INODE_OPS etc",
 		LongHelp: "",
 		Labels:   volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 
 	glusterVolumeProfileFopTotalHitsAggregatedOpsInt = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -191,7 +195,7 @@ var (
 			" like READ_WRIET_OPS, LOCK_OPS, INODE_OPS etc",
 		LongHelp: "",
 		Labels:   volumeProfileFopInfoLabels,
-	})
+	}, &volumeProfileGaugeVecs)
 )
 
 // opType represents aggregated operations like
@@ -295,6 +299,11 @@ func getVolumeHealLabels(volname string, host string, brick string) prometheus.L
 func healCounts(gluster glusterutils.GInterface) error {
 	isLeader, err := gluster.IsLeader()
 
+	// Reset all vecs to not export stale information
+	for _, gaugeVec := range volumeHealGaugeVecs {
+		gaugeVec.Reset()
+	}
+
 	if err != nil {
 		// Unable to find out if the current node is leader
 		// Cannot register volume metrics at this node
@@ -356,7 +365,13 @@ func getBrickHost(vol glusterutils.Volume, brickname string) string {
 }
 
 func profileInfo(gluster glusterutils.GInterface) error {
+	// Reset all vecs to not export stale information
+	for _, gaugeVec := range volumeProfileGaugeVecs {
+		gaugeVec.Reset()
+	}
+
 	isLeader, err := gluster.IsLeader()
+
 	if err != nil {
 		log.WithError(err).Error("Unable to find if the current node is leader")
 		return err

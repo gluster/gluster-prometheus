@@ -127,38 +127,46 @@ var (
 		},
 	}
 
+	peerCountsGaugeVecs []*prometheus.GaugeVec
+
 	glusterPVCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "pv_count",
 		Help:      "No: of Physical Volumes",
 		LongHelp:  "",
 		Labels:    gnrlMetricLabels,
-	})
+	}, &peerCountsGaugeVecs)
 	glusterLVCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "lv_count",
 		Help:      "No: of Logical Volumes in a Volume Group",
 		LongHelp:  "",
 		Labels:    withVgMetricLabels,
-	})
+	}, &peerCountsGaugeVecs)
 	glusterVGCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "vg_count",
 		Help:      "No: of Volume Groups",
 		LongHelp:  "",
 		Labels:    gnrlMetricLabels,
-	})
+	}, &peerCountsGaugeVecs)
 	glusterTPCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "thinpool_count",
 		Help:      "No: of thinpools in a Volume Group",
 		LongHelp:  "",
 		Labels:    withVgMetricLabels,
-	})
+	}, &peerCountsGaugeVecs)
 )
 
 func peerCounts(gluster glusterutils.GInterface) (err error) {
+	// Reset all vecs to not export stale information
+	for _, gaugeVec := range peerCountsGaugeVecs {
+		gaugeVec.Reset()
+	}
+
 	var peerID string
+
 	// 'gluster' is initialized inside 'main' function,
 	// so it is better to check whether it is available or not
 	if gluster != nil {
