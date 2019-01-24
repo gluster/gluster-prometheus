@@ -40,13 +40,15 @@ var (
 		},
 	}
 
+	psGaugeVecs []*prometheus.GaugeVec
+
 	glusterCPUPercentage = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "cpu_percentage",
 		Help:      "CPU Percentage used by Gluster processes",
 		LongHelp:  "CPU percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the CPU time used divided by the time the process has been running (cputime/realtime ratio), expressed as a percentage.",
 		Labels:    labels,
-	})
+	}, &psGaugeVecs)
 
 	glusterMemoryPercentage = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -54,7 +56,7 @@ var (
 		Help:      "Memory Percentage used by Gluster processes",
 		LongHelp:  "Memory percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the ratio of the process's resident set size to the physical memory on the machine, expressed as a percentage",
 		Labels:    labels,
-	})
+	}, &psGaugeVecs)
 
 	glusterResidentMemory = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -62,7 +64,7 @@ var (
 		Help:      "Resident Memory of Gluster processes in bytes",
 		LongHelp:  "Resident Memory of Gluster process in bytes. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.",
 		Labels:    labels,
-	})
+	}, &psGaugeVecs)
 
 	glusterVirtualMemory = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -70,7 +72,7 @@ var (
 		Help:      "Virtual Memory of Gluster processes in bytes",
 		LongHelp:  "Virtual Memory of Gluster process in bytes. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.",
 		Labels:    labels,
-	})
+	}, &psGaugeVecs)
 
 	glusterElapsedTime = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -78,7 +80,7 @@ var (
 		Help:      "Elapsed Time of Gluster processes in seconds",
 		LongHelp:  "Elapsed Time or Uptime of Gluster processes in seconds. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path.",
 		Labels:    labels,
-	})
+	}, &psGaugeVecs)
 )
 
 func getCmdLine(pid string) ([]string, error) {
@@ -134,6 +136,11 @@ func getUnknownLabels(peerID, cmd string, args []string) (prometheus.Labels, err
 }
 
 func ps(gluster glusterutils.GInterface) error {
+	// Reset all vecs to not export stale information
+	for _, gaugeVec := range psGaugeVecs {
+		gaugeVec.Reset()
+	}
+
 	args := []string{
 		"--no-header", // No header in the output
 		"-ww",         // To set unlimited width to avoid crop

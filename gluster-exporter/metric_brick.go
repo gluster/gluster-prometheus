@@ -136,13 +136,15 @@ var (
 		},
 	}
 
+	brickGaugeVecs []*prometheus.GaugeVec
+
 	glusterBrickCapacityUsed = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "brick_capacity_used_bytes",
 		Help:      "Used capacity of gluster bricks in bytes",
 		LongHelp:  "",
 		Labels:    brickLabels,
-	})
+	}, &brickGaugeVecs)
 
 	glusterBrickCapacityFree = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -150,7 +152,7 @@ var (
 		Help:      "Free capacity of gluster bricks in bytes",
 		LongHelp:  "",
 		Labels:    brickLabels,
-	})
+	}, &brickGaugeVecs)
 
 	glusterBrickCapacityTotal = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -158,7 +160,7 @@ var (
 		Help:      "Total capacity of gluster bricks in bytes",
 		LongHelp:  "",
 		Labels:    brickLabels,
-	})
+	}, &brickGaugeVecs)
 
 	glusterBrickInodesTotal = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -166,7 +168,7 @@ var (
 		Help:      "Total no of inodes of gluster brick disk",
 		LongHelp:  "",
 		Labels:    brickLabels,
-	})
+	}, &brickGaugeVecs)
 
 	glusterBrickInodesFree = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -174,7 +176,7 @@ var (
 		Help:      "Free no of inodes of gluster brick disk",
 		LongHelp:  "",
 		Labels:    brickLabels,
-	})
+	}, &brickGaugeVecs)
 
 	glusterBrickInodesUsed = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -182,7 +184,7 @@ var (
 		Help:      "Used no of inodes of gluster brick disk",
 		LongHelp:  "",
 		Labels:    brickLabels,
-	})
+	}, &brickGaugeVecs)
 
 	glusterSubvolCapacityUsed = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -190,7 +192,7 @@ var (
 		Help:      "Effective used capacity of gluster subvolume in bytes",
 		LongHelp:  "",
 		Labels:    subvolLabels,
-	})
+	}, &brickGaugeVecs)
 
 	glusterSubvolCapacityTotal = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -198,7 +200,7 @@ var (
 		Help:      "Effective total capacity of gluster subvolume in bytes",
 		LongHelp:  "",
 		Labels:    subvolLabels,
-	})
+	}, &brickGaugeVecs)
 
 	glusterBrickLVSize = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -206,7 +208,7 @@ var (
 		Help:      "Bricks LV size Bytes",
 		LongHelp:  "",
 		Labels:    lvmLbls,
-	})
+	}, &brickGaugeVecs)
 
 	glusterBrickLVPercent = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -214,7 +216,7 @@ var (
 		Help:      "Bricks LV usage percent",
 		LongHelp:  "",
 		Labels:    lvmLbls,
-	})
+	}, &brickGaugeVecs)
 
 	glusterBrickLVMetadataSize = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -222,7 +224,7 @@ var (
 		Help:      "Bricks LV metadata size Bytes",
 		LongHelp:  "",
 		Labels:    lvmLbls,
-	})
+	}, &brickGaugeVecs)
 
 	glusterBrickLVMetadataPercent = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -230,7 +232,7 @@ var (
 		Help:      "Bricks LV metadata usage percent",
 		LongHelp:  "",
 		Labels:    lvmLbls,
-	})
+	}, &brickGaugeVecs)
 
 	glusterVGExtentTotal = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -238,7 +240,7 @@ var (
 		Help:      "VG extent total count ",
 		LongHelp:  "",
 		Labels:    lvmLbls,
-	})
+	}, &brickGaugeVecs)
 
 	glusterVGExtentAlloc = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -246,7 +248,7 @@ var (
 		Help:      "VG extent allocated count ",
 		LongHelp:  "",
 		Labels:    lvmLbls,
-	})
+	}, &brickGaugeVecs)
 
 	glusterThinPoolDataTotal = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -254,7 +256,7 @@ var (
 		Help:      "Thin pool size Bytes",
 		LongHelp:  "",
 		Labels:    thinLvmLbls,
-	})
+	}, &brickGaugeVecs)
 
 	glusterThinPoolDataUsed = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -262,7 +264,7 @@ var (
 		Help:      "Thin pool data used Bytes",
 		LongHelp:  "",
 		Labels:    thinLvmLbls,
-	})
+	}, &brickGaugeVecs)
 
 	glusterThinPoolMetadataTotal = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -270,7 +272,7 @@ var (
 		Help:      "Thin pool metadata size Bytes",
 		LongHelp:  "",
 		Labels:    thinLvmLbls,
-	})
+	}, &brickGaugeVecs)
 
 	glusterThinPoolMetadataUsed = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -278,7 +280,9 @@ var (
 		Help:      "Thin pool metadata used Bytes",
 		LongHelp:  "",
 		Labels:    thinLvmLbls,
-	})
+	}, &brickGaugeVecs)
+
+	brickStatusGaugeVecs []*prometheus.GaugeVec
 
 	glusterBrickUp = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -286,7 +290,7 @@ var (
 		Help:      "Brick up (1-up, 0-down)",
 		LongHelp:  "",
 		Labels:    brickStatusLbls,
-	})
+	}, &brickStatusGaugeVecs)
 )
 
 func getGlusterBrickLabels(brick glusterutils.Brick, subvol string) prometheus.Labels {
@@ -576,7 +580,13 @@ func lvmUsage(path string) (stats []LVMStat, thinPoolStats []ThinPoolStat, err e
 }
 
 func brickUtilization(gluster glusterutils.GInterface) error {
+	// Reset all vecs to not export stale information
+	for _, gaugeVec := range brickGaugeVecs {
+		gaugeVec.Reset()
+	}
+
 	volumes, err := gluster.VolumeInfo()
+
 	if err != nil {
 		// Return without exporting metric in this cycle
 		return err
@@ -693,11 +703,18 @@ func getBrickStatusLabels(vol string, host string, brickPath string, peerID stri
 }
 
 func brickStatus(gluster glusterutils.GInterface) error {
+	// Reset all vecs to not export stale information
+	for _, gaugeVec := range brickStatusGaugeVecs {
+		gaugeVec.Reset()
+	}
+
 	isLeader, err := gluster.IsLeader()
+
 	if err != nil {
 		log.WithError(err).Error("Unable to find if the current node is leader")
 		return err
 	}
+
 	if !isLeader {
 		return nil
 	}
@@ -706,6 +723,7 @@ func brickStatus(gluster glusterutils.GInterface) error {
 	if err != nil {
 		return err
 	}
+
 	for _, volume := range volumes {
 		// If volume is down, the bricks should be marked down
 		var brickStatus []glusterutils.BrickStatus

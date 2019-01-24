@@ -15,13 +15,15 @@ var (
 		},
 	}
 
+	volumeCountGaugeVecs []*prometheus.GaugeVec
+
 	glusterVolumeTotalCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_total_count",
 		Help:      "Total no of volumes",
 		LongHelp:  "",
 		Labels:    []MetricLabel{},
-	})
+	}, &volumeCountGaugeVecs)
 
 	glusterVolumeCreatedCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -29,7 +31,7 @@ var (
 		Help:      "Freshly created no of volumes",
 		LongHelp:  "",
 		Labels:    []MetricLabel{},
-	})
+	}, &volumeCountGaugeVecs)
 
 	glusterVolumeStartedCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -37,7 +39,7 @@ var (
 		Help:      "Total no of started volumes",
 		LongHelp:  "",
 		Labels:    []MetricLabel{},
-	})
+	}, &volumeCountGaugeVecs)
 
 	glusterVolumeBrickCount = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -45,7 +47,7 @@ var (
 		Help:      "Total no of bricks in volume",
 		LongHelp:  "",
 		Labels:    volumeLabels,
-	})
+	}, &volumeCountGaugeVecs)
 
 	glusterVolumeSnapshotBrickCountTotal = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -53,7 +55,7 @@ var (
 		Help:      "Total count of snapshots bricks for volume",
 		LongHelp:  "",
 		Labels:    volumeLabels,
-	})
+	}, &volumeCountGaugeVecs)
 
 	glusterVolumeSnapshotBrickCountActive = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -61,7 +63,7 @@ var (
 		Help:      "Total active count of snapshots bricks for volume",
 		LongHelp:  "",
 		Labels:    volumeLabels,
-	})
+	}, &volumeCountGaugeVecs)
 
 	glusterVolumeUp = newPrometheusGaugeVec(Metric{
 		Namespace: "gluster",
@@ -69,7 +71,7 @@ var (
 		Help:      "Volume is started or not (1-started, 0-not started)",
 		LongHelp:  "",
 		Labels:    volumeLabels,
-	})
+	}, &volumeCountGaugeVecs)
 )
 
 func getVolumeLabels(volname string) prometheus.Labels {
@@ -79,7 +81,13 @@ func getVolumeLabels(volname string) prometheus.Labels {
 }
 
 func volumeCounts(gluster glusterutils.GInterface) error {
+	// Reset all vecs to not export stale information
+	for _, gaugeVec := range volumeCountGaugeVecs {
+		gaugeVec.Reset()
+	}
+
 	isLeader, err := gluster.IsLeader()
+
 	if err != nil {
 		log.WithError(err).Error("Unable to find if the current node is leader")
 		return err
