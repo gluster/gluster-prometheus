@@ -42,7 +42,7 @@ var (
 		Help:      "self heal count for volume in split brain",
 		LongHelp:  "",
 		Labels:    volumeHealLabels,
-	})
+	}, &volumeHealGaugeVecs)
 
 	volumeProfileInfoLabels = []MetricLabel{
 		clusterIDLabel,
