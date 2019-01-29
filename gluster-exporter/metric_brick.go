@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
@@ -608,7 +609,7 @@ func brickUtilization(gluster glusterutils.GInterface) error {
 	}
 
 	for _, volume := range volumes {
-		if volume.State != glusterutils.VolumeStateStarted {
+		if volume.State != glusterconsts.VolumeStateStarted {
 			// Export brick metrics only if the Volume
 			// is is in Started state
 			continue
@@ -639,10 +640,10 @@ func brickUtilization(gluster glusterutils.GInterface) error {
 					// Skip exporting utilization data in case of arbiter
 					// brick to avoid wrong values when both the data bricks
 					// are down
-					if brick.Type != glusterutils.BrickTypeArbiter && usage.Used >= maxBrickUsed {
+					if brick.Type != glusterconsts.BrickTypeArbiter && usage.Used >= maxBrickUsed {
 						maxBrickUsed = usage.Used
 					}
-					if brick.Type != glusterutils.BrickTypeArbiter {
+					if brick.Type != glusterconsts.BrickTypeArbiter {
 						if leastBrickTotal == 0 || usage.All <= leastBrickTotal {
 							leastBrickTotal = usage.All
 						}
@@ -680,7 +681,7 @@ func brickUtilization(gluster glusterutils.GInterface) error {
 			effectiveCapacity := maxBrickUsed
 			effectiveTotalCapacity := leastBrickTotal
 			var subvolLabels = getGlusterSubvolLabels(volume.Name, subvol.Name)
-			if subvol.Type == glusterutils.SubvolTypeDisperse {
+			if subvol.Type == glusterconsts.SubvolTypeDisperse {
 				// In disperse volume data bricks contribute to the sub
 				// volume size
 				effectiveCapacity = maxBrickUsed * float64(subvol.DisperseDataCount)
@@ -737,7 +738,7 @@ func brickStatus(gluster glusterutils.GInterface) error {
 	for _, volume := range volumes {
 		// If volume is down, the bricks should be marked down
 		var brickStatus []glusterutils.BrickStatus
-		if volume.State != glusterutils.VolumeStateStarted {
+		if volume.State != glusterconsts.VolumeStateStarted {
 			for _, subvol := range volume.SubVolumes {
 				for _, brick := range subvol.Bricks {
 					status := glusterutils.BrickStatus{

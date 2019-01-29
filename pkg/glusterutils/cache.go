@@ -4,6 +4,8 @@ import (
 	"errors"
 	"sync"
 	"time"
+
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 )
 
 // GCache is a wrapper around 'GInterface' object
@@ -309,4 +311,12 @@ func (gc *GCache) VolumeProfileInfo(vol string) ([]ProfileInfo, error) {
 		err = errors.New("[CacheError] Unable to convert back to a valid return type")
 	}
 	return retVal, err
+}
+
+// GConfig implements GConfigInterface
+func (gc *GCache) GConfig() (gConf *conf.GConfig) {
+	// below comment is needed to avoid go-metalinter failures
+	// #nosec
+	gConf, _ = conf.GConfigFromInterface(gc.gd)
+	return
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
@@ -112,10 +113,10 @@ func volumeCounts(gluster glusterutils.GInterface) error {
 	for _, volume := range volumes {
 		up := 0
 		switch volume.State {
-		case glusterutils.VolumeStateStarted:
+		case glusterconsts.VolumeStateStarted:
 			up = 1
 			volStartCount++
-		case glusterutils.VolumeStateCreated:
+		case glusterconsts.VolumeStateCreated:
 			volCreatedCount++
 		default:
 			// Volume is stopped, nothing to do as the stopped count

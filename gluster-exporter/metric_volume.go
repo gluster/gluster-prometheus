@@ -4,7 +4,9 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
@@ -415,9 +417,13 @@ func profileInfo(gluster glusterutils.GInterface) error {
 	if err != nil {
 		return err
 	}
-	volOption := glusterutils.CountFOPHitsGD1
-	if glusterConfig.GlusterMgmt == glusterutils.MgmtGlusterd2 {
-		volOption = glusterutils.CountFOPHitsGD2
+	volOption := glusterconsts.CountFOPHitsGD1
+	var glusterConfig *conf.GConfig
+	if glusterConfig, err = conf.GConfigFromInterface(gluster); err != nil {
+		return err
+	}
+	if glusterConfig.GlusterMgmt == glusterconsts.MgmtGlusterd2 {
+		volOption = glusterconsts.CountFOPHitsGD2
 	}
 	var (
 		// supported aggregated operations are,

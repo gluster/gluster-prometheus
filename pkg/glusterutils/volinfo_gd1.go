@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
 )
 
 // VolumeInfo returns gluster vol info (glusterd)
@@ -52,9 +54,9 @@ func (g *GD1) VolumeInfo() ([]Volume, error) {
 			outvol.SubVolumes[sidx].DisperseRedundancyCount = vol.DisperseRedundancyCount
 			outvol.SubVolumes[sidx].Name = fmt.Sprintf("%s-%s-%d", vol.Name, strings.ToLower(subvolType), sidx)
 			for bidx := 0; bidx < subvolBricksCount; bidx++ {
-				brickType := BrickTypeDefault
+				brickType := glusterconsts.BrickTypeDefault
 				if vol.Bricks[sidx+bidx].IsArbiter == 1 {
-					brickType = BrickTypeArbiter
+					brickType = glusterconsts.BrickTypeArbiter
 				}
 				brickParts := strings.Split(vol.Bricks[sidx+bidx].Name, ":")
 				brick := Brick{

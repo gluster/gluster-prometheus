@@ -3,10 +3,11 @@ package glusterutils
 import (
 	"time"
 
+	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/gluster/glusterd2/pkg/restclient"
 )
 
-func initRESTClient(config *Config) (*restclient.Client, error) {
+func initRESTClient(config *conf.GConfig) (*restclient.Client, error) {
 	client, err := restclient.New(
 		config.Glusterd2Endpoint,
 		config.Glusterd2User,
@@ -21,7 +22,7 @@ func initRESTClient(config *Config) (*restclient.Client, error) {
 	return client, nil
 }
 
-func setDefaultConfig(config *Config) {
+func setDefaultConfig(config *conf.GConfig) {
 	if config.Timeout == 0 {
 		config.Timeout = 30
 	}

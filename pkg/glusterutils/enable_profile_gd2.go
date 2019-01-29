@@ -1,6 +1,7 @@
 package glusterutils
 
 import (
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
 	"github.com/gluster/glusterd2/pkg/api"
 	log "github.com/sirupsen/logrus"
 )
@@ -12,15 +13,15 @@ func (g *GD2) EnableVolumeProfiling(volume Volume) error {
 		return err
 	}
 
-	value, exists := volume.Options[CountFOPHitsGD2]
+	value, exists := volume.Options[glusterconsts.CountFOPHitsGD2]
 	if !exists {
 		// Enable profiling for the volumes as its not set
 		err := client.VolumeSet(
 			volume.Name,
 			api.VolOptionReq{
 				Options: map[string]string{
-					CountFOPHitsGD2:       "on",
-					LatencyMeasurementGD2: "on",
+					glusterconsts.CountFOPHitsGD2:       "on",
+					glusterconsts.LatencyMeasurementGD2: "on",
 				},
 				VolOptionFlags: api.VolOptionFlags{
 					AllowAdvanced: true,
