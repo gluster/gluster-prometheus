@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
 	"github.com/gluster/gluster-prometheus/pkg/logging"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -31,8 +31,7 @@ var (
 	docgen                        = flag.Bool("docgen", false, "Generate exported metrics documentation in Asciidoc format")
 	config                        = flag.String("config", defaultConfFile, "Config file path")
 	defaultInterval time.Duration = 5
-	glusterConfig   glusterutils.Config
-	clusterIDLabel  = MetricLabel{
+	clusterIDLabel                = MetricLabel{
 		Name: "cluster_id",
 		Help: "Cluster ID",
 	}
@@ -57,7 +56,7 @@ func dumpVersionInfo() {
 }
 
 func getDefaultGlusterdDir(mgmt string) string {
-	if mgmt == glusterutils.MgmtGlusterd2 {
+	if mgmt == glusterconsts.MgmtGlusterd2 {
 		return defaultGlusterd2Workdir
 	}
 	return defaultGlusterd1Workdir
@@ -88,38 +87,22 @@ func main() {
 	}
 
 	// Create Log dir
-	err = os.MkdirAll(exporterConf.GlobalConf.LogDir, 0750)
+	err = os.MkdirAll(exporterConf.LogDir, 0750)
 	if err != nil {
-		log.WithError(err).WithField("logdir", exporterConf.GlobalConf.LogDir).
+		log.WithError(err).WithField("logdir", exporterConf.LogDir).
 			Fatal("Failed to create log directory")
 	}
 
-	if err := logging.Init(exporterConf.GlobalConf.LogDir, exporterConf.GlobalConf.LogFile, exporterConf.GlobalConf.LogLevel); err != nil {
+	if err := logging.Init(exporterConf.LogDir, exporterConf.LogFile, exporterConf.LogLevel); err != nil {
 		log.WithError(err).Fatal("Failed to initialize logging")
 	}
 
 	// Set the Gluster Configurations used in glusterutils
-	glusterConfig.GlusterMgmt = "glusterd"
-	if exporterConf.GlobalConf.GlusterMgmt != "" {
-		glusterConfig.GlusterMgmt = exporterConf.GlobalConf.GlusterMgmt
-		if exporterConf.GlobalConf.GlusterMgmt == "glusterd2" {
-			if exporterConf.GlobalConf.GD2RESTEndpoint != "" {
-				glusterConfig.Glusterd2Endpoint = exporterConf.GlobalConf.GD2RESTEndpoint
-			}
-		}
+	if exporterConf.GlusterdWorkdir == "" {
+		exporterConf.GlusterdWorkdir =
+			getDefaultGlusterdDir(exporterConf.GlusterMgmt)
 	}
-
-	// If GD2_ENDPOINTS env variable is set, use that info
-	// for making REST API calls
-	if endpoint := os.Getenv("GD2_ENDPOINTS"); endpoint != "" {
-		glusterConfig.Glusterd2Endpoint = strings.Split(endpoint, ",")[0]
-	}
-
-	glusterConfig.GlusterdWorkdir = getDefaultGlusterdDir(glusterConfig.GlusterMgmt)
-	if exporterConf.GlobalConf.GlusterdDir != "" {
-		glusterConfig.GlusterdWorkdir = exporterConf.GlobalConf.GlusterdDir
-	}
-	gluster = glusterutils.MakeGluster(&glusterConfig, exporterConf)
+	gluster = glusterutils.MakeGluster(exporterConf)
 
 	// start := time.Now()
 
@@ -128,7 +111,8 @@ func main() {
 			if !collectorConf.Disabled {
 				go func(m glusterMetric, gi glusterutils.GInterface) {
 					for {
-						clusterID = glusterutils.GetClusterID()
+						// exporter's config will have proper Cluster ID set
+						clusterID = exporterConf.GlusterClusterID
 						err := m.fn(gi)
 						interval := defaultInterval
 						if collectorConf.SyncInterval > 0 {
@@ -151,8 +135,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsPath := exporterConf.GlobalConf.MetricsPath
-	port := exporterConf.GlobalConf.Port
+	metricsPath := exporterConf.MetricsPath
+	port := exporterConf.Port
 	http.Handle(metricsPath, promhttp.Handler())
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Failed to run exporter\nError: %s", err)

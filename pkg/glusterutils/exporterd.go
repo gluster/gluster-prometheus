@@ -12,11 +12,11 @@ import (
 	"time"
 
 	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
 )
 
 var (
-	peerIDPattern    = regexp.MustCompile("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
-	defaultClusterID = "default"
+	peerIDPattern = regexp.MustCompile("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
 )
 
 // IsLeader returns true or false based on whether the node is the leader of the cluster or not
@@ -69,16 +69,19 @@ func (g *GD2) IsLeader() (bool, error) {
 }
 
 // MakeGluster returns respective gluster obj based on configuration
-func MakeGluster(config *Config, expConf *conf.Config) GInterface {
-	var gi GInterface
-	setDefaultConfig(config)
-	gi = &GD2{config: config}
-	if config.GlusterMgmt == "" || config.GlusterMgmt == MgmtGlusterd {
-		gi = &GD1{config: config}
+func MakeGluster(expConf *conf.Config) (gi GInterface) {
+	gConfig := expConf.GConfig()
+	if gConfig == nil {
+		return nil
 	}
-	cacheTTL := time.Duration(expConf.GlobalConf.CacheTTL) * time.Second
+	setDefaultConfig(gConfig)
+	gi = &GD2{config: gConfig}
+	if gConfig.GlusterMgmt == "" || gConfig.GlusterMgmt == glusterconsts.MgmtGlusterd {
+		gi = &GD1{config: gConfig}
+	}
+	cacheTTL := time.Duration(expConf.CacheTTL) * time.Second
 	cachedGI := NewGCacheWithTTL(gi, cacheTTL)
-	cachedGI.EnableCacheForFuncs(expConf.GlobalConf.CacheEnabledFuncs)
+	cachedGI.EnableCacheForFuncs(expConf.CacheEnabledFuncs)
 	return cachedGI
 }
 
@@ -132,11 +135,23 @@ func (g *GD2) LocalPeerID() (string, error) {
 }
 
 // GetClusterID returns local clusterd ID
-func GetClusterID() string {
-	if clusterid := os.Getenv("GLUSTER_CLUSTER_ID"); clusterid != "" {
-		return clusterid
+func GetClusterID() (clusterID string) {
+	if clusterID = os.Getenv(glusterconsts.EnvGlusterClusterID); clusterID == "" {
+		clusterID = glusterconsts.DefaultGlusterClusterID
 	}
-	return defaultClusterID
+	return
+}
+
+// GConfig method returns the configuration
+// this implements the 'conf.GConfigInterface'
+func (g *GD1) GConfig() *conf.GConfig {
+	return g.config
+}
+
+// GConfig method returns the configuration
+// this implements the 'conf.GConfigInterface'
+func (g *GD2) GConfig() *conf.GConfig {
+	return g.config
 }
 
 // GetGlusterVersion gets the glusterfs version

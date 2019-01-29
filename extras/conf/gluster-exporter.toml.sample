@@ -1,4 +1,5 @@
 [globals]
+gluster-cluster-id = ""
 gluster-mgmt = "glusterd"
 glusterd-dir = "/var/lib/glusterd"
 gluster-binary-path = "gluster"

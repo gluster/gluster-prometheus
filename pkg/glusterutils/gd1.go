@@ -2,6 +2,8 @@ package glusterutils
 
 import (
 	"encoding/xml"
+
+	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
 )
 
 type healBricks struct {
@@ -165,10 +167,10 @@ func (t *gd1Transport) String() string {
 
 func getSubvolType(voltype string) string {
 	switch voltype {
-	case VolumeTypeDistReplicate:
-		return SubvolTypeReplicate
-	case VolumeTypeDistDisperse:
-		return SubvolTypeDisperse
+	case glusterconsts.VolumeTypeDistReplicate:
+		return glusterconsts.SubvolTypeReplicate
+	case glusterconsts.VolumeTypeDistDisperse:
+		return glusterconsts.SubvolTypeDisperse
 	default:
 		return voltype
 	}
