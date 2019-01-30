@@ -56,6 +56,17 @@ type gd1Volumes struct {
 	List    []gd1Volume `xml:"volInfo>volumes>volume"`
 }
 
+type gd1VolumeStatusDetail struct {
+	Name      string       `xml:"volName"`
+	NodeCount int          `xml:"nodeCount"`
+	Nodes     []gd1Process `xml:"node"`
+}
+
+type gd1VolumesDetail struct {
+	XMLName xml.Name                `xml:"cliOutput"`
+	List    []gd1VolumeStatusDetail `xml:"volStatus>volumes>volume"`
+}
+
 type snapshotParentVolume struct {
 	Name          string `xml:"name"`
 	SnapCount     int    `xml:"snapCount"`
@@ -143,6 +154,10 @@ type gd1Process struct {
 	Port          string           `xml:"port"` // can contain 'N/A' entries
 	ProtocolPorts gd1ProtocolPorts `xml:"ports"`
 	PID           int              `xml:"pid"`
+	InodesTotal   uint64           `xml:"inodesTotal"`
+	InodesFree    uint64           `xml:"inodesFree"`
+	SizeTotal     uint64           `xml:"sizeTotal"`
+	SizeFree      uint64           `xml:"sizeFree"`
 }
 
 type gd1VolumeStatusInfo struct {
