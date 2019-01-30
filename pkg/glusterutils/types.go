@@ -52,6 +52,12 @@ type Volume struct {
 	ReplicaCount            int               `json:"replica-count"`
 }
 
+// VolumeStatus represents the detailed status of a Gluster volume
+type VolumeStatus struct {
+	Name  string
+	Nodes []BrickStatus
+}
+
 // HealEntry describe gluster heal info for each brick
 type HealEntry struct {
 	PeerID         string
@@ -70,12 +76,17 @@ type Snapshot struct {
 
 // BrickStatus describes the status details of volume brick
 type BrickStatus struct {
-	Hostname string
-	PeerID   string
-	Status   int
-	PID      int
-	Path     string
-	Volume   string
+	Hostname       string
+	PeerID         string
+	Status         int
+	PID            int
+	Port           int
+	Path           string
+	Volume         string
+	Capacity       uint64
+	Free           uint64
+	Gd1InodesFree  int64 // only valid with GD1, -1 with GD2
+	Gd1InodesTotal int64 // only valid with GD1, -1 with GD2
 }
 
 // GInterface should be implemented in GD1 and GD2 structs
@@ -90,6 +101,7 @@ type GInterface interface {
 	VolumeProfileInfo(vol string) ([]ProfileInfo, error)
 	VolumeBrickStatus(vol string) ([]BrickStatus, error)
 	EnableVolumeProfiling(volinfo Volume) error
+	VolumeStatus() ([]VolumeStatus, error)
 }
 
 // FopStat defines file ops related details

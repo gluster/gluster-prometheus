@@ -289,6 +289,29 @@ func (gc *GCache) VolumeInfo() ([]Volume, error) {
 	return retVal, err
 }
 
+// VolumeStatus method wraps the GInterface.VolumeStatus call
+func (gc *GCache) VolumeStatus() ([]VolumeStatus, error) {
+	gc.lock.Lock()
+	defer gc.lock.Unlock()
+	// caching the results for each volume
+	const localName = "VolumeProfileStatus"
+	var retVal []VolumeStatus
+	var err error
+	var ok bool
+	if gc.timeForNewCall(localName, localName) {
+		if retVal, err = gc.gd.VolumeStatus(); err != nil {
+			return retVal, err
+		}
+		// reset the last called time only on a successful call
+		gc.lastCallTimeMap[localName] = time.Now()
+		gc.lastCallValueMap[localName] = retVal
+	}
+	if retVal, ok = gc.lastCallValueMap[localName].([]VolumeStatus); !ok {
+		err = errors.New("[CacheError] Unable to convert back to a valid return type")
+	}
+	return retVal, err
+}
+
 // VolumeProfileInfo method wraps the GInterface.VolumeProfileInfo call
 func (gc *GCache) VolumeProfileInfo(vol string) ([]ProfileInfo, error) {
 	gc.lock.Lock()

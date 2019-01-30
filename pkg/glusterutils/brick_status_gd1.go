@@ -7,7 +7,7 @@ import (
 // VolumeBrickStatus gets brick status info from glusterd2 using rest api
 func (g GD1) VolumeBrickStatus(vol string) ([]BrickStatus, error) {
 	// Run gluster volume status {vol}
-	out, err := g.execGluster("volume", "status", vol)
+	out, err := g.execGluster("volume", "status", vol, "detail")
 	if err != nil {
 		return nil, err
 	}
