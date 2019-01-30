@@ -27,6 +27,7 @@ func (g *GD2) Peers() ([]Peer, error) {
 			ID:            peergd2.ID.String(),
 			PeerAddresses: peergd2.PeerAddresses,
 			Online:        peergd2.Online,
+			Gd1State:      -1, // Gd1State is not valid for GD2
 		}
 	}
 	return peersgd2, nil

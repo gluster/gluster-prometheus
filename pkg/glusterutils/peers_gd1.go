@@ -42,6 +42,7 @@ func (g *GD1) Peers() ([]Peer, error) {
 			ID:            peergd1.PeerID,
 			PeerAddresses: peergd1.Hostname,
 			Online:        online,
+			Gd1State:      peergd1.State,
 		}
 	}
 
