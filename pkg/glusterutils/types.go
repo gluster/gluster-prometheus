@@ -9,6 +9,7 @@ type Peer struct {
 	ID            string   `json:"id"`
 	PeerAddresses []string `json:"peer-addresses"`
 	Online        bool     `json:"online"`
+	Gd1State      int      // GD1 only
 }
 
 // Brick represents Gluster Brick
