@@ -37,6 +37,7 @@ collectors related configurations.
 gluster-mgmt = "glusterd"
 glusterd-dir = "/var/lib/glusterd"
 gluster-binary-path = "gluster"
+gd1-remote-host = "localhost"
 gd2-rest-endpoint = "http://127.0.0.1:24007"
 port = 8080
 metrics-path = "/metrics"

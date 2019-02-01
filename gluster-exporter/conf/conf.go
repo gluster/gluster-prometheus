@@ -15,6 +15,7 @@ type GConfig struct {
 	GlusterMgmt       string `toml:"gluster-mgmt"`
 	Glusterd2Endpoint string `toml:"gd2-rest-endpoint"`
 	GlusterCmd        string `toml:"gluster-binary-path"`
+	GlusterRemoteHost string `toml:"gd1-remote-host"`
 	GlusterdWorkdir   string `toml:"glusterd-dir"`
 	GlusterClusterID  string `toml:"gluster-cluster-id"`
 	Glusterd2User     string
