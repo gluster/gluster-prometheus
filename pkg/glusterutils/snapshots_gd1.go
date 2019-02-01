@@ -2,13 +2,12 @@ package glusterutils
 
 import (
 	"encoding/xml"
-	"os/exec"
 )
 
 // Snapshots returns snaphosts list for the cluster
 func (g *GD1) Snapshots() ([]Snapshot, error) {
-	// Run Gluster snapshot list --xml
-	out, err := exec.Command(g.config.GlusterCmd, "snapshot", "info", "--xml").Output()
+	// Run Gluster snapshot list
+	out, err := g.execGluster("snapshot", "info")
 	if err != nil {
 		return nil, err
 	}

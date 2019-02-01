@@ -2,13 +2,12 @@ package glusterutils
 
 import (
 	"encoding/xml"
-	"os/exec"
 )
 
 // VolumeBrickStatus gets brick status info from glusterd2 using rest api
 func (g GD1) VolumeBrickStatus(vol string) ([]BrickStatus, error) {
-	// Run gluster volume status {vol} --xml
-	out, err := exec.Command(g.config.GlusterCmd, "volume", "status", vol, "--xml").Output()
+	// Run gluster volume status {vol}
+	out, err := g.execGluster("volume", "status", vol)
 	if err != nil {
 		return nil, err
 	}
