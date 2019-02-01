@@ -190,9 +190,11 @@ func getSubvolBricksCount(replicaCount int, disperseCount int) int {
 	return 1
 }
 
-// execGluster runs `gluster` with --xml and the args provided
+// execGluster runs `gluster` with --xml --remote-host=<...> and the args provided
 func (g *GD1) execGluster(args ...string) ([]byte, error) {
 	// always request output in XML format
 	args = append(args, "--xml")
+	// grab remote host from config
+	args = append(args, fmt.Sprintf("--remote-host=%s", g.config.GlusterRemoteHost))
 	return exec.Command(g.config.GlusterCmd, args...).Output()
 }

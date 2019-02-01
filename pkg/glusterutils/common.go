@@ -32,6 +32,9 @@ func setDefaultConfig(config *conf.GConfig) {
 	if config.GlusterCmd == "" {
 		config.GlusterCmd = "gluster"
 	}
+	if config.GlusterRemoteHost == "" {
+		config.GlusterRemoteHost = "localhost"
+	}
 	if config.Glusterd2Endpoint == "" {
 		config.Glusterd2Endpoint = "http://localhost:24007"
 	}
