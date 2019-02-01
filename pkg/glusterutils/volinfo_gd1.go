@@ -3,7 +3,6 @@ package glusterutils
 import (
 	"encoding/xml"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
@@ -11,8 +10,8 @@ import (
 
 // VolumeInfo returns gluster vol info (glusterd)
 func (g *GD1) VolumeInfo() ([]Volume, error) {
-	// Run Gluster volume info --xml
-	out, err := exec.Command(g.config.GlusterCmd, "volume", "info", "--xml").Output()
+	// Run Gluster volume info
+	out, err := g.execGluster("volume", "info")
 	if err != nil {
 		return nil, err
 	}

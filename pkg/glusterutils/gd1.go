@@ -4,6 +4,9 @@ import (
 	"encoding/xml"
 
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
+
+	"fmt"
+	"os/exec"
 )
 
 type healBricks struct {
@@ -185,4 +188,11 @@ func getSubvolBricksCount(replicaCount int, disperseCount int) int {
 		return disperseCount
 	}
 	return 1
+}
+
+// execGluster runs `gluster` with --xml and the args provided
+func (g *GD1) execGluster(args ...string) ([]byte, error) {
+	// always request output in XML format
+	args = append(args, "--xml")
+	return exec.Command(g.config.GlusterCmd, args...).Output()
 }

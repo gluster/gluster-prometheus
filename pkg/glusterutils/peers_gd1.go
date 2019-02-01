@@ -2,7 +2,6 @@ package glusterutils
 
 import (
 	"encoding/xml"
-	"os/exec"
 )
 
 type peerGlusterd1 struct {
@@ -22,7 +21,7 @@ type peersGlusterd1 struct {
 func (g *GD1) Peers() ([]Peer, error) {
 	var gd1Peers peersGlusterd1
 	var peersgd1 []Peer
-	out, err := exec.Command(g.config.GlusterCmd, "pool", "list", "--xml").Output()
+	out, err := g.execGluster("pool", "list")
 	if err != nil {
 		return peersgd1, err
 	}

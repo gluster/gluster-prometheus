@@ -2,13 +2,12 @@ package glusterutils
 
 import (
 	"encoding/xml"
-	"os/exec"
 )
 
 // VolumeProfileInfo returns profile info details for the volume
 func (g *GD1) VolumeProfileInfo(vol string) ([]ProfileInfo, error) {
-	// Run Gluster volume profile <volname> info --xml
-	out, err := exec.Command(g.config.GlusterCmd, "volume", "profile", vol, "info", "--xml").Output()
+	// Run Gluster volume profile <volname> info
+	out, err := g.execGluster("volume", "profile", vol, "info")
 	if err != nil {
 		return nil, err
 	}

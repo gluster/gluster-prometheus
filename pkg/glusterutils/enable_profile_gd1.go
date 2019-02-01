@@ -1,8 +1,6 @@
 package glusterutils
 
 import (
-	"os/exec"
-
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils/glusterconsts"
 	log "github.com/sirupsen/logrus"
 )
@@ -12,7 +10,7 @@ func (g *GD1) EnableVolumeProfiling(volume Volume) error {
 	value, exists := volume.Options[glusterconsts.CountFOPHitsGD1]
 	if !exists {
 		// Enable profiling for the volumes as its not set
-		_, err := exec.Command(g.config.GlusterCmd, "volume", "profile", volume.Name, "start").Output()
+		_, err := g.execGluster("volume", "profile", volume.Name, "start")
 		if err != nil {
 			return err
 		}
