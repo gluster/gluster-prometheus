@@ -101,5 +101,5 @@ func GConfigFromInterface(iFace interface{}) (*GConfig, error) {
 	if gConfig, ok := iFace.(GConfigInterface); ok {
 		return gConfig.GConfig(), nil
 	}
-	return nil, errors.New("Provided interface don't implement 'GConfigInterface'")
+	return nil, errors.New("provided interface don't implement 'GConfigInterface'")
 }

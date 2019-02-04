@@ -249,9 +249,9 @@ func newOperationType(commonOpName string, supportedOpLabels []string) (opType, 
 	commonOpName = strings.TrimSpace(commonOpName)
 	var opT = opType{opName: commonOpName}
 	if len(supportedOpLabels) == 0 {
-		return opT, errors.New("Supported operation labels should not be empty")
+		return opT, errors.New("supported operation labels should not be empty")
 	} else if commonOpName == "" {
-		return opT, errors.New("Empty common operation name is not allowed")
+		return opT, errors.New("empty common operation name is not allowed")
 	}
 	opT.opsSupported = make(map[string]struct{})
 	var emtS struct{}
