@@ -54,7 +54,7 @@ install_dep() {
 }
 
 install_gometalinter() {
-  LINTER_VER="2.0.5"
+  LINTER_VER="3.0.0"
   LINTER_TARBALL="gometalinter-${LINTER_VER}-linux-amd64.tar.gz"
   LINTER_URL="https://github.com/alecthomas/gometalinter/releases/download/v${LINTER_VER}/${LINTER_TARBALL}"
 
