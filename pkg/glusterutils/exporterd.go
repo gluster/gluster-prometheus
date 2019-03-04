@@ -58,7 +58,7 @@ func (g *GD2) IsLeader() (bool, error) {
 	}
 	for _, pr := range peerList {
 		if pr.Online {
-			if peerID == peerList[0].ID {
+			if peerID == pr.ID {
 				return true, nil
 			}
 			return false, nil
