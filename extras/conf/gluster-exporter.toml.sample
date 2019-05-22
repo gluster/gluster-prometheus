@@ -3,6 +3,10 @@ gluster-cluster-id = ""
 gluster-mgmt = "glusterd"
 glusterd-dir = "/var/lib/glusterd"
 gluster-binary-path = "gluster"
+# If you want to connect to a remote gd1 host, set the variable gd1-remote-host
+# However, using a remote host restrict the gluster cli to read-only commands
+# The following collectors won't work in remote mode : gluster_volume_counts, gluster_volume_profile 
+#gd1-remote-host = "localhost"
 gd2-rest-endpoint = "http://localhost:24007"
 port = 8080
 metrics-path = "/metrics"
