@@ -17,6 +17,10 @@ var (
 		},
 	}
 
+	countLabels = []MetricLabel{
+		clusterIDLabel,
+	}
+
 	volumeCountGaugeVecs []*prometheus.GaugeVec
 
 	glusterVolumeTotalCount = newPrometheusGaugeVec(Metric{
@@ -24,7 +28,7 @@ var (
 		Name:      "volume_total_count",
 		Help:      "Total no of volumes",
 		LongHelp:  "",
-		Labels:    []MetricLabel{},
+		Labels:    countLabels,
 	}, &volumeCountGaugeVecs)
 
 	glusterVolumeCreatedCount = newPrometheusGaugeVec(Metric{
@@ -32,7 +36,7 @@ var (
 		Name:      "volume_created_count",
 		Help:      "Freshly created no of volumes",
 		LongHelp:  "",
-		Labels:    []MetricLabel{},
+		Labels:    countLabels,
 	}, &volumeCountGaugeVecs)
 
 	glusterVolumeStartedCount = newPrometheusGaugeVec(Metric{
@@ -40,7 +44,7 @@ var (
 		Name:      "volume_started_count",
 		Help:      "Total no of started volumes",
 		LongHelp:  "",
-		Labels:    []MetricLabel{},
+		Labels:    countLabels,
 	}, &volumeCountGaugeVecs)
 
 	glusterVolumeBrickCount = newPrometheusGaugeVec(Metric{

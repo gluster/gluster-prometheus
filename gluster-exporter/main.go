@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/gluster/gluster-prometheus/gluster-exporter/conf"
@@ -86,11 +87,13 @@ func main() {
 		log.WithError(err).Fatal("Loading global config failed")
 	}
 
-	// Create Log dir
-	err = os.MkdirAll(exporterConf.LogDir, 0750)
-	if err != nil {
-		log.WithError(err).WithField("logdir", exporterConf.LogDir).
-			Fatal("Failed to create log directory")
+	if strings.ToLower(exporterConf.LogFile) != "stderr" && exporterConf.LogFile != "-" && strings.ToLower(exporterConf.LogFile) != "stdout" {
+		// Create Log dir
+		err = os.MkdirAll(exporterConf.LogDir, 0750)
+		if err != nil {
+			log.WithError(err).WithField("logdir", exporterConf.LogDir).
+				Fatal("Failed to create log directory")
+		}
 	}
 
 	if err := logging.Init(exporterConf.LogDir, exporterConf.LogFile, exporterConf.LogLevel); err != nil {
