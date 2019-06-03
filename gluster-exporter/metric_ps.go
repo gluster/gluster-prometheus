@@ -40,9 +40,9 @@ var (
 		},
 	}
 
-	psGaugeVecs []*prometheus.GaugeVec
+	psGaugeVecs = make(map[string]*ExportedGaugeVec)
 
-	glusterCPUPercentage = newPrometheusGaugeVec(Metric{
+	glusterCPUPercentage = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "cpu_percentage",
 		Help:      "CPU Percentage used by Gluster processes",
@@ -50,7 +50,7 @@ var (
 		Labels:    labels,
 	}, &psGaugeVecs)
 
-	glusterMemoryPercentage = newPrometheusGaugeVec(Metric{
+	glusterMemoryPercentage = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "memory_percentage",
 		Help:      "Memory Percentage used by Gluster processes",
@@ -58,7 +58,7 @@ var (
 		Labels:    labels,
 	}, &psGaugeVecs)
 
-	glusterResidentMemory = newPrometheusGaugeVec(Metric{
+	glusterResidentMemory = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "resident_memory_bytes",
 		Help:      "Resident Memory of Gluster processes in bytes",
@@ -66,7 +66,7 @@ var (
 		Labels:    labels,
 	}, &psGaugeVecs)
 
-	glusterVirtualMemory = newPrometheusGaugeVec(Metric{
+	glusterVirtualMemory = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "virtual_memory_bytes",
 		Help:      "Virtual Memory of Gluster processes in bytes",
@@ -74,7 +74,7 @@ var (
 		Labels:    labels,
 	}, &psGaugeVecs)
 
-	glusterElapsedTime = newPrometheusGaugeVec(Metric{
+	glusterElapsedTime = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "elapsed_time_seconds",
 		Help:      "Elapsed Time of Gluster processes in seconds",
@@ -141,7 +141,7 @@ func getUnknownLabels(peerID, cmd string, args []string) (prometheus.Labels, err
 func ps(gluster glusterutils.GInterface) error {
 	// Reset all vecs to not export stale information
 	for _, gaugeVec := range psGaugeVecs {
-		gaugeVec.Reset()
+		gaugeVec.RemoveStaleMetrics()
 	}
 
 	args := []string{
@@ -276,11 +276,11 @@ func ps(gluster glusterutils.GInterface) error {
 		rsz = rsz * 1024
 
 		// Update the Metrics
-		glusterCPUPercentage.With(lbls).Set(pcpu)
-		glusterMemoryPercentage.With(lbls).Set(pmem)
-		glusterResidentMemory.With(lbls).Set(rsz)
-		glusterVirtualMemory.With(lbls).Set(vsz)
-		glusterElapsedTime.With(lbls).Set(etimes)
+		psGaugeVecs[glusterCPUPercentage].Set(lbls, pcpu)
+		psGaugeVecs[glusterMemoryPercentage].Set(lbls, pmem)
+		psGaugeVecs[glusterResidentMemory].Set(lbls, rsz)
+		psGaugeVecs[glusterVirtualMemory].Set(lbls, vsz)
+		psGaugeVecs[glusterElapsedTime].Set(lbls, etimes)
 	}
 	return nil
 }

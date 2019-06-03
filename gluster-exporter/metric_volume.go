@@ -28,9 +28,9 @@ var (
 		},
 	}
 
-	volumeHealGaugeVecs []*prometheus.GaugeVec
+	volumeHealGaugeVecs = make(map[string]*ExportedGaugeVec)
 
-	glusterVolumeHealCount = newPrometheusGaugeVec(Metric{
+	glusterVolumeHealCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_heal_count",
 		Help:      "self heal count for volume",
@@ -38,7 +38,7 @@ var (
 		Labels:    volumeHealLabels,
 	}, &volumeHealGaugeVecs)
 
-	glusterVolumeSplitBrainHealCount = newPrometheusGaugeVec(Metric{
+	glusterVolumeSplitBrainHealCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_split_brain_heal_count",
 		Help:      "self heal count for volume in split brain",
@@ -58,9 +58,9 @@ var (
 		},
 	}
 
-	volumeProfileGaugeVecs []*prometheus.GaugeVec
+	volumeProfileGaugeVecs = make(map[string]*ExportedGaugeVec)
 
-	glusterVolumeProfileTotalReads = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileTotalReads = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_total_reads",
 		Help:      "Total no of reads",
@@ -68,7 +68,7 @@ var (
 		Labels:    volumeProfileInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileTotalWrites = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileTotalWrites = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_total_writes",
 		Help:      "Total no of writes",
@@ -76,7 +76,7 @@ var (
 		Labels:    volumeProfileInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileDuration = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileDuration = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_duration_secs",
 		Help:      "Duration",
@@ -84,7 +84,7 @@ var (
 		Labels:    volumeProfileInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileTotalReadsInt = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileTotalReadsInt = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_total_reads_interval",
 		Help:      "Total no of reads for interval stats",
@@ -92,7 +92,7 @@ var (
 		Labels:    volumeProfileInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileTotalWritesInt = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileTotalWritesInt = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_total_writes_interval",
 		Help:      "Total no of writes for interval stats",
@@ -100,7 +100,7 @@ var (
 		Labels:    volumeProfileInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileDurationInt = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileDurationInt = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_duration_secs_interval",
 		Help:      "Duration for interval stats",
@@ -128,7 +128,7 @@ var (
 		},
 	}
 
-	glusterVolumeProfileFopHits = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopHits = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_hits",
 		Help:      "Cumulative FOP hits",
@@ -136,7 +136,7 @@ var (
 		Labels:    volumeProfileFopInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileFopAvgLatency = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopAvgLatency = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_avg_latency",
 		Help:      "Cumulative FOP avergae latency",
@@ -144,7 +144,7 @@ var (
 		Labels:    volumeProfileFopInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileFopMinLatency = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopMinLatency = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_min_latency",
 		Help:      "Cumulative FOP min latency",
@@ -152,7 +152,7 @@ var (
 		Labels:    volumeProfileFopInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileFopMaxLatency = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopMaxLatency = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_max_latency",
 		Help:      "Cumulative FOP max latency",
@@ -160,7 +160,7 @@ var (
 		Labels:    volumeProfileFopInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileFopHitsInt = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopHitsInt = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_hits_interval",
 		Help:      "Interval based FOP hits",
@@ -168,7 +168,7 @@ var (
 		Labels:    volumeProfileFopInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileFopAvgLatencyInt = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopAvgLatencyInt = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_avg_latency_interval",
 		Help:      "Interval based FOP average latency",
@@ -176,7 +176,7 @@ var (
 		Labels:    volumeProfileFopInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileFopMinLatencyInt = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopMinLatencyInt = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_min_latency_interval",
 		Help:      "Interval based FOP min latency",
@@ -184,7 +184,7 @@ var (
 		Labels:    volumeProfileFopInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileFopMaxLatencyInt = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopMaxLatencyInt = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_max_latency_interval",
 		Help:      "Interval based FOP max latency",
@@ -192,7 +192,7 @@ var (
 		Labels:    volumeProfileFopInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileFopTotalHitsAggregatedOps = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopTotalHitsAggregatedOps = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_total_hits_on_aggregated_fops",
 		Help: "Cumulative total hits on aggregated FOPs" +
@@ -201,7 +201,7 @@ var (
 		Labels:   volumeProfileFopInfoLabels,
 	}, &volumeProfileGaugeVecs)
 
-	glusterVolumeProfileFopTotalHitsAggregatedOpsInt = newPrometheusGaugeVec(Metric{
+	glusterVolumeProfileFopTotalHitsAggregatedOpsInt = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_profile_fop_total_hits_on_aggregated_fops_interval",
 		Help: "Interval based total hits on aggregated FOPs" +
@@ -315,7 +315,7 @@ func healCounts(gluster glusterutils.GInterface) error {
 
 	// Reset all vecs to not export stale information
 	for _, gaugeVec := range volumeHealGaugeVecs {
-		gaugeVec.Reset()
+		gaugeVec.RemoveStaleMetrics()
 	}
 
 	if err != nil {
@@ -339,7 +339,7 @@ func healCounts(gluster glusterutils.GInterface) error {
 	// (can be either 'glusterVolumeHealCount' or 'glusterVolumeSplitBrainHealCount')
 	// arg3: volName a string representing the volume name
 	// arg4: errStr the error string in case of error
-	locHealInfoFunc := func(f1 func(string) ([]glusterutils.HealEntry, error), gVect *prometheus.GaugeVec, volName string, errStr string) {
+	locHealInfoFunc := func(f1 func(string) ([]glusterutils.HealEntry, error), gVect string, volName string, errStr string) {
 		// Get the heal count
 		heals, err := f1(volName)
 		if err != nil {
@@ -350,7 +350,7 @@ func healCounts(gluster glusterutils.GInterface) error {
 		}
 		for _, healinfo := range heals {
 			labels := getVolumeHealLabels(volName, healinfo.Hostname, healinfo.Brick)
-			gVect.With(labels).Set(float64(healinfo.NumHealEntries))
+			volumeHealGaugeVecs[gVect].Set(labels, float64(healinfo.NumHealEntries))
 		}
 	}
 
@@ -400,7 +400,7 @@ func getBrickHost(vol glusterutils.Volume, brickname string) string {
 func profileInfo(gluster glusterutils.GInterface) error {
 	// Reset all vecs to not export stale information
 	for _, gaugeVec := range volumeProfileGaugeVecs {
-		gaugeVec.Reset()
+		gaugeVec.RemoveStaleMetrics()
 	}
 
 	isLeader, err := gluster.IsLeader()
@@ -453,32 +453,32 @@ func profileInfo(gluster glusterutils.GInterface) error {
 		}
 		for _, entry := range profileinfo {
 			labels := getVolumeProfileInfoLabels(name, entry.BrickName)
-			glusterVolumeProfileTotalReads.With(labels).Set(float64(entry.TotalReads))
-			glusterVolumeProfileTotalWrites.With(labels).Set(float64(entry.TotalWrites))
-			glusterVolumeProfileDuration.With(labels).Set(float64(entry.Duration))
-			glusterVolumeProfileTotalReadsInt.With(labels).Set(float64(entry.TotalReadsInt))
-			glusterVolumeProfileTotalWritesInt.With(labels).Set(float64(entry.TotalWritesInt))
-			glusterVolumeProfileDurationInt.With(labels).Set(float64(entry.DurationInt))
+			volumeProfileGaugeVecs[glusterVolumeProfileTotalReads].Set(labels, float64(entry.TotalReads))
+			volumeProfileGaugeVecs[glusterVolumeProfileTotalWrites].Set(labels, float64(entry.TotalWrites))
+			volumeProfileGaugeVecs[glusterVolumeProfileDuration].Set(labels, float64(entry.Duration))
+			volumeProfileGaugeVecs[glusterVolumeProfileTotalReadsInt].Set(labels, float64(entry.TotalReadsInt))
+			volumeProfileGaugeVecs[glusterVolumeProfileTotalWritesInt].Set(labels, float64(entry.TotalWritesInt))
+			volumeProfileGaugeVecs[glusterVolumeProfileDurationInt].Set(labels, float64(entry.DurationInt))
 			brickhost := getBrickHost(volume, entry.BrickName)
 			for _, eachOp := range aggregatedOps {
 				fopLbls := getVolumeProfileFopInfoLabels(name, entry.BrickName,
 					brickhost, eachOp.String())
-				glusterVolumeProfileFopTotalHitsAggregatedOps.With(fopLbls).Set(eachOp.opHits(entry.FopStats))
-				glusterVolumeProfileFopTotalHitsAggregatedOpsInt.With(fopLbls).Set(eachOp.opHits(entry.FopStatsInt))
+				volumeProfileGaugeVecs[glusterVolumeProfileFopTotalHitsAggregatedOps].Set(fopLbls, eachOp.opHits(entry.FopStats))
+				volumeProfileGaugeVecs[glusterVolumeProfileFopTotalHitsAggregatedOpsInt].Set(fopLbls, eachOp.opHits(entry.FopStatsInt))
 			}
 			for _, fopInfo := range entry.FopStats {
 				fopLbls := getVolumeProfileFopInfoLabels(name, entry.BrickName, brickhost, fopInfo.Name)
-				glusterVolumeProfileFopHits.With(fopLbls).Set(float64(fopInfo.Hits))
-				glusterVolumeProfileFopAvgLatency.With(fopLbls).Set(fopInfo.AvgLatency)
-				glusterVolumeProfileFopMinLatency.With(fopLbls).Set(fopInfo.MinLatency)
-				glusterVolumeProfileFopMaxLatency.With(fopLbls).Set(fopInfo.MaxLatency)
+				volumeProfileGaugeVecs[glusterVolumeProfileFopHits].Set(fopLbls, float64(fopInfo.Hits))
+				volumeProfileGaugeVecs[glusterVolumeProfileFopAvgLatency].Set(fopLbls, fopInfo.AvgLatency)
+				volumeProfileGaugeVecs[glusterVolumeProfileFopMinLatency].Set(fopLbls, fopInfo.MinLatency)
+				volumeProfileGaugeVecs[glusterVolumeProfileFopMaxLatency].Set(fopLbls, fopInfo.MaxLatency)
 			}
 			for _, fopInfo := range entry.FopStatsInt {
 				fopLbls := getVolumeProfileFopInfoLabels(name, entry.BrickName, brickhost, fopInfo.Name)
-				glusterVolumeProfileFopHitsInt.With(fopLbls).Set(float64(fopInfo.Hits))
-				glusterVolumeProfileFopAvgLatencyInt.With(fopLbls).Set(fopInfo.AvgLatency)
-				glusterVolumeProfileFopMinLatencyInt.With(fopLbls).Set(fopInfo.MinLatency)
-				glusterVolumeProfileFopMaxLatencyInt.With(fopLbls).Set(fopInfo.MaxLatency)
+				volumeProfileGaugeVecs[glusterVolumeProfileFopHitsInt].Set(fopLbls, float64(fopInfo.Hits))
+				volumeProfileGaugeVecs[glusterVolumeProfileFopAvgLatencyInt].Set(fopLbls, fopInfo.AvgLatency)
+				volumeProfileGaugeVecs[glusterVolumeProfileFopMinLatencyInt].Set(fopLbls, fopInfo.MinLatency)
+				volumeProfileGaugeVecs[glusterVolumeProfileFopMaxLatencyInt].Set(fopLbls, fopInfo.MaxLatency)
 			}
 		}
 	}
