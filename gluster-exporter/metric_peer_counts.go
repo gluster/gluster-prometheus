@@ -129,30 +129,30 @@ var (
 		},
 	}
 
-	peerCountsGaugeVecs []*prometheus.GaugeVec
+	peerCountsGaugeVecs = make(map[string]*ExportedGaugeVec)
 
-	glusterPVCount = newPrometheusGaugeVec(Metric{
+	glusterPVCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "pv_count",
 		Help:      "No: of Physical Volumes",
 		LongHelp:  "",
 		Labels:    gnrlMetricLabels,
 	}, &peerCountsGaugeVecs)
-	glusterLVCount = newPrometheusGaugeVec(Metric{
+	glusterLVCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "lv_count",
 		Help:      "No: of Logical Volumes in a Volume Group",
 		LongHelp:  "",
 		Labels:    withVgMetricLabels,
 	}, &peerCountsGaugeVecs)
-	glusterVGCount = newPrometheusGaugeVec(Metric{
+	glusterVGCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "vg_count",
 		Help:      "No: of Volume Groups",
 		LongHelp:  "",
 		Labels:    gnrlMetricLabels,
 	}, &peerCountsGaugeVecs)
-	glusterTPCount = newPrometheusGaugeVec(Metric{
+	glusterTPCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "thinpool_count",
 		Help:      "No: of thinpools in a Volume Group",
@@ -164,7 +164,7 @@ var (
 func peerCounts(gluster glusterutils.GInterface) (err error) {
 	// Reset all vecs to not export stale information
 	for _, gaugeVec := range peerCountsGaugeVecs {
-		gaugeVec.Reset()
+		gaugeVec.RemoveStaleMetrics()
 	}
 
 	var peerID string
@@ -189,13 +189,13 @@ func peerCounts(gluster glusterutils.GInterface) (err error) {
 		"name":       "Physical_Volumes",
 		"peerID":     peerID,
 	}
-	glusterPVCount.With(genrlLbls).Set(float64(pMetrics.PVCount))
+	peerCountsGaugeVecs[glusterPVCount].Set(genrlLbls, float64(pMetrics.PVCount))
 	genrlLbls = prometheus.Labels{
 		"cluster_id": clusterID,
 		"name":       "Volume_Groups",
 		"peerID":     peerID,
 	}
-	glusterVGCount.With(genrlLbls).Set(float64(pMetrics.VGCount))
+	peerCountsGaugeVecs[glusterVGCount].Set(genrlLbls, float64(pMetrics.VGCount))
 	// logical volume counts are added specific to each VG
 	for vgName, lvCount := range pMetrics.LVCountMap {
 		genrlLbls = prometheus.Labels{
@@ -204,7 +204,7 @@ func peerCounts(gluster glusterutils.GInterface) (err error) {
 			"peerID":     peerID,
 			"vgName":     vgName,
 		}
-		glusterLVCount.With(genrlLbls).Set(float64(lvCount))
+		peerCountsGaugeVecs[glusterLVCount].Set(genrlLbls, float64(lvCount))
 	}
 	// similarly thinpool counts are also added per VG
 	for vgName, tpCount := range pMetrics.ThinPoolCountMap {
@@ -214,7 +214,7 @@ func peerCounts(gluster glusterutils.GInterface) (err error) {
 			"peerID":     peerID,
 			"vgName":     vgName,
 		}
-		glusterTPCount.With(genrlLbls).Set(float64(tpCount))
+		peerCountsGaugeVecs[glusterTPCount].Set(genrlLbls, float64(tpCount))
 	}
 	return
 }
