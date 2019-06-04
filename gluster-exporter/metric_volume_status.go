@@ -156,8 +156,7 @@ func volumeInfo(gluster glusterutils.GInterface) (err error) {
 			volStatusGaugeVecs[glusterVolumeBrickFreeBytes].Set(perBrickLabels, float64(node.Free))
 		}
 	}
-
-	return
+	return nil
 }
 
 func init() {

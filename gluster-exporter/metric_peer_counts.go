@@ -49,7 +49,7 @@ func NewPeerMetrics() (*PeerMetrics, error) {
 			break
 		}
 		if decErr != nil {
-			err = errors.New("Unable to parse JSON output: " + err.Error())
+			err = errors.New("Unable to parse JSON output: " + decErr.Error())
 			return nil, err
 		}
 		// if the token is 'vg', collect/decode the details into VGDetails array
@@ -57,7 +57,7 @@ func NewPeerMetrics() (*PeerMetrics, error) {
 			decErr = dec.Decode(&vgs)
 		}
 		if decErr != nil {
-			err = errors.New("JSON output changed, parse failed: " + err.Error())
+			err = errors.New("JSON output changed, parse failed: " + decErr.Error())
 			return nil, err
 		}
 	}
@@ -216,7 +216,7 @@ func peerCounts(gluster glusterutils.GInterface) (err error) {
 		}
 		peerCountsGaugeVecs[glusterTPCount].Set(genrlLbls, float64(tpCount))
 	}
-	return
+	return nil
 }
 
 func init() {

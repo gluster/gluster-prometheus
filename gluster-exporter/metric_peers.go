@@ -107,8 +107,7 @@ func peerInfo(gluster glusterutils.GInterface) (err error) {
 		}
 		peerGaugeVecs[glusterPeerConnected].Set(peerSCLabels, float64(connected))
 	}
-
-	return
+	return nil
 }
 
 func init() {

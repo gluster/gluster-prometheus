@@ -94,17 +94,17 @@ func getCmdLine(pid string) ([]string, error) {
 	return strings.Split(strings.Trim(string(out), "\x00"), "\x00"), nil
 }
 
-func getGlusterdLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
+func getGlusterdLabels(peerID, cmd string) prometheus.Labels {
 	return prometheus.Labels{
 		"cluster_id": clusterID,
 		"name":       cmd,
 		"volume":     "",
 		"peerid":     peerID,
 		"brick_path": "",
-	}, nil
+	}
 }
 
-func getGlusterFsdLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
+func getGlusterFsdLabels(peerID, cmd string, args []string) prometheus.Labels {
 	bpath := ""
 	volume := ""
 
@@ -125,17 +125,17 @@ func getGlusterFsdLabels(peerID, cmd string, args []string) (prometheus.Labels, 
 		"volume":     volume,
 		"peerid":     peerID,
 		"brick_path": bpath,
-	}, nil
+	}
 }
 
-func getUnknownLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
+func getUnknownLabels(peerID, cmd string) prometheus.Labels {
 	return prometheus.Labels{
 		"cluster_id": clusterID,
 		"name":       cmd,
 		"volume":     "",
 		"peerid":     peerID,
 		"brick_path": "",
-	}, nil
+	}
 }
 
 func ps(gluster glusterutils.GInterface) error {
@@ -153,7 +153,7 @@ func ps(gluster glusterutils.GInterface) error {
 		strings.Join(glusterProcs, ","),
 	}
 
-	out, err := exec.Command("ps", args...).Output()
+	out, err := exec.Command("ps", args...).Output() // #nosec
 
 	if err != nil {
 		// Return without exporting metrics in this cycle
@@ -197,29 +197,13 @@ func ps(gluster glusterutils.GInterface) error {
 		var lbls prometheus.Labels
 		switch lineData[6] {
 		case "glusterd":
-			lbls, err = getGlusterdLabels(peerID, lineData[6], cmdlineArgs)
-			if err != nil {
-				log.WithError(err).Debug("Unable to get glusterd labels")
-				continue
-			}
+			lbls = getGlusterdLabels(peerID, lineData[6])
 		case "glusterd2":
-			lbls, err = getGlusterdLabels(peerID, lineData[6], cmdlineArgs)
-			if err != nil {
-				log.WithError(err).Debug("Unable to get glusterd2 labels")
-				continue
-			}
+			lbls = getGlusterdLabels(peerID, lineData[6])
 		case "glusterfsd":
-			lbls, err = getGlusterFsdLabels(peerID, lineData[6], cmdlineArgs)
-			if err != nil {
-				log.WithError(err).Debug("Unable to get glusterfsd labels")
-				continue
-			}
+			lbls = getGlusterFsdLabels(peerID, lineData[6], cmdlineArgs)
 		default:
-			lbls, err = getUnknownLabels(peerID, lineData[6], cmdlineArgs)
-			if err != nil {
-				log.WithError(err).Debug("Unable to get default labels")
-				continue
-			}
+			lbls = getUnknownLabels(peerID, lineData[6])
 		}
 
 		pcpu, err := strconv.ParseFloat(lineData[1], 64)

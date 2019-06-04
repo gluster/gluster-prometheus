@@ -213,5 +213,5 @@ func (g *GD1) execGluster(args ...string) ([]byte, error) {
 	if g.config.GlusterRemoteHost != "" {
 		args = append(args, fmt.Sprintf("--remote-host=%s", g.config.GlusterRemoteHost))
 	}
-	return exec.Command(g.config.GlusterCmd, args...).Output()
+	return exec.Command(g.config.GlusterCmd, args...).Output() // #nosec
 }
