@@ -86,7 +86,7 @@ vendor-install:
 
 test: check-reqs
 	@./scripts/pre-commit.sh
-	@./scripts/gometalinter-tests.sh
+	@./scripts/go-lint.sh
 	@echo
 
 release: build

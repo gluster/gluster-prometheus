@@ -399,7 +399,7 @@ type VGDetails struct {
 func getLVS() ([]LVMStat, []ThinPoolStat, error) {
 	cmd := "lvm vgs --unquoted --reportformat=json --noheading --nosuffix --units m -o lv_uuid,lv_name,data_percent,pool_lv,lv_attr,lv_size,lv_path,lv_metadata_size,metadata_percent,vg_name,vg_extent_count,vg_free_count"
 
-	out, err := exec.Command("sh", "-c", cmd).Output()
+	out, err := exec.Command("sh", "-c", cmd).Output() // #nosec
 	lvmDet := []LVMStat{}
 	thinPool := []ThinPoolStat{}
 	var vgExtentFreeTemp float64

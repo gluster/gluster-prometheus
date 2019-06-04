@@ -46,6 +46,6 @@ run_check '.*\.(ba)?sh' shellcheck
 run_check '.*\.(ba)?sh' bash -n
 
 # Install via: pip install yamllint
-run_check '.*\.ya?ml' yamllint -s -d "{extends: default, rules: {line-length: {allow-non-breakable-inline-mappings: true}}}"
+run_check '.*\.ya?ml' yamllint -s -d "{extends: default, rules: {line-length: {allow-non-breakable-inline-mappings: true}}, ignore: scripts/golangci.yml}"
 
 echo "ALL OK."
