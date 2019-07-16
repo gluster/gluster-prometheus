@@ -81,7 +81,7 @@ vendor-update:
 
 vendor-install:
 	@echo Installing vendored packages
-	@$(DEPENV) dep ensure -v -vendor-only
+	@$(DEPENV) dep ensure -v -vendor-only || $(MAKE) vendor-install
 	@echo
 
 test: check-reqs
