@@ -81,12 +81,12 @@ vendor-update:
 
 vendor-install:
 	@echo Installing vendored packages
-	@$(DEPENV) dep ensure -v -vendor-only
+	@$(DEPENV) dep ensure -v -vendor-only || $(MAKE) vendor-install
 	@echo
 
 test: check-reqs
 	@./scripts/pre-commit.sh
-	@./scripts/gometalinter-tests.sh
+	@./scripts/go-lint.sh
 	@echo
 
 release: build

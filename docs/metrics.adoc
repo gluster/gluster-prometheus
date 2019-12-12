@@ -7,6 +7,9 @@ Used capacity of gluster bricks in bytes
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |host
 |Host name or IP
 
@@ -30,6 +33,9 @@ Free capacity of gluster bricks in bytes
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |host
 |Host name or IP
@@ -55,6 +61,9 @@ Total capacity of gluster bricks in bytes
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |host
 |Host name or IP
 
@@ -78,6 +87,9 @@ Total no of inodes of gluster brick disk
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |host
 |Host name or IP
@@ -103,6 +115,9 @@ Free no of inodes of gluster brick disk
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |host
 |Host name or IP
 
@@ -126,6 +141,9 @@ Used no of inodes of gluster brick disk
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |host
 |Host name or IP
@@ -151,6 +169,9 @@ Effective used capacity of gluster subvolume in bytes
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume Name
 
@@ -166,6 +187,9 @@ Effective total capacity of gluster subvolume in bytes
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume Name
 
@@ -180,6 +204,9 @@ Bricks LV size Bytes
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |host
 |Host name or IP
@@ -214,6 +241,9 @@ Bricks LV usage percent
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |host
 |Host name or IP
 
@@ -246,6 +276,9 @@ Bricks LV metadata size Bytes
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |host
 |Host name or IP
@@ -280,6 +313,9 @@ Bricks LV metadata usage percent
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |host
 |Host name or IP
 
@@ -312,6 +348,9 @@ VG extent total count
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |host
 |Host name or IP
@@ -346,6 +385,9 @@ VG extent allocated count
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |host
 |Host name or IP
 
@@ -379,6 +421,9 @@ Thin pool size Bytes
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |host
 |Host name or IP
 
@@ -405,6 +450,9 @@ Thin pool data used Bytes
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |host
 |Host name or IP
@@ -433,6 +481,9 @@ Thin pool metadata size Bytes
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |host
 |Host name or IP
 
@@ -459,6 +510,9 @@ Thin pool metadata used Bytes
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |host
 |Host name or IP
@@ -487,6 +541,9 @@ Brick up (1-up, 0-down)
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume Name
 
@@ -511,6 +568,9 @@ No: of Physical Volumes
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |name
 |Metric name, for which data is collected
 
@@ -525,6 +585,9 @@ No: of Logical Volumes in a Volume Group
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |name
 |Metric name, for which the data is collected
@@ -544,6 +607,9 @@ No: of Volume Groups
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |name
 |Metric name, for which data is collected
 
@@ -559,6 +625,9 @@ No: of thinpools in a Volume Group
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |name
 |Metric name, for which the data is collected
 
@@ -570,12 +639,63 @@ No: of thinpools in a Volume Group
 
 |===
 
+== gluster_peer_count
+
+Number of peers in cluster
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|===
+
+== gluster_peer_status
+
+Peer status info
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|hostname
+|Hostname of the peer for which data is collected
+
+|uuid
+|Uuid of the peer for which data is collected
+
+|===
+
+== gluster_peer_connected
+
+Peer connection status
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|hostname
+|Hostname of the peer for which data is collected
+
+|uuid
+|Uuid of the peer for which data is collected
+
+|===
+
 == gluster_cpu_percentage
 
 CPU percentage of Gluster process. One metric will be exposed for each process. Note: values of labels will be empty if not applicable to that process. For example, glusterd process will not have labels for volume or brick_path. It is the CPU time used divided by the time the process has been running (cputime/realtime ratio), expressed as a percentage.
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume Name
@@ -598,6 +718,9 @@ Memory percentage of Gluster process. One metric will be exposed for each proces
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume Name
 
@@ -618,6 +741,9 @@ Resident Memory of Gluster process in bytes. One metric will be exposed for each
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume Name
@@ -640,6 +766,9 @@ Virtual Memory of Gluster process in bytes. One metric will be exposed for each 
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume Name
 
@@ -660,6 +789,9 @@ Elapsed Time or Uptime of Gluster processes in seconds. One metric will be expos
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume Name
@@ -682,6 +814,30 @@ self heal count for volume
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
+|volume
+|Volume Name
+
+|brick_path
+|Brick Path
+
+|host
+|Hostname or IP
+
+|===
+
+== gluster_volume_split_brain_heal_count
+
+self heal count for volume in split brain
+
+|===
+|Label|Description
+
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume Name
 
@@ -700,6 +856,9 @@ Total no of reads
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume name
 
@@ -714,6 +873,9 @@ Total no of writes
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume name
@@ -730,6 +892,9 @@ Duration
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume name
 
@@ -744,6 +909,9 @@ Total no of reads for interval stats
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume name
@@ -760,6 +928,9 @@ Total no of writes for interval stats
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume name
 
@@ -775,6 +946,9 @@ Duration for interval stats
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume name
 
@@ -789,6 +963,9 @@ Cumulative FOP hits
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume name
@@ -811,6 +988,9 @@ Cumulative FOP avergae latency
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume name
 
@@ -831,6 +1011,9 @@ Cumulative FOP min latency
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume name
@@ -853,6 +1036,9 @@ Cumulative FOP max latency
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume name
 
@@ -873,6 +1059,9 @@ Interval based FOP hits
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume name
@@ -895,6 +1084,9 @@ Interval based FOP average latency
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume name
 
@@ -915,6 +1107,9 @@ Interval based FOP min latency
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume name
@@ -937,6 +1132,9 @@ Interval based FOP max latency
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume name
 
@@ -957,6 +1155,9 @@ Cumulative total hits on aggregated FOPs like READ_WRIET_OPS, LOCK_OPS, INODE_OP
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume name
@@ -979,6 +1180,9 @@ Interval based total hits on aggregated FOPs like READ_WRIET_OPS, LOCK_OPS, INOD
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume name
 
@@ -997,13 +1201,37 @@ Interval based total hits on aggregated FOPs like READ_WRIET_OPS, LOCK_OPS, INOD
 
 Total no of volumes
 
+|===
+|Label|Description
+
+|cluster_id
+|Cluster ID
+
+|===
+
 == gluster_volume_created_count
 
 Freshly created no of volumes
 
+|===
+|Label|Description
+
+|cluster_id
+|Cluster ID
+
+|===
+
 == gluster_volume_started_count
 
 Total no of started volumes
+
+|===
+|Label|Description
+
+|cluster_id
+|Cluster ID
+
+|===
 
 == gluster_volume_brick_count
 
@@ -1011,6 +1239,9 @@ Total no of bricks in volume
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume Name
@@ -1024,6 +1255,9 @@ Total count of snapshots bricks for volume
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume Name
 
@@ -1035,6 +1269,9 @@ Total active count of snapshots bricks for volume
 
 |===
 |Label|Description
+
+|cluster_id
+|Cluster ID
 
 |volume
 |Volume Name
@@ -1048,8 +1285,173 @@ Volume is started or not (1-started, 0-not started)
 |===
 |Label|Description
 
+|cluster_id
+|Cluster ID
+
 |volume
 |Volume Name
+
+|===
+
+== gluster_volume_status_brick_count
+
+Number of bricks for volume
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|volume_name
+|Name of the volume
+
+|===
+
+== gluster_volume_brick_status
+
+Per node brick status for volume
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|volume_name
+|Name of the volume
+
+|hostname
+|Hostname of the brick
+
+|peerid
+|Uuid of the peer hosting this brick
+
+|===
+
+== gluster_volume_brick_port
+
+Brick port
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|volume_name
+|Name of the volume
+
+|hostname
+|Hostname of the brick
+
+|peerid
+|Uuid of the peer hosting this brick
+
+|===
+
+== gluster_volume_brick_pid
+
+Brick pid
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|volume_name
+|Name of the volume
+
+|hostname
+|Hostname of the brick
+
+|peerid
+|Uuid of the peer hosting this brick
+
+|===
+
+== gluster_volume_brick_total_inodes
+
+Brick total inodes
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|volume_name
+|Name of the volume
+
+|hostname
+|Hostname of the brick
+
+|peerid
+|Uuid of the peer hosting this brick
+
+|===
+
+== gluster_volume_brick_free_inodes
+
+Brick free inodes
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|volume_name
+|Name of the volume
+
+|hostname
+|Hostname of the brick
+
+|peerid
+|Uuid of the peer hosting this brick
+
+|===
+
+== gluster_volume_brick_total_bytes
+
+Brick total bytes
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|volume_name
+|Name of the volume
+
+|hostname
+|Hostname of the brick
+
+|peerid
+|Uuid of the peer hosting this brick
+
+|===
+
+== gluster_volume_brick_free_bytes
+
+Brick free bytes
+
+|===
+|Label|Description
+
+|instance
+|Hostname of the gluster-prometheus instance providing this metric
+
+|volume_name
+|Name of the volume
+
+|hostname
+|Hostname of the brick
+
+|peerid
+|Uuid of the peer hosting this brick
 
 |===
 

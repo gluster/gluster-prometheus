@@ -28,23 +28,23 @@ var (
 		},
 	}
 
-	peerGaugeVecs []*prometheus.GaugeVec
+	peerGaugeVecs = make(map[string]*ExportedGaugeVec)
 
-	glusterPeerCount = newPrometheusGaugeVec(Metric{
+	glusterPeerCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "peer_count",
 		Help:      "Number of peers in cluster",
 		Labels:    peerCountMetricLabels,
 	}, &peerGaugeVecs)
 
-	glusterPeerStatus = newPrometheusGaugeVec(Metric{
+	glusterPeerStatus = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "peer_status",
 		Help:      "Peer status info",
 		Labels:    peerSCMetricLabels,
 	}, &peerGaugeVecs)
 
-	glusterPeerConnected = newPrometheusGaugeVec(Metric{
+	glusterPeerConnected = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "peer_connected",
 		Help:      "Peer connection status",
@@ -55,7 +55,7 @@ var (
 func peerInfo(gluster glusterutils.GInterface) (err error) {
 	// Reset all vecs to not export stale information
 	for _, gaugeVec := range peerGaugeVecs {
-		gaugeVec.Reset()
+		gaugeVec.RemoveStaleMetrics()
 	}
 
 	var peerID string
@@ -85,7 +85,7 @@ func peerInfo(gluster glusterutils.GInterface) (err error) {
 		"instance": fqdn,
 	}
 
-	glusterPeerCount.With(peerCountLabels).Set(float64(len(peers)))
+	peerGaugeVecs[glusterPeerCount].Set(peerCountLabels, float64(len(peers)))
 
 	var connected int
 	for _, peer := range peers {
@@ -103,12 +103,11 @@ func peerInfo(gluster glusterutils.GInterface) (err error) {
 		// non-negative peer state, i.e. we're running with the GD1
 		// backend.
 		if peer.Gd1State > -1 {
-			glusterPeerStatus.With(peerSCLabels).Set(float64(peer.Gd1State))
+			peerGaugeVecs[glusterPeerStatus].Set(peerSCLabels, float64(peer.Gd1State))
 		}
-		glusterPeerConnected.With(peerSCLabels).Set(float64(connected))
+		peerGaugeVecs[glusterPeerConnected].Set(peerSCLabels, float64(connected))
 	}
-
-	return
+	return nil
 }
 
 func init() {

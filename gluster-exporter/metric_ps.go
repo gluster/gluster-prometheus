@@ -40,9 +40,9 @@ var (
 		},
 	}
 
-	psGaugeVecs []*prometheus.GaugeVec
+	psGaugeVecs = make(map[string]*ExportedGaugeVec)
 
-	glusterCPUPercentage = newPrometheusGaugeVec(Metric{
+	glusterCPUPercentage = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "cpu_percentage",
 		Help:      "CPU Percentage used by Gluster processes",
@@ -50,7 +50,7 @@ var (
 		Labels:    labels,
 	}, &psGaugeVecs)
 
-	glusterMemoryPercentage = newPrometheusGaugeVec(Metric{
+	glusterMemoryPercentage = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "memory_percentage",
 		Help:      "Memory Percentage used by Gluster processes",
@@ -58,7 +58,7 @@ var (
 		Labels:    labels,
 	}, &psGaugeVecs)
 
-	glusterResidentMemory = newPrometheusGaugeVec(Metric{
+	glusterResidentMemory = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "resident_memory_bytes",
 		Help:      "Resident Memory of Gluster processes in bytes",
@@ -66,7 +66,7 @@ var (
 		Labels:    labels,
 	}, &psGaugeVecs)
 
-	glusterVirtualMemory = newPrometheusGaugeVec(Metric{
+	glusterVirtualMemory = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "virtual_memory_bytes",
 		Help:      "Virtual Memory of Gluster processes in bytes",
@@ -74,7 +74,7 @@ var (
 		Labels:    labels,
 	}, &psGaugeVecs)
 
-	glusterElapsedTime = newPrometheusGaugeVec(Metric{
+	glusterElapsedTime = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "elapsed_time_seconds",
 		Help:      "Elapsed Time of Gluster processes in seconds",
@@ -94,17 +94,17 @@ func getCmdLine(pid string) ([]string, error) {
 	return strings.Split(strings.Trim(string(out), "\x00"), "\x00"), nil
 }
 
-func getGlusterdLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
+func getGlusterdLabels(peerID, cmd string) prometheus.Labels {
 	return prometheus.Labels{
 		"cluster_id": clusterID,
 		"name":       cmd,
 		"volume":     "",
 		"peerid":     peerID,
 		"brick_path": "",
-	}, nil
+	}
 }
 
-func getGlusterFsdLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
+func getGlusterFsdLabels(peerID, cmd string, args []string) prometheus.Labels {
 	bpath := ""
 	volume := ""
 
@@ -125,23 +125,23 @@ func getGlusterFsdLabels(peerID, cmd string, args []string) (prometheus.Labels, 
 		"volume":     volume,
 		"peerid":     peerID,
 		"brick_path": bpath,
-	}, nil
+	}
 }
 
-func getUnknownLabels(peerID, cmd string, args []string) (prometheus.Labels, error) {
+func getUnknownLabels(peerID, cmd string) prometheus.Labels {
 	return prometheus.Labels{
 		"cluster_id": clusterID,
 		"name":       cmd,
 		"volume":     "",
 		"peerid":     peerID,
 		"brick_path": "",
-	}, nil
+	}
 }
 
 func ps(gluster glusterutils.GInterface) error {
 	// Reset all vecs to not export stale information
 	for _, gaugeVec := range psGaugeVecs {
-		gaugeVec.Reset()
+		gaugeVec.RemoveStaleMetrics()
 	}
 
 	args := []string{
@@ -153,7 +153,7 @@ func ps(gluster glusterutils.GInterface) error {
 		strings.Join(glusterProcs, ","),
 	}
 
-	out, err := exec.Command("ps", args...).Output()
+	out, err := exec.Command("ps", args...).Output() // #nosec
 
 	if err != nil {
 		// Return without exporting metrics in this cycle
@@ -197,29 +197,13 @@ func ps(gluster glusterutils.GInterface) error {
 		var lbls prometheus.Labels
 		switch lineData[6] {
 		case "glusterd":
-			lbls, err = getGlusterdLabels(peerID, lineData[6], cmdlineArgs)
-			if err != nil {
-				log.WithError(err).Debug("Unable to get glusterd labels")
-				continue
-			}
+			lbls = getGlusterdLabels(peerID, lineData[6])
 		case "glusterd2":
-			lbls, err = getGlusterdLabels(peerID, lineData[6], cmdlineArgs)
-			if err != nil {
-				log.WithError(err).Debug("Unable to get glusterd2 labels")
-				continue
-			}
+			lbls = getGlusterdLabels(peerID, lineData[6])
 		case "glusterfsd":
-			lbls, err = getGlusterFsdLabels(peerID, lineData[6], cmdlineArgs)
-			if err != nil {
-				log.WithError(err).Debug("Unable to get glusterfsd labels")
-				continue
-			}
+			lbls = getGlusterFsdLabels(peerID, lineData[6], cmdlineArgs)
 		default:
-			lbls, err = getUnknownLabels(peerID, lineData[6], cmdlineArgs)
-			if err != nil {
-				log.WithError(err).Debug("Unable to get default labels")
-				continue
-			}
+			lbls = getUnknownLabels(peerID, lineData[6])
 		}
 
 		pcpu, err := strconv.ParseFloat(lineData[1], 64)
@@ -276,11 +260,11 @@ func ps(gluster glusterutils.GInterface) error {
 		rsz = rsz * 1024
 
 		// Update the Metrics
-		glusterCPUPercentage.With(lbls).Set(pcpu)
-		glusterMemoryPercentage.With(lbls).Set(pmem)
-		glusterResidentMemory.With(lbls).Set(rsz)
-		glusterVirtualMemory.With(lbls).Set(vsz)
-		glusterElapsedTime.With(lbls).Set(etimes)
+		psGaugeVecs[glusterCPUPercentage].Set(lbls, pcpu)
+		psGaugeVecs[glusterMemoryPercentage].Set(lbls, pmem)
+		psGaugeVecs[glusterResidentMemory].Set(lbls, rsz)
+		psGaugeVecs[glusterVirtualMemory].Set(lbls, vsz)
+		psGaugeVecs[glusterElapsedTime].Set(lbls, etimes)
 	}
 	return nil
 }
