@@ -34,6 +34,10 @@ var (
 			Name: "peerid",
 			Help: "Uuid of the peer hosting this brick",
 		},
+		{
+			Name: "brick_path",
+			Help: "Path of the brick",
+		},
 	}
 
 	volStatusGaugeVecs = make(map[string]*ExportedGaugeVec)
@@ -144,6 +148,7 @@ func volumeInfo(gluster glusterutils.GInterface) (err error) {
 				"volume_name": vol.Name,
 				"hostname":    node.Hostname,
 				"peerid":      node.PeerID,
+				"brick_path":  node.Path,
 			}
 			volStatusGaugeVecs[glusterVolumeBrickStatus].Set(perBrickLabels, float64(node.Status))
 			volStatusGaugeVecs[glusterVolumeBrickPort].Set(perBrickLabels, float64(node.Port))
