@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/gluster/gluster-prometheus/pkg/glusterutils"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
@@ -33,6 +35,14 @@ var (
 		{
 			Name: "peerid",
 			Help: "Uuid of the peer hosting this brick",
+		},
+		{
+			Name: "pid",
+			Help: "PID of the brick",
+		},
+		{
+			Name: "brick_path",
+			Help: "Path of the brick",
 		},
 	}
 
@@ -139,11 +149,15 @@ func volumeInfo(gluster glusterutils.GInterface) (err error) {
 		glusterVolStatusBrickCount.With(brickCountLabels).Set(float64(len(vol.Nodes)))
 
 		for _, node := range vol.Nodes {
+			brickPid := strconv.Itoa(node.PID)
+
 			perBrickLabels := prometheus.Labels{
 				"instance":    fqdn,
 				"volume_name": vol.Name,
 				"hostname":    node.Hostname,
 				"peerid":      node.PeerID,
+				"pid":         brickPid,
+				"brick_path":  node.Path,
 			}
 			glusterVolumeBrickStatus.With(perBrickLabels).Set(float64(node.Status))
 			glusterVolumeBrickPort.With(perBrickLabels).Set(float64(node.Port))
