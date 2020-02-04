@@ -12,7 +12,7 @@ language: go
 
 env:
   global:
-    - GOLANGCI_VERSION="v1.16.0"
+    - GOLANGCI_VERSION="v1.18.0"
 
 go:
   # Kubernetes minimum_go_version can be found in this file:
