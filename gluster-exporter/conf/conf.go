@@ -12,17 +12,18 @@ import (
 
 // GConfig represents Glusterd1/Glusterd2 configurations
 type GConfig struct {
-	GlusterMgmt       string `toml:"gluster-mgmt"`
-	Glusterd2Endpoint string `toml:"gd2-rest-endpoint"`
-	GlusterCmd        string `toml:"gluster-binary-path"`
-	GlusterRemoteHost string `toml:"gd1-remote-host"`
-	GlusterdWorkdir   string `toml:"glusterd-dir"`
-	GlusterClusterID  string `toml:"gluster-cluster-id"`
-	Glusterd2User     string
-	Glusterd2Secret   string
-	Glusterd2Cacert   string
-	Glusterd2Insecure bool
-	Timeout           int64
+	GlusterMgmt         string `toml:"gluster-mgmt"`
+	Glusterd2Endpoint   string `toml:"gd2-rest-endpoint"`
+	GlusterCmd          string `toml:"gluster-binary-path"`
+	GlusterRemoteHost   string `toml:"gd1-remote-host"`
+	GlusterGlusterdSock string `toml:"gd1-glusterd-sock"`
+	GlusterdWorkdir     string `toml:"glusterd-dir"`
+	GlusterClusterID    string `toml:"gluster-cluster-id"`
+	Glusterd2User       string
+	Glusterd2Secret     string
+	Glusterd2Cacert     string
+	Glusterd2Insecure   bool
+	Timeout             int64
 }
 
 // Globals maintains the global system configurations

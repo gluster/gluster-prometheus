@@ -210,8 +210,10 @@ func (g *GD1) execGluster(args ...string) ([]byte, error) {
 	// always request output in XML format
 	args = append(args, "--xml")
 	// grab remote host from config
-	if g.config.GlusterRemoteHost != "" {
+	if g.config.GlusterGlusterdSock != "" {
+		args = append(args, fmt.Sprintf("--glusterd-sock=%s", g.config.GlusterGlusterdSock))
+	} else if g.config.GlusterRemoteHost != "" {
 		args = append(args, fmt.Sprintf("--remote-host=%s", g.config.GlusterRemoteHost))
 	}
-	return exec.Command(g.config.GlusterCmd, args...).Output()
+	return exec.Command(g.config.GlusterCmd, args...).Output() // #nosec
 }

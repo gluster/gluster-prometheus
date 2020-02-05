@@ -46,58 +46,58 @@ var (
 		},
 	}
 
-	volStatusGaugeVecs []*prometheus.GaugeVec
+	volStatusGaugeVecs = make(map[string]*ExportedGaugeVec)
 
-	glusterVolStatusBrickCount = newPrometheusGaugeVec(Metric{
+	glusterVolStatusBrickCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_status_brick_count",
 		Help:      "Number of bricks for volume",
 		Labels:    volStatusBrickCountLabels,
 	}, &volStatusGaugeVecs)
 
-	glusterVolumeBrickStatus = newPrometheusGaugeVec(Metric{
+	glusterVolumeBrickStatus = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_brick_status",
 		Help:      "Per node brick status for volume",
 		Labels:    volStatusPerBrickLabels,
 	}, &volStatusGaugeVecs)
 
-	glusterVolumeBrickPort = newPrometheusGaugeVec(Metric{
+	glusterVolumeBrickPort = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_brick_port",
 		Help:      "Brick port",
 		Labels:    volStatusPerBrickLabels,
 	}, &volStatusGaugeVecs)
 
-	glusterVolumeBrickPid = newPrometheusGaugeVec(Metric{
+	glusterVolumeBrickPid = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_brick_pid",
 		Help:      "Brick pid",
 		Labels:    volStatusPerBrickLabels,
 	}, &volStatusGaugeVecs)
 
-	glusterVolumeBrickTotalInodes = newPrometheusGaugeVec(Metric{
+	glusterVolumeBrickTotalInodes = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_brick_total_inodes",
 		Help:      "Brick total inodes",
 		Labels:    volStatusPerBrickLabels,
 	}, &volStatusGaugeVecs)
 
-	glusterVolumeBrickFreeInodes = newPrometheusGaugeVec(Metric{
+	glusterVolumeBrickFreeInodes = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_brick_free_inodes",
 		Help:      "Brick free inodes",
 		Labels:    volStatusPerBrickLabels,
 	}, &volStatusGaugeVecs)
 
-	glusterVolumeBrickTotalBytes = newPrometheusGaugeVec(Metric{
+	glusterVolumeBrickTotalBytes = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_brick_total_bytes",
 		Help:      "Brick total bytes",
 		Labels:    volStatusPerBrickLabels,
 	}, &volStatusGaugeVecs)
 
-	glusterVolumeBrickFreeBytes = newPrometheusGaugeVec(Metric{
+	glusterVolumeBrickFreeBytes = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_brick_free_bytes",
 		Help:      "Brick free bytes",
@@ -108,7 +108,7 @@ var (
 func volumeInfo(gluster glusterutils.GInterface) (err error) {
 	// Reset all vecs to not export stale information
 	for _, gaugeVec := range volStatusGaugeVecs {
-		gaugeVec.Reset()
+		gaugeVec.RemoveStaleMetrics()
 	}
 
 	var peerID string
@@ -146,7 +146,7 @@ func volumeInfo(gluster glusterutils.GInterface) (err error) {
 			"instance":    fqdn,
 			"volume_name": vol.Name,
 		}
-		glusterVolStatusBrickCount.With(brickCountLabels).Set(float64(len(vol.Nodes)))
+		volStatusGaugeVecs[glusterVolStatusBrickCount].Set(brickCountLabels, float64(len(vol.Nodes)))
 
 		for _, node := range vol.Nodes {
 			brickPid := strconv.Itoa(node.PID)
@@ -159,19 +159,18 @@ func volumeInfo(gluster glusterutils.GInterface) (err error) {
 				"pid":         brickPid,
 				"brick_path":  node.Path,
 			}
-			glusterVolumeBrickStatus.With(perBrickLabels).Set(float64(node.Status))
-			glusterVolumeBrickPort.With(perBrickLabels).Set(float64(node.Port))
-			glusterVolumeBrickPid.With(perBrickLabels).Set(float64(node.PID))
+			volStatusGaugeVecs[glusterVolumeBrickStatus].Set(perBrickLabels, float64(node.Status))
+			volStatusGaugeVecs[glusterVolumeBrickPort].Set(perBrickLabels, float64(node.Port))
+			volStatusGaugeVecs[glusterVolumeBrickPid].Set(perBrickLabels, float64(node.PID))
 
-			glusterVolumeBrickTotalInodes.With(perBrickLabels).Set(float64(node.Gd1InodesTotal))
-			glusterVolumeBrickFreeInodes.With(perBrickLabels).Set(float64(node.Gd1InodesFree))
+			volStatusGaugeVecs[glusterVolumeBrickTotalInodes].Set(perBrickLabels, float64(node.Gd1InodesTotal))
+			volStatusGaugeVecs[glusterVolumeBrickFreeInodes].Set(perBrickLabels, float64(node.Gd1InodesFree))
 
-			glusterVolumeBrickTotalBytes.With(perBrickLabels).Set(float64(node.Capacity))
-			glusterVolumeBrickFreeBytes.With(perBrickLabels).Set(float64(node.Free))
+			volStatusGaugeVecs[glusterVolumeBrickTotalBytes].Set(perBrickLabels, float64(node.Capacity))
+			volStatusGaugeVecs[glusterVolumeBrickFreeBytes].Set(perBrickLabels, float64(node.Free))
 		}
 	}
-
-	return
+	return nil
 }
 
 func init() {

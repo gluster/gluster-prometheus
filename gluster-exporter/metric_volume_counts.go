@@ -21,9 +21,9 @@ var (
 		clusterIDLabel,
 	}
 
-	volumeCountGaugeVecs []*prometheus.GaugeVec
+	volumeCountGaugeVecs = make(map[string]*ExportedGaugeVec)
 
-	glusterVolumeTotalCount = newPrometheusGaugeVec(Metric{
+	glusterVolumeTotalCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_total_count",
 		Help:      "Total no of volumes",
@@ -31,7 +31,7 @@ var (
 		Labels:    countLabels,
 	}, &volumeCountGaugeVecs)
 
-	glusterVolumeCreatedCount = newPrometheusGaugeVec(Metric{
+	glusterVolumeCreatedCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_created_count",
 		Help:      "Freshly created no of volumes",
@@ -39,7 +39,7 @@ var (
 		Labels:    countLabels,
 	}, &volumeCountGaugeVecs)
 
-	glusterVolumeStartedCount = newPrometheusGaugeVec(Metric{
+	glusterVolumeStartedCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_started_count",
 		Help:      "Total no of started volumes",
@@ -47,7 +47,7 @@ var (
 		Labels:    countLabels,
 	}, &volumeCountGaugeVecs)
 
-	glusterVolumeBrickCount = newPrometheusGaugeVec(Metric{
+	glusterVolumeBrickCount = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_brick_count",
 		Help:      "Total no of bricks in volume",
@@ -55,7 +55,7 @@ var (
 		Labels:    volumeLabels,
 	}, &volumeCountGaugeVecs)
 
-	glusterVolumeSnapshotBrickCountTotal = newPrometheusGaugeVec(Metric{
+	glusterVolumeSnapshotBrickCountTotal = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_snapshot_brick_count_total",
 		Help:      "Total count of snapshots bricks for volume",
@@ -63,7 +63,7 @@ var (
 		Labels:    volumeLabels,
 	}, &volumeCountGaugeVecs)
 
-	glusterVolumeSnapshotBrickCountActive = newPrometheusGaugeVec(Metric{
+	glusterVolumeSnapshotBrickCountActive = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_snapshot_brick_count_active",
 		Help:      "Total active count of snapshots bricks for volume",
@@ -71,7 +71,7 @@ var (
 		Labels:    volumeLabels,
 	}, &volumeCountGaugeVecs)
 
-	glusterVolumeUp = newPrometheusGaugeVec(Metric{
+	glusterVolumeUp = registerExportedGaugeVec(Metric{
 		Namespace: "gluster",
 		Name:      "volume_up",
 		Help:      "Volume is started or not (1-started, 0-not started)",
@@ -90,7 +90,7 @@ func getVolumeLabels(volname string) prometheus.Labels {
 func volumeCounts(gluster glusterutils.GInterface) error {
 	// Reset all vecs to not export stale information
 	for _, gaugeVec := range volumeCountGaugeVecs {
-		gaugeVec.Reset()
+		gaugeVec.RemoveStaleMetrics()
 	}
 
 	isLeader, err := gluster.IsLeader()
@@ -126,12 +126,12 @@ func volumeCounts(gluster glusterutils.GInterface) error {
 			// Volume is stopped, nothing to do as the stopped count
 			// could be derived using total - started - created
 		}
-		glusterVolumeUp.With(getVolumeLabels(volume.Name)).Set(float64(up))
+		volumeCountGaugeVecs[glusterVolumeUp].Set(getVolumeLabels(volume.Name), float64(up))
 		volBrickCount := 0
 		for _, subvol := range volume.SubVolumes {
 			volBrickCount += len(subvol.Bricks)
 		}
-		glusterVolumeBrickCount.With(getVolumeLabels(volume.Name)).Set(float64(volBrickCount))
+		volumeCountGaugeVecs[glusterVolumeBrickCount].Set(getVolumeLabels(volume.Name), float64(volBrickCount))
 		volSnapBrickCountTotal := 0
 		volSnapBrickCountActive := 0
 		for _, snap := range snapshots {
@@ -142,18 +142,18 @@ func volumeCounts(gluster glusterutils.GInterface) error {
 				}
 			}
 		}
-		glusterVolumeSnapshotBrickCountTotal.With(getVolumeLabels(volume.Name)).Set(float64(volSnapBrickCountTotal))
-		glusterVolumeSnapshotBrickCountActive.With(getVolumeLabels(volume.Name)).Set(float64(volSnapBrickCountActive))
+		volumeCountGaugeVecs[glusterVolumeSnapshotBrickCountTotal].Set(getVolumeLabels(volume.Name), float64(volSnapBrickCountTotal))
+		volumeCountGaugeVecs[glusterVolumeSnapshotBrickCountActive].Set(getVolumeLabels(volume.Name), float64(volSnapBrickCountActive))
 	}
-	glusterVolumeTotalCount.With(prometheus.Labels{
+	volumeCountGaugeVecs[glusterVolumeTotalCount].Set(prometheus.Labels{
 		"cluster_id": clusterID,
-	}).Set(float64(volCount))
-	glusterVolumeStartedCount.With(prometheus.Labels{
+	}, float64(volCount))
+	volumeCountGaugeVecs[glusterVolumeStartedCount].Set(prometheus.Labels{
 		"cluster_id": clusterID,
-	}).Set(float64(volStartCount))
-	glusterVolumeCreatedCount.With(prometheus.Labels{
+	}, float64(volStartCount))
+	volumeCountGaugeVecs[glusterVolumeCreatedCount].Set(prometheus.Labels{
 		"cluster_id": clusterID,
-	}).Set(float64(volCreatedCount))
+	}, float64(volCreatedCount))
 	return nil
 }
 

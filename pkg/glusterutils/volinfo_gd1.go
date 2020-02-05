@@ -57,10 +57,10 @@ func (g *GD1) VolumeInfo() ([]Volume, error) {
 				if vol.Bricks[sidx+bidx].IsArbiter == 1 {
 					brickType = glusterconsts.BrickTypeArbiter
 				}
-				brickParts := strings.Split(vol.Bricks[sidx+bidx].Name, ":")
+				brickParts := strings.Split(vol.Bricks[sidx*subvolBricksCount+bidx].Name, ":")
 				brick := Brick{
 					Host:       brickParts[0],
-					PeerID:     vol.Bricks[sidx+bidx].PeerID,
+					PeerID:     vol.Bricks[sidx*subvolBricksCount+bidx].PeerID,
 					Type:       brickType,
 					Path:       brickParts[1],
 					VolumeID:   vol.ID,

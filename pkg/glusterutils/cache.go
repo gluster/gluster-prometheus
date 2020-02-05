@@ -340,6 +340,6 @@ func (gc *GCache) VolumeProfileInfo(vol string) ([]ProfileInfo, error) {
 func (gc *GCache) GConfig() (gConf *conf.GConfig) {
 	// below comment is needed to avoid go-metalinter failures
 	// #nosec
-	gConf, _ = conf.GConfigFromInterface(gc.gd)
+	gConf, _ = conf.GConfigFromInterface(gc.gd) //nolint:errcheck
 	return
 }

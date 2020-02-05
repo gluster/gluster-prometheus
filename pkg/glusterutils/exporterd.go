@@ -174,6 +174,6 @@ func ExecuteCmd(cmd string) ([]byte, error) {
 		cmdstr = fullcmd
 	}
 	args := cmdfields[1:]
-	out, err := exec.Command(cmdstr, args...).Output()
+	out, err := exec.Command(cmdstr, args...).Output() // #nosec
 	return out, err
 }
