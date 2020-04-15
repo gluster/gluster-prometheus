@@ -20,7 +20,7 @@ PREFIX=/usr make install
 == Usage
 
 Run `gluster-exporter` with default settings, glusterd is consumable
-at http://localhost:8080/metrics
+at http://localhost:9713/metrics
 
 ----
 systemctl enable gluster-exporter
@@ -42,7 +42,7 @@ gluster-binary-path = "gluster"
 # The following collectors won't work in remote mode : gluster_volume_counts, gluster_volume_profile 
 #gd1-remote-host = "localhost"
 gd2-rest-endpoint = "http://127.0.0.1:24007"
-port = 8080
+port = 9713
 metrics-path = "/metrics"
 log-dir = "/var/log"
 log-file = "gluster-exporter.log"
