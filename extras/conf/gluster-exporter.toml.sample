@@ -8,7 +8,7 @@ gluster-binary-path = "gluster"
 # The following collectors won't work in remote mode : gluster_volume_counts, gluster_volume_profile 
 #gd1-remote-host = "localhost"
 gd2-rest-endpoint = "http://localhost:24007"
-port = 8080
+port = 9713
 metrics-path = "/metrics"
 log-dir = "/var/log/gluster-exporter"
 log-file = "exporter.log"
