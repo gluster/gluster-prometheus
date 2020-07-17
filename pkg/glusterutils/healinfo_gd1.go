@@ -40,7 +40,7 @@ func (g *GD1) getHealDetails(cmd string) ([]HealEntry, error) {
 // HealInfo gets gluster vol heal info (GD1)
 func (g GD1) HealInfo(vol string) ([]HealEntry, error) {
 	// Get the overall heal count
-	cmd := fmt.Sprintf("vol heal %s info", vol)
+	cmd := fmt.Sprintf("vol heal %s info --nolog", vol)
 	heals, err := g.getHealDetails(cmd)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (g GD1) HealInfo(vol string) ([]HealEntry, error) {
 
 // SplitBrainHealInfo gets gluster vol heal info (GD1)
 func (g GD1) SplitBrainHealInfo(vol string) ([]HealEntry, error) {
-	cmd := fmt.Sprintf("vol heal %s info split-brain", vol)
+	cmd := fmt.Sprintf("vol heal %s info split-brain --nolog", vol)
 	splitBrainHeals, err := g.getHealDetails(cmd)
 	if err != nil {
 		return nil, err
