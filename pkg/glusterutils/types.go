@@ -105,6 +105,11 @@ type GInterface interface {
 	VolumeStatus() ([]VolumeStatus, error)
 }
 
+// GDConfigInterface returns the configuration of the GD
+type GDConfigInterface interface {
+	Config() *Config
+}
+
 // FopStat defines file ops related details
 type FopStat struct {
 	Name       string
