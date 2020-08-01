@@ -44,8 +44,10 @@ glusterd-dir = "/var/lib/glusterd"
 gluster-binary-path = "gluster"
 # If you want to connect to a remote gd1 host, set the variable gd1-remote-host
 # However, using a remote host restrict the gluster cli to read-only commands
-# The following collectors won't work in remote mode : gluster_volume_counts, gluster_volume_profile 
+# The following collectors won't work in remote host mode : gluster_volume_counts, gluster_volume_profile
 #gd1-remote-host = "localhost"
+# In order to enable those, you can alternatively connect via the unix socket
+#gd1-glusterd-sock = "/var/run/glusterd.socket"
 gd2-rest-endpoint = "http://127.0.0.1:24007"
 port = 9713
 metrics-path = "/metrics"
@@ -68,6 +70,51 @@ To use `gluster-exporter` without systemd,
 
 ----
 gluster-exporter --config=/etc/gluster-exporter/gluster-exporter.toml
+----
+
+== Docker
+
+To build the Debian container,
+
+----
+docker build -t gluster-prometheus -f extras/debian.Dockerfile .
+----
+
+To run the container, assuming a correct `gluster-exporter.toml` is
+present in the working directory, and gluster is running locally,
+
+[source,bash]
+----
+docker run -it --rm \
+  --net=host \
+  -v /var/lib/glusterd:/var/lib/glusterd:ro \
+  -v $PWD:/etc/gluster-exporter:ro \
+  --pid=host \
+  -v /var/run:/var/run:ro \
+  -v /data:/data:ro \
+  gluster-prometheus --config=/etc/gluster-exporter/gluster-exporter.toml
+----
+
+Explanation of some of the settings:
+
+----
+# Required
+--net=host # Used to bind to a port, and to easily access localhost
+-v /var/lib/glusterd:/var/lib/glusterd:ro # Required by all collectors to determine the leader
+-v $PWD:/etc/gluster-exporter:ro # Mounts the current directory to gain access to `gluster-exporter.toml`
+# Optional
+--pid=host # Required only for gluster_ps collector
+-v /var/run:/var/run:ro # Required only if you're using `gd1-glusterd-sock` to connect
+-v /data:/data:ro # Required only for disk usage metrics, assumes all disks are mounted under `/data`
+----
+
+It's recommended to have the following settings in `gluster-exporter.toml`
+to make the logs available via `docker logs`
+
+[source,toml]
+----
+log-dir = ""
+log-file = "stdout"
 ----
 
 == Metrics
