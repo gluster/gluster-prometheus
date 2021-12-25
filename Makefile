@@ -81,6 +81,7 @@ vendor-update:
 
 vendor-install:
 	@echo Installing vendored packages
+	@if test $(MAKELEVEL) -gt 5; then echo Aborting to avoid infinite forks; exit 1; fi
 	@$(DEPENV) dep ensure -v -vendor-only || $(MAKE) vendor-install
 	@echo
 
