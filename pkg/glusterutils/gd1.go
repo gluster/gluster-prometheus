@@ -19,7 +19,8 @@ type healEntriesXML struct {
 	HostUUID       string   `xml:"hostUuid,attr"`
 	Brickname      string   `xml:"name"`
 	Connected      string   `xml:"status"`
-	NumHealEntries string   `xml:"numberOfEntries"`
+	NumHealPending string   `xml:"numberOfEntriesInHealPending"`
+	NumSplitBrain  string   `xml:"numberOfEntriesInSplitBrain"`
 }
 
 type gd1Brick struct {

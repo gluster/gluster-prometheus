@@ -128,33 +128,6 @@ func (gc *GCache) HealInfo(vol string) ([]HealEntry, error) {
 	return retVal, err
 }
 
-// SplitBrainHealInfo wraps the GInterface.SplitBrainHealInfo call
-func (gc *GCache) SplitBrainHealInfo(vol string) ([]HealEntry, error) {
-	gc.lock.Lock()
-	defer gc.lock.Unlock()
-	// adding the argument[s] also to the 'localName'
-	// as we want to cache the function call with each argument
-	// it will be wrong to cache the results for only one volume
-	// and show the same result throughout for other volumes
-	const origName = "SplitBrainHealInfo"
-	var localName = origName + "-" + vol
-	var retVal []HealEntry
-	var err error
-	var ok bool
-	if gc.timeForNewCall(localName, origName) {
-		if retVal, err = gc.gd.SplitBrainHealInfo(vol); err != nil {
-			return retVal, err
-		}
-		// reset the last called time only on a successful call
-		gc.lastCallTimeMap[localName] = time.Now()
-		gc.lastCallValueMap[localName] = retVal
-	}
-	if retVal, ok = gc.lastCallValueMap[localName].([]HealEntry); !ok {
-		err = errors.New("[CacheError] Unable to convert back to a valid return type")
-	}
-	return retVal, err
-}
-
 // IsLeader method wraps the GInterface.IsLeader call
 func (gc *GCache) IsLeader() (bool, error) {
 	gc.lock.Lock()

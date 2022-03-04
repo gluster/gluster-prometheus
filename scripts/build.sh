@@ -42,7 +42,7 @@ fi
 
 echo "Building $BIN $VERSION"
 
-go build $INSTALLFLAG -ldflags "${LDFLAGS}" -o "$OUTDIR/$BIN" "$GOPKG" || exit 1
+GO111MODULE=off go build $INSTALLFLAG -ldflags "${LDFLAGS}" -o "$OUTDIR/$BIN" "$GOPKG" || exit 1
 
 echo "Built $PACKAGE $VERSION at $OUTDIR/$BIN"
 

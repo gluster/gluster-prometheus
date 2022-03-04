@@ -41,7 +41,7 @@ get_release()
 }
 
 if test "x$1" = "x--full"; then
-    echo -n "v$(get_version)-$(get_release)"
+    printf "v%s-%s" "$(get_version)" "$(get_release)"
 elif test "x$1" = "x--version"; then
     get_version
 elif test "x$1" = "x--release"; then
