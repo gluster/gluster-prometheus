@@ -332,36 +332,20 @@ func healCounts(gluster glusterutils.GInterface) error {
 		return err
 	}
 
-	// locHealInfoFunc is a function literal, which takes
-	// arg1: f1 a function which takes a string and returns ([]HealEntry, error)
-	// (can be 'HealInfo' or 'SplitBrainHealInfo')
-	// arg2: gVect a pointer to GaugeVec
-	// (can be either 'glusterVolumeHealCount' or 'glusterVolumeSplitBrainHealCount')
-	// arg3: volName a string representing the volume name
-	// arg4: errStr the error string in case of error
-	locHealInfoFunc := func(f1 func(string) ([]glusterutils.HealEntry, error), gVect string, volName string, errStr string) {
-		// Get the heal count
-		heals, err := f1(volName)
+	for _, volume := range volumes {
+		volName := volume.Name
+
+		heals, err := gluster.HealInfo(volName)
 		if err != nil {
 			log.WithError(err).WithFields(log.Fields{
 				"volume": volName,
-			}).Debug(errStr)
-			return
+			}).Debug("Error getting heal info summary")
+			continue
 		}
 		for _, healinfo := range heals {
 			labels := getVolumeHealLabels(volName, healinfo.Hostname, healinfo.Brick)
-			volumeHealGaugeVecs[gVect].Set(labels, float64(healinfo.NumHealEntries))
-		}
-	}
-
-	for _, volume := range volumes {
-		name := volume.Name
-		if strings.Contains(volume.Type, "Replicate") {
-			locHealInfoFunc(gluster.HealInfo, glusterVolumeHealCount, name, "Error getting heal info")
-			locHealInfoFunc(gluster.SplitBrainHealInfo, glusterVolumeSplitBrainHealCount, name, "Error getting split brain heal info")
-		}
-		if strings.Contains(volume.Type, "Disperse") {
-			locHealInfoFunc(gluster.HealInfo, glusterVolumeHealCount, name, "Error getting heal info")
+			volumeHealGaugeVecs[glusterVolumeHealCount].Set(labels, float64(healinfo.NumHealPending))
+			volumeHealGaugeVecs[glusterVolumeSplitBrainHealCount].Set(labels, float64(healinfo.NumSplitBrain))
 		}
 	}
 	return nil
